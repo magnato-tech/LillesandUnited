@@ -12,14 +12,19 @@
       "Baptistkirken"
     ],
     "freePopcornLimit": 100,
-    "popcornClaimedCount": 0
+    "popcornClaimedCount": 1
   },
   "popcorn": {
     "totalCapacity": 100,
     "bongs": [
       {
         "number": 1,
-        "status": "blank"
+        "status": "used",
+        "activatedAt": "2026-09-05T18:11:18.530Z",
+        "personId": "4e204cdf-1eeb-4d7a-9b2c-924828e6e1a3",
+        "userName": "Emma",
+        "clientToken": "tok_57a8bffd860b42f1",
+        "usedAt": "2026-09-05T18:11:18.539Z"
       },
       {
         "number": 2,
@@ -556,6 +561,215 @@
       "firstName": "Amalie",
       "phone": "48011223",
       "registeredAt": "2026-09-18T17:18:00Z"
+    }
+  ],
+  "persons": [
+    {
+      "id": "9872eb2c-717f-4b77-ace0-9a5754dbc120",
+      "firstName": "Oliver",
+      "nameNumber": 1,
+      "displayId": "Oliver_1",
+      "anonymousToken": "tok_7c359955247a46df",
+      "createdAt": "2026-09-05T17:45:39.713Z",
+      "updatedAt": "2026-09-05T17:45:39.713Z"
+    },
+    {
+      "id": "1bb1a443-488f-4e54-9e4b-d5003bcbc3b6",
+      "firstName": "Oliver",
+      "nameNumber": 2,
+      "displayId": "Oliver_2",
+      "anonymousToken": "tok_ed31f945fcb94f48",
+      "createdAt": "2026-09-05T17:45:39.725Z",
+      "updatedAt": "2026-09-05T17:45:39.725Z"
+    },
+    {
+      "id": "af209405-3c0d-43f9-841b-04027621ee50",
+      "firstName": "Kari",
+      "nameNumber": 1,
+      "displayId": "Kari_1",
+      "anonymousToken": "tok_7de7ca0772774e2a",
+      "createdAt": "2026-09-05T17:45:39.731Z",
+      "updatedAt": "2026-09-05T17:45:39.731Z"
+    },
+    {
+      "id": "f0a85665-91c4-4d9e-8ae7-a66abcbe15a2",
+      "firstName": "Oliver",
+      "nameNumber": 3,
+      "displayId": "Oliver_3",
+      "anonymousToken": "tok_7eb4d9d871af48fa",
+      "createdAt": "2026-09-05T17:48:36.168Z",
+      "updatedAt": "2026-09-05T17:48:36.168Z"
+    },
+    {
+      "id": "235d028a-b8e1-4921-bc93-b8f35f8f402c",
+      "firstName": "Oliver",
+      "nameNumber": 4,
+      "displayId": "Oliver_4",
+      "anonymousToken": "tok_198a7a2f4b564833",
+      "createdAt": "2026-09-05T17:48:36.180Z",
+      "updatedAt": "2026-09-05T17:48:36.180Z"
+    },
+    {
+      "id": "8e486bf7-e67d-4e65-b20e-352798f149a1",
+      "firstName": "Kari",
+      "nameNumber": 2,
+      "displayId": "Kari_2",
+      "anonymousToken": "tok_aa73c5ace198411f",
+      "createdAt": "2026-09-05T17:48:36.186Z",
+      "updatedAt": "2026-09-05T17:48:36.186Z"
+    },
+    {
+      "id": "6be70855-4fb8-43fa-a151-18b2cc83b73b",
+      "firstName": "Sander",
+      "nameNumber": 1,
+      "displayId": "Sander_1",
+      "anonymousToken": "tok_b74c0e6d47a44cab",
+      "createdAt": "2026-09-05T17:49:00.923Z",
+      "updatedAt": "2026-09-05T17:49:00.923Z"
+    },
+    {
+      "id": "9cb7abba-4d44-46ce-8566-c9f2c383f8d7",
+      "firstName": "Sander",
+      "nameNumber": 2,
+      "displayId": "Sander_2",
+      "anonymousToken": "tok_f181c995146a4546",
+      "createdAt": "2026-09-05T17:49:00.925Z",
+      "updatedAt": "2026-09-05T17:49:00.925Z"
+    },
+    {
+      "id": "97db7b3a-fdc3-409b-8d5d-707f6dd45597",
+      "firstName": "Nora",
+      "nameNumber": 1,
+      "displayId": "Nora_1",
+      "anonymousToken": "tok_8710113a501b437f",
+      "createdAt": "2026-09-05T18:02:15.296Z",
+      "updatedAt": "2026-09-05T18:02:15.296Z"
+    },
+    {
+      "id": "70ac0743-3b3e-4137-ab7e-1f319d1d62b6",
+      "firstName": "Oliver",
+      "nameNumber": 5,
+      "displayId": "Oliver_5",
+      "anonymousToken": "tok_6d0c22a5f6df487f",
+      "createdAt": "2026-09-05T18:02:15.309Z",
+      "updatedAt": "2026-09-05T18:02:15.309Z"
+    },
+    {
+      "id": "f5b861b5-6822-4fbc-a861-c558ac22e443",
+      "firstName": "Nora",
+      "nameNumber": 2,
+      "displayId": "Nora_2",
+      "anonymousToken": "tok_d6b89df1b25a472e",
+      "createdAt": "2026-09-05T18:03:05.644Z",
+      "updatedAt": "2026-09-05T18:03:05.644Z"
+    },
+    {
+      "id": "ec173cc3-0443-49da-8291-1f22d6a09775",
+      "firstName": "Oliver",
+      "nameNumber": 6,
+      "displayId": "Oliver_6",
+      "anonymousToken": "tok_00e06d0030104dad",
+      "createdAt": "2026-09-05T18:03:05.656Z",
+      "updatedAt": "2026-09-05T18:03:05.656Z"
+    },
+    {
+      "id": "a5fc41b4-ff46-4c8c-a781-3af0705dbb82",
+      "firstName": "Nora",
+      "nameNumber": 3,
+      "displayId": "Nora_3",
+      "anonymousToken": "tok_4a6f89d424ba42a7",
+      "createdAt": "2026-09-05T18:03:25.744Z",
+      "updatedAt": "2026-09-05T18:03:25.744Z"
+    },
+    {
+      "id": "853f2fda-8f64-4ddc-83ec-832c98cebadd",
+      "firstName": "Oliver",
+      "nameNumber": 7,
+      "displayId": "Oliver_7",
+      "anonymousToken": "tok_26f107f7423640c8",
+      "createdAt": "2026-09-05T18:03:25.756Z",
+      "updatedAt": "2026-09-05T18:03:25.756Z"
+    },
+    {
+      "id": "e94c4f7d-7d17-4093-bdb9-c6c89b79db3b",
+      "firstName": "Kari",
+      "nameNumber": 3,
+      "displayId": "Kari_3",
+      "anonymousToken": "tok_d97a15d959854dd8",
+      "createdAt": "2026-09-05T18:03:25.791Z",
+      "updatedAt": "2026-09-05T18:03:25.791Z"
+    },
+    {
+      "id": "ea527adb-856e-47cc-b559-f83d39764a3e",
+      "firstName": "Simen",
+      "nameNumber": 1,
+      "displayId": "Simen_1",
+      "anonymousToken": "tok_ba0c638bf24c40b0",
+      "createdAt": "2026-09-05T18:03:25.801Z",
+      "updatedAt": "2026-09-05T18:03:25.801Z"
+    },
+    {
+      "id": "510984da-bb73-41ee-911d-4f4e7367b5ca",
+      "firstName": "Thea",
+      "nameNumber": 1,
+      "displayId": "Thea_1",
+      "anonymousToken": "tok_3950e14dbc024cc7",
+      "createdAt": "2026-09-05T18:03:25.802Z",
+      "updatedAt": "2026-09-05T18:03:25.802Z"
+    },
+    {
+      "id": "eb866300-497b-433e-b7c3-5e21bd906f36",
+      "firstName": "Nora",
+      "nameNumber": 4,
+      "displayId": "Nora_4",
+      "anonymousToken": "tok_65cd251bd13d4907",
+      "createdAt": "2026-09-05T18:03:42.231Z",
+      "updatedAt": "2026-09-05T18:03:42.231Z"
+    },
+    {
+      "id": "ddaaed69-b2ff-49a9-a247-e3e8cc043273",
+      "firstName": "Oliver",
+      "nameNumber": 8,
+      "displayId": "Oliver_8",
+      "anonymousToken": "tok_d51f0e70817a4024",
+      "createdAt": "2026-09-05T18:03:42.247Z",
+      "updatedAt": "2026-09-05T18:03:42.247Z"
+    },
+    {
+      "id": "e9df1b08-5fd9-4953-99db-ef2daf031e88",
+      "firstName": "Kari",
+      "nameNumber": 4,
+      "displayId": "Kari_4",
+      "anonymousToken": "tok_0eae0adcafbc4603",
+      "createdAt": "2026-09-05T18:03:42.280Z",
+      "updatedAt": "2026-09-05T18:03:42.280Z"
+    },
+    {
+      "id": "0862afbd-4c9c-46fa-9a7d-8d76ab47cf54",
+      "firstName": "Simen",
+      "nameNumber": 2,
+      "displayId": "Simen_2",
+      "anonymousToken": "tok_878f28a62c3b4f72",
+      "createdAt": "2026-09-05T18:03:42.287Z",
+      "updatedAt": "2026-09-05T18:03:42.287Z"
+    },
+    {
+      "id": "68474501-00bc-495f-8cb6-3d13045cd72b",
+      "firstName": "Thea",
+      "nameNumber": 2,
+      "displayId": "Thea_2",
+      "anonymousToken": "tok_9b89686f15914944",
+      "createdAt": "2026-09-05T18:03:42.288Z",
+      "updatedAt": "2026-09-05T18:03:42.288Z"
+    },
+    {
+      "id": "4e204cdf-1eeb-4d7a-9b2c-924828e6e1a3",
+      "firstName": "Emma",
+      "nameNumber": 1,
+      "displayId": "Emma_1",
+      "anonymousToken": "tok_57a8bffd860b42f1",
+      "createdAt": "2026-09-05T18:11:18.517Z",
+      "updatedAt": "2026-09-05T18:11:18.517Z"
     }
   ]
 }

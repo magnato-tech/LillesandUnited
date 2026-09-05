@@ -116,6 +116,7 @@ export const INITIAL_STATE: AppState = {
     { id: 'a2', firstName: 'Noah', registeredAt: '2026-09-18T17:15:30Z' },
     { id: 'a3', firstName: 'Amalie', phone: '48011223', registeredAt: '2026-09-18T17:18:00Z' },
   ],
+  persons: [],
 };
 
 export const SIMULATION_NAMES_16 = [

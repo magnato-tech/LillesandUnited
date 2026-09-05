@@ -10,6 +10,8 @@ interface TableTennisViewProps {
   onSetMyPlayer: (name: string | null) => void;
   onRegister: (firstName: string) => Promise<void>;
   onGoToAdmin: () => void;
+  activePersonId?: string | null;
+  persons?: Person[];
 }
 
 export const TableTennisView: React.FC<TableTennisViewProps> = ({
@@ -18,16 +20,20 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
   onSetMyPlayer,
   onRegister,
   onGoToAdmin,
+  activePersonId,
+  persons = [],
 }) => {
-  const [nameInput, setNameInput] = useState(myPlayerName || '');
+  const activePerson = persons.find((p) => p.id === activePersonId);
+  const effectiveName = activePerson?.firstName || myPlayerName || '';
+  const [nameInput, setNameInput] = useState(effectiveName);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   React.useEffect(() => {
-    if (myPlayerName) {
-      setNameInput(myPlayerName);
+    if (effectiveName) {
+      setNameInput(effectiveName);
     }
-  }, [myPlayerName]);
+  }, [effectiveName]);
 
   const { tournament } = state;
   const isRegistrationOpen = tournament.status === 'registration';
@@ -36,10 +42,11 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
   const stats = calculateTournamentStats(tournament.matches, tournament.estimatedMinutesPerMatch);
 
   const isAlreadyRegistered = Boolean(
-    myPlayerName &&
-    tournament.participants.some(
-      (p) => p.firstName.toLowerCase() === myPlayerName.toLowerCase()
-    )
+    (activePersonId && tournament.participants.some((p) => p.personId === activePersonId)) ||
+    (myPlayerName &&
+      tournament.participants.some(
+        (p) => p.firstName.toLowerCase() === myPlayerName.toLowerCase()
+      ))
   );
 
   // Active matches on tables
@@ -67,17 +74,19 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
     }
   };
 
-  // Determine user's current status if myPlayerName is set
+  // Determine user's current status if activePersonId or myPlayerName is set
   const myCurrentStatus = () => {
-    if (!myPlayerName) return null;
-    const nameLower = myPlayerName.toLowerCase();
+    if (!activePersonId && !myPlayerName) return null;
+    const nameLower = (myPlayerName || '').toLowerCase();
 
     // Find participant object
-    const isRegistered = tournament.participants.some(
-      (p) => p.firstName.toLowerCase() === nameLower
+    const myParticipant = tournament.participants.find(
+      (p) =>
+        (activePersonId && p.personId === activePersonId) ||
+        (nameLower && p.firstName.toLowerCase() === nameLower)
     );
 
-    if (!isRegistered) {
+    if (!myParticipant) {
       return {
         status: 'not_registered',
         title: 'Ikke funnet i deltakerlisten',
@@ -85,16 +94,22 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
       };
     }
 
+    const myLabel = myParticipant.displayId || myParticipant.firstName;
+
     if (tournament.status === 'registration') {
       return {
         status: 'registered_waiting',
-        title: `Du er påmeldt som "${myPlayerName}"!`,
+        title: `Du er påmeldt som "${myLabel}"!`,
         description: `Trekningen skjer ved turneringsstart kl. 18:45. Gjør deg klar med racketen!`,
       };
     }
 
     // Check if player won the entire tournament
-    if (tournament.winner && tournament.winner.firstName.toLowerCase() === nameLower) {
+    if (
+      tournament.winner &&
+      ((activePersonId && tournament.winner.personId === activePersonId) ||
+        tournament.winner.id === myParticipant.id)
+    ) {
       return {
         status: 'champion',
         title: `🏆 GRATULERER! DU VANT BORDTENNISCUPEN! 🏆`,
@@ -105,17 +120,22 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
     // Find player's current active or upcoming match
     const myMatches = tournament.matches.filter(
       (m) =>
-        (m.playerA && m.playerA.firstName.toLowerCase() === nameLower) ||
-        (m.playerB && m.playerB.firstName.toLowerCase() === nameLower)
+        (m.playerA && ((activePersonId && m.playerA.personId === activePersonId) || m.playerA.id === myParticipant.id)) ||
+        (m.playerB && ((activePersonId && m.playerB.personId === activePersonId) || m.playerB.id === myParticipant.id))
     );
+
+    const isMatchPlayerMe = (player: Participant | null) => {
+      if (!player) return false;
+      if (activePersonId && player.personId === activePersonId) return true;
+      return player.id === myParticipant.id;
+    };
 
     // Look for in_progress match
     const activeMatch = myMatches.find((m) => m.status === 'in_progress');
     if (activeMatch) {
-      const opponent =
-        activeMatch.playerA?.firstName.toLowerCase() === nameLower
-          ? activeMatch.playerB?.firstName
-          : activeMatch.playerA?.firstName;
+      const opponent = isMatchPlayerMe(activeMatch.playerA)
+        ? activeMatch.playerB?.displayId || activeMatch.playerB?.firstName
+        : activeMatch.playerA?.displayId || activeMatch.playerA?.firstName;
 
       return {
         status: 'playing_now',
@@ -128,10 +148,9 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
     // Look for ready match on table
     const readyOnTable = myMatches.find((m) => m.status === 'ready' && m.tableNumber);
     if (readyOnTable) {
-      const opponent =
-        readyOnTable.playerA?.firstName.toLowerCase() === nameLower
-          ? readyOnTable.playerB?.firstName
-          : readyOnTable.playerA?.firstName;
+      const opponent = isMatchPlayerMe(readyOnTable.playerA)
+        ? readyOnTable.playerB?.displayId || readyOnTable.playerB?.firstName
+        : readyOnTable.playerA?.displayId || readyOnTable.playerA?.firstName;
 
       return {
         status: 'ready_table',
@@ -146,10 +165,9 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
       (m) => m.status === 'ready' || (m.status === 'not_ready' && !m.winnerId)
     );
     if (waitingMatch) {
-      const opponent =
-        waitingMatch.playerA?.firstName.toLowerCase() === nameLower
-          ? waitingMatch.playerB?.firstName
-          : waitingMatch.playerA?.firstName;
+      const opponent = isMatchPlayerMe(waitingMatch.playerA)
+        ? waitingMatch.playerB?.displayId || waitingMatch.playerB?.firstName
+        : waitingMatch.playerA?.displayId || waitingMatch.playerA?.firstName;
 
       return {
         status: 'in_queue',
@@ -161,7 +179,7 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
     }
 
     // Check if knocked out
-    const lostMatch = myMatches.find((m) => m.winnerId && m.status === 'completed');
+    const lostMatch = myMatches.find((m) => m.winnerId && m.winnerId !== myParticipant.id && m.status === 'completed');
     if (lostMatch) {
       return {
         status: 'eliminated',
@@ -302,14 +320,14 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-base sm:text-xl font-black text-white truncate max-w-[40%]">
-                  {table1Match.playerA?.firstName || 'Spiller 1'}
+                  {table1Match.playerA?.displayId || table1Match.playerA?.firstName || 'Spiller 1'}
                 </div>
                 <div className="text-xl sm:text-3xl font-black text-lime-400 font-mono px-3">
                   {table1Match.scoreA !== null ? table1Match.scoreA : '0'} :{' '}
                   {table1Match.scoreB !== null ? table1Match.scoreB : '0'}
                 </div>
                 <div className="text-base sm:text-xl font-black text-white truncate max-w-[40%] text-right">
-                  {table1Match.playerB?.firstName || 'Spiller 2'}
+                  {table1Match.playerB?.displayId || table1Match.playerB?.firstName || 'Spiller 2'}
                 </div>
               </div>
             </div>
@@ -356,14 +374,14 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <div className="text-base sm:text-xl font-black text-white truncate max-w-[40%]">
-                  {table2Match.playerA?.firstName || 'Spiller 1'}
+                  {table2Match.playerA?.displayId || table2Match.playerA?.firstName || 'Spiller 1'}
                 </div>
                 <div className="text-xl sm:text-3xl font-black text-sky-400 font-mono px-3">
                   {table2Match.scoreA !== null ? table2Match.scoreA : '0'} :{' '}
                   {table2Match.scoreB !== null ? table2Match.scoreB : '0'}
                 </div>
                 <div className="text-base sm:text-xl font-black text-white truncate max-w-[40%] text-right">
-                  {table2Match.playerB?.firstName || 'Spiller 2'}
+                  {table2Match.playerB?.displayId || table2Match.playerB?.firstName || 'Spiller 2'}
                 </div>
               </div>
             </div>
@@ -453,7 +471,9 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
 
             <div className="flex flex-wrap gap-2">
               {tournament.participants.map((p) => {
-                const isMe = myPlayerName && myPlayerName.toLowerCase() === p.firstName.toLowerCase();
+                const isMe =
+                  (activePersonId && p.personId === activePersonId) ||
+                  (myPlayerName && myPlayerName.toLowerCase() === p.firstName.toLowerCase());
                 return (
                   <span
                     key={p.id}
@@ -463,7 +483,7 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
                         : 'bg-zinc-950 text-zinc-300 border-zinc-800'
                     }`}
                   >
-                    {p.firstName}
+                    {p.displayId || p.firstName}
                     {isMe && ' (Deg)'}
                   </span>
                 );
@@ -508,6 +528,7 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
           matches={tournament.matches}
           winner={tournament.winner}
           myPlayerName={myPlayerName}
+          activePersonId={activePersonId}
         />
       </div>
 

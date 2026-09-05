@@ -6,12 +6,14 @@ interface BracketViewProps {
   matches: Match[];
   winner: Participant | null;
   myPlayerName: string | null;
+  activePersonId?: string | null;
 }
 
 export const BracketView: React.FC<BracketViewProps> = ({
   matches,
   winner,
   myPlayerName,
+  activePersonId,
 }) => {
   if (matches.length === 0) {
     return (
@@ -100,13 +102,14 @@ export const BracketView: React.FC<BracketViewProps> = ({
                 {/* Match Cards for this round */}
                 <div className="flex flex-col justify-around gap-4 h-full">
                   {roundMatches.map((match) => {
-                    const isMyMatch =
-                      myPlayerName &&
-                      ((match.playerA &&
-                        match.playerA.firstName.toLowerCase() === myPlayerName.toLowerCase()) ||
-                        (match.playerB &&
-                          match.playerB.firstName.toLowerCase() === myPlayerName.toLowerCase()));
+                    const isPlayerMe = (player: Participant | null) => {
+                      if (!player) return false;
+                      if (activePersonId && player.personId === activePersonId) return true;
+                      if (myPlayerName && player.firstName.toLowerCase() === myPlayerName.toLowerCase()) return true;
+                      return false;
+                    };
 
+                    const isMyMatch = isPlayerMe(match.playerA) || isPlayerMe(match.playerB);
                     const isTableActive = match.tableNumber && match.status === 'in_progress';
                     const isTableReady = match.tableNumber && match.status === 'ready';
 
@@ -170,16 +173,13 @@ export const BracketView: React.FC<BracketViewProps> = ({
                               <Trophy className="w-3.5 h-3.5 text-lime-400 shrink-0" />
                             )}
                             <span className="truncate">
-                              {match.playerA ? match.playerA.firstName : 'Ikke klar'}
+                              {match.playerA ? (match.playerA.displayId || match.playerA.firstName) : 'Ikke klar'}
                             </span>
-                            {myPlayerName &&
-                              match.playerA &&
-                              match.playerA.firstName.toLowerCase() ===
-                                myPlayerName.toLowerCase() && (
-                                <span className="text-[9px] bg-lime-400 text-zinc-950 font-black px-1.5 py-0.5 rounded shadow-artistic-sm shrink-0">
-                                  DEG
-                                </span>
-                              )}
+                            {isPlayerMe(match.playerA) && (
+                              <span className="text-[9px] bg-lime-400 text-zinc-950 font-black px-1.5 py-0.5 rounded shadow-artistic-sm shrink-0">
+                                DEG
+                              </span>
+                            )}
                           </div>
                           <span className="text-xs font-black ml-2 font-mono">
                             {match.scoreA !== null ? match.scoreA : '-'}
@@ -209,16 +209,13 @@ export const BracketView: React.FC<BracketViewProps> = ({
                                 <Trophy className="w-3.5 h-3.5 text-lime-400 shrink-0" />
                               )}
                               <span className="truncate">
-                                {match.playerB ? match.playerB.firstName : 'Ikke klar'}
+                                {match.playerB ? (match.playerB.displayId || match.playerB.firstName) : 'Ikke klar'}
                               </span>
-                              {myPlayerName &&
-                                match.playerB &&
-                                match.playerB.firstName.toLowerCase() ===
-                                  myPlayerName.toLowerCase() && (
-                                  <span className="text-[9px] bg-lime-400 text-zinc-950 font-black px-1.5 py-0.5 rounded shadow-artistic-sm shrink-0">
-                                    DEG
-                                  </span>
-                                )}
+                              {isPlayerMe(match.playerB) && (
+                                <span className="text-[9px] bg-lime-400 text-zinc-950 font-black px-1.5 py-0.5 rounded shadow-artistic-sm shrink-0">
+                                  DEG
+                                </span>
+                              )}
                             </div>
                             <span className="text-xs font-black ml-2 font-mono">
                               {match.scoreB !== null ? match.scoreB : '-'}

@@ -1,4 +1,4 @@
-import { AppState, Participant, Match, AlphaInterest, PopcornBong } from '../types';
+import { AppState, Participant, Match, AlphaInterest, PopcornBong, Person } from '../types';
 import { INITIAL_STATE } from '../lib/initial-data';
 
 let currentAdminPin = typeof window !== 'undefined' ? (sessionStorage.getItem('lillesand_admin_pin') || 'united2026') : 'united2026';
@@ -39,26 +39,72 @@ export async function fetchState(): Promise<AppState> {
 }
 
 // ----------------------------------------------------
+// CENTRAL PERSON API
+// ----------------------------------------------------
+
+export async function createPerson(
+  firstName: string,
+  anonymousToken?: string
+): Promise<{ person: Person; state: AppState }> {
+  const res = await fetch('/api/persons', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ firstName, anonymousToken }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke opprette person');
+  return data;
+}
+
+export async function fetchPersons(): Promise<Person[]> {
+  try {
+    const res = await fetch('/api/persons');
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.persons || [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export async function fetchPerson(id: string): Promise<Person | null> {
+  try {
+    const res = await fetch(`/api/persons/${id}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.person || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+// ----------------------------------------------------
 // POPCORN DIGITAL BONG API
 // ----------------------------------------------------
 
 export async function activatePopcornBong(
   clientToken: string,
-  userName?: string
+  userName?: string,
+  personId?: string
 ): Promise<{ bong: PopcornBong; state: AppState; alreadyActivated?: boolean }> {
   const res = await fetch('/api/popcorn/activate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ clientToken, userName }),
+    body: JSON.stringify({ clientToken, userName, personId }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke aktivere popcornbong');
   return data;
 }
 
-export async function getMyPopcornBong(clientToken?: string, userName?: string): Promise<PopcornBong | null> {
+export async function getMyPopcornBong(
+  clientToken?: string,
+  userName?: string,
+  personId?: string
+): Promise<PopcornBong | null> {
   try {
     const params = new URLSearchParams();
+    if (personId) params.set('personId', personId);
     if (clientToken) params.set('clientToken', clientToken);
     if (userName) params.set('userName', userName);
     const res = await fetch(`/api/popcorn/my-bong?${params.toString()}`);
@@ -111,11 +157,16 @@ export async function resetPopcorn(): Promise<AppState> {
 // PARTICIPANTS & TOURNAMENT API
 // ----------------------------------------------------
 
-export async function registerParticipant(firstName: string, userId?: string): Promise<AppState> {
+export async function registerParticipant(
+  firstName: string,
+  userId?: string,
+  personId?: string,
+  anonymousToken?: string
+): Promise<AppState> {
   const res = await fetch('/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ firstName, userId }),
+    body: JSON.stringify({ firstName, userId, personId, anonymousToken }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke registrere deltaker');

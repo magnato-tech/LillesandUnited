@@ -10,13 +10,17 @@ import { DisplayScreen } from './components/DisplayScreen';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MyProfileView } from './components/MyProfileView';
 import { WelcomeBanner } from './components/WelcomeBanner';
-import { AppState } from './types';
+import { AppState, Person } from './types';
 import { INITIAL_STATE } from './lib/initial-data';
-import { fetchState, registerParticipant } from './services/api';
+import { fetchState, registerParticipant, createPerson } from './services/api';
+import { getActivePersonId, setActivePersonId, setActivePersonToken } from './lib/userProfile';
 
 export default function App() {
   const [state, setState] = useState<AppState>(INITIAL_STATE);
   const [currentTab, setCurrentTab] = useState<'home' | 'profile' | 'tabletennis' | 'alpha' | 'kiosk' | 'display' | 'admin'>('home');
+  const [activePersonId, setActivePersonIdState] = useState<string | null>(() => {
+    return getActivePersonId();
+  });
   const [myPlayerName, setMyPlayerName] = useState<string | null>(() => {
     return localStorage.getItem('lillesand_my_player_name');
   });
@@ -28,6 +32,16 @@ export default function App() {
     try {
       const data = await fetchState();
       setState(data);
+
+      // Sync active person name if activePersonId is set
+      const currentId = getActivePersonId();
+      if (currentId && data.persons && Array.isArray(data.persons)) {
+        const matchingPerson = data.persons.find((p) => p.id === currentId);
+        if (matchingPerson) {
+          setMyPlayerName(matchingPerson.firstName);
+          localStorage.setItem('lillesand_my_player_name', matchingPerson.firstName);
+        }
+      }
 
       // Trigger confetti if winner was crowned
       if (data.tournament?.winner && data.tournament.winner.id !== previousWinnerRef.current) {
@@ -51,12 +65,48 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSetMyPlayer = (name: string | null) => {
-    setMyPlayerName(name);
-    if (name) {
-      localStorage.setItem('lillesand_my_player_name', name);
+  const handleSelectPerson = (person: Person | null) => {
+    if (person) {
+      setActivePersonIdState(person.id);
+      setActivePersonId(person.id);
+      setActivePersonToken(person.anonymousToken);
+      setMyPlayerName(person.firstName);
+      localStorage.setItem('lillesand_my_player_name', person.firstName);
     } else {
+      setActivePersonIdState(null);
+      setActivePersonId(null);
+      setActivePersonToken(null);
+      setMyPlayerName(null);
       localStorage.removeItem('lillesand_my_player_name');
+    }
+  };
+
+  const handleCreatePerson = async (firstName: string): Promise<Person | null> => {
+    try {
+      const res = await createPerson(firstName);
+      setState(res.state);
+      handleSelectPerson(res.person);
+      return res.person;
+    } catch (err) {
+      console.error('Failed to create person:', err);
+      return null;
+    }
+  };
+
+  const handleSetMyPlayer = async (name: string | null) => {
+    if (!name) {
+      handleSelectPerson(null);
+      return;
+    }
+    const clean = name.trim();
+    // Check if there is an existing registered Person
+    const existing = (state.persons || []).find(
+      (p) => p.firstName.toLowerCase() === clean.toLowerCase()
+    );
+    if (existing) {
+      handleSelectPerson(existing);
+    } else {
+      await handleCreatePerson(clean);
     }
   };
 
@@ -91,6 +141,10 @@ export default function App() {
           myPlayerName={myPlayerName}
           onSetMyPlayer={handleSetMyPlayer}
           participants={state.tournament.participants}
+          persons={state.persons || []}
+          activePersonId={activePersonId}
+          onSelectPerson={handleSelectPerson}
+          onCreatePerson={handleCreatePerson}
         />
 
         {/* Main Content Area */}
@@ -124,6 +178,8 @@ export default function App() {
               onSetMyPlayer={handleSetMyPlayer}
               onGoToTab={setCurrentTab}
               onRefreshState={loadLatestState}
+              activePersonId={activePersonId}
+              persons={state.persons || []}
             />
           )}
 
@@ -152,6 +208,8 @@ export default function App() {
               myPlayerName={myPlayerName}
               onSetMyPlayer={handleSetMyPlayer}
               onBongClaimed={loadLatestState}
+              activePersonId={activePersonId}
+              persons={state.persons || []}
             />
           )}
 

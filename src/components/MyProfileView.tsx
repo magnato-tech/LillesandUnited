@@ -15,7 +15,7 @@ import {
   Edit2,
   ChevronRight,
 } from 'lucide-react';
-import { AppState, PopcornBong } from '../types';
+import { AppState, PopcornBong, Person } from '../types';
 import { getUserToken, saveUserTokenForName, startNewGuestSession } from '../lib/userProfile';
 import { activatePopcornBong, registerParticipant, registerAlphaInterest, renameUser } from '../services/api';
 
@@ -25,6 +25,8 @@ interface MyProfileViewProps {
   onSetMyPlayer: (name: string | null) => void;
   onRefreshState: () => void;
   onGoToTab: (tab: 'home' | 'tabletennis' | 'alpha' | 'kiosk') => void;
+  activePersonId?: string | null;
+  persons?: Person[];
 }
 
 export const MyProfileView: React.FC<MyProfileViewProps> = ({
@@ -33,6 +35,8 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
   onSetMyPlayer,
   onRefreshState,
   onGoToTab,
+  activePersonId = null,
+  persons = [],
 }) => {
   const [editingName, setEditingName] = useState(false);
   const [newNameInput, setNewNameInput] = useState('');
@@ -41,24 +45,39 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const currentUserName = myPlayerName && myPlayerName.trim() ? myPlayerName.trim() : null;
-  const userToken = useMemo(() => getUserToken(currentUserName), [currentUserName]);
+  const activePerson = useMemo(() => {
+    if (!activePersonId || !Array.isArray(persons)) return null;
+    return persons.find((p) => p.id === activePersonId) || null;
+  }, [activePersonId, persons]);
+
+  const currentUserName = activePerson?.firstName || ((myPlayerName && myPlayerName.trim()) ? myPlayerName.trim() : null);
+  const userToken = useMemo(() => {
+    if (activePerson?.anonymousToken) return activePerson.anonymousToken;
+    return getUserToken(currentUserName);
+  }, [activePerson, currentUserName]);
 
   // Find user's popcorn bong
   const userBong = useMemo((): PopcornBong | null => {
     if (!state.popcorn?.bongs) return null;
+    // 1. Primary lookup by Person.id
+    if (activePersonId) {
+      const byPersonId = state.popcorn.bongs.find((b) => b.personId === activePersonId);
+      if (byPersonId) return byPersonId;
+    }
+    // 2. Fallback to clientToken
+    if (userToken) {
+      const byToken = state.popcorn.bongs.find((b) => b.clientToken === userToken);
+      if (byToken) return byToken;
+    }
+    // 3. Fallback to name if legacy
     if (currentUserName && currentUserName.toLowerCase() !== 'gjest') {
       const byName = state.popcorn.bongs.find(
         (b) => b.userName && b.userName.toLowerCase() === currentUserName.toLowerCase()
       );
       if (byName) return byName;
     }
-    if (userToken) {
-      const byToken = state.popcorn.bongs.find((b) => b.clientToken === userToken);
-      if (byToken) return byToken;
-    }
     return null;
-  }, [state.popcorn, currentUserName, userToken]);
+  }, [state.popcorn, activePersonId, currentUserName, userToken]);
 
   // Find user's table tennis registration
   const participant = useMemo(() => {
@@ -173,7 +192,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
     setLoadingAction('popcorn');
     setActionError(null);
     try {
-      await activatePopcornBong(userToken, currentUserName || undefined);
+      await activatePopcornBong(userToken, currentUserName || undefined, activePersonId || undefined);
       onRefreshState();
     } catch (err: any) {
       setActionError(err.message || 'Kunne ikke aktivere popcornbong.');

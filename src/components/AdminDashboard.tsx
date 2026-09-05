@@ -667,6 +667,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     statusBadge = 'Hentet';
                   }
 
+                  const person = bong.personId ? (state.persons || []).find((p) => p.id === bong.personId) : null;
+                  const displayName = person?.displayId || bong.userName;
+
                   return (
                     <button
                       key={bong.number}
@@ -681,7 +684,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         #{bong.number}
                       </span>
                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider truncate max-w-full px-0.5">
-                        {bong.userName ? `${bong.userName}` : statusBadge}
+                        {displayName ? `${displayName}` : statusBadge}
                       </span>
                     </button>
                   );
@@ -1188,6 +1191,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Registered Central Persons overview (displayId) */}
+          <div className="pt-4 border-t-2 border-zinc-800">
+            <h4 className="font-black text-white text-sm uppercase mb-3">
+              Registrerte personer (displayId):
+            </h4>
+            {(!state.persons || state.persons.length === 0) ? (
+              <p className="text-xs text-zinc-500 font-medium">Ingen sentrale personer registrert enda.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {state.persons.map((p) => (
+                  <div
+                    key={p.id}
+                    className="px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono font-bold text-lime-400 flex items-center gap-1.5 shadow-artistic-sm"
+                  >
+                    <span>👤</span>
+                    <span>{p.displayId || `${p.firstName}_${p.nameNumber || 1}`}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -1210,113 +1235,127 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             {/* CASE 1: GRØNN BONG (AKTIVERT - KLAR TIL UTLEVERING) */}
-            {selectedBong.status === 'activated' && (
-              <div>
-                <div className="w-16 h-16 rounded-2xl bg-lime-400 text-zinc-950 flex items-center justify-center mx-auto mb-4 shadow-artistic-sm -rotate-2">
-                  <Popcorn className="w-8 h-8" />
-                </div>
+            {selectedBong.status === 'activated' && (() => {
+              const person = selectedBong.personId
+                ? (state.persons || []).find((p) => p.id === selectedBong.personId)
+                : null;
+              const displayName = person?.displayId || selectedBong.userName;
 
-                <div className="text-center mb-6">
-                  <span className="text-xs font-black uppercase tracking-wider text-lime-400 block mb-1">
-                    Klar til utlevering
-                  </span>
-                  <h2 className="text-4xl font-black text-white uppercase tracking-tight font-mono">
-                    BONG #{selectedBong.number}
-                  </h2>
-                  {selectedBong.userName && (
-                    <span className="inline-block mt-1 px-3 py-0.5 bg-lime-400 text-zinc-950 rounded-full font-black text-xs uppercase tracking-wider">
-                      Tilhører: {selectedBong.userName}
+              return (
+                <div>
+                  <div className="w-16 h-16 rounded-2xl bg-lime-400 text-zinc-950 flex items-center justify-center mx-auto mb-4 shadow-artistic-sm -rotate-2">
+                    <Popcorn className="w-8 h-8" />
+                  </div>
+
+                  <div className="text-center mb-6">
+                    <span className="text-xs font-black uppercase tracking-wider text-lime-400 block mb-1">
+                      Klar til utlevering
                     </span>
+                    <h2 className="text-4xl font-black text-white uppercase tracking-tight font-mono">
+                      BONG #{selectedBong.number}
+                    </h2>
+                    {displayName && (
+                      <span className="inline-block mt-1 px-3 py-0.5 bg-lime-400 text-zinc-950 rounded-full font-black text-xs uppercase tracking-wider">
+                        Tilhører: {displayName}
+                      </span>
+                    )}
+                    <p className="text-xs text-zinc-300 mt-2 font-medium">
+                      Ungdommen viser gyldig aktivert bong på sin mobil. Gi ut nypoppet popcornbeger nå.
+                    </p>
+                    {selectedBong.activatedAt && (
+                      <span className="text-[11px] text-zinc-500 font-mono mt-1 block">
+                        Aktivert:{' '}
+                        {new Date(selectedBong.activatedAt).toLocaleTimeString('no-NO', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                      </span>
+                    )}
+                  </div>
+
+                  {bongActionError && (
+                    <p className="text-xs text-rose-400 font-bold mb-4 text-center">
+                      {bongActionError}
+                    </p>
                   )}
-                  <p className="text-xs text-zinc-300 mt-2 font-medium">
-                    Ungdommen viser gyldig aktivert bong på sin mobil. Gi ut nypoppet popcornbeger nå.
-                  </p>
-                  {selectedBong.activatedAt && (
-                    <span className="text-[11px] text-zinc-500 font-mono mt-1 block">
-                      Aktivert:{' '}
-                      {new Date(selectedBong.activatedAt).toLocaleTimeString('no-NO', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                      })}
-                    </span>
-                  )}
+
+                  <div className="space-y-3">
+                    <button
+                      id="confirm-give-popcorn-btn"
+                      onClick={() => handleRedeemBong(selectedBong.number)}
+                      disabled={bongActionLoading}
+                      className="w-full py-4 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 font-black text-base uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Check className="w-5 h-5" />
+                      {bongActionLoading ? 'Lagrer...' : 'GI POPCORN'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedBong(null)}
+                      className="w-full py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-zinc-300 text-xs font-black uppercase tracking-wider hover:border-zinc-700 shadow-artistic-sm"
+                    >
+                      Avbryt
+                    </button>
+                  </div>
                 </div>
+              );
+            })()}
 
-                {bongActionError && (
-                  <p className="text-xs text-rose-400 font-bold mb-4 text-center">
-                    {bongActionError}
-                  </p>
-                )}
+            {/* CASE 2: RØD BONG (FORSØK PÅ DOBBEL UTLEVERING - Section 8) */}
+            {selectedBong.status === 'used' && (() => {
+              const person = selectedBong.personId
+                ? (state.persons || []).find((p) => p.id === selectedBong.personId)
+                : null;
+              const displayName = person?.displayId || selectedBong.userName;
 
-                <div className="space-y-3">
-                  <button
-                    id="confirm-give-popcorn-btn"
-                    onClick={() => handleRedeemBong(selectedBong.number)}
-                    disabled={bongActionLoading}
-                    className="w-full py-4 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 font-black text-base uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Check className="w-5 h-5" />
-                    {bongActionLoading ? 'Lagrer...' : 'GI POPCORN'}
-                  </button>
+              return (
+                <div>
+                  <div className="w-16 h-16 rounded-2xl bg-rose-500 text-zinc-950 flex items-center justify-center mx-auto mb-4 shadow-artistic-sm rotate-2">
+                    <AlertTriangle className="w-8 h-8" />
+                  </div>
+
+                  <div className="text-center mb-6">
+                    <div className="p-3 rounded-2xl bg-rose-500/20 border-2 border-rose-500 mb-3 text-rose-200">
+                      <h3 className="font-black text-sm uppercase tracking-wider">
+                        ⚠️ DENNE BONGEN ER ALLEREDE BRUKT
+                      </h3>
+                    </div>
+
+                    <h2 className="text-4xl font-black text-white uppercase tracking-tight font-mono">
+                      BONG #{selectedBong.number}
+                    </h2>
+                    {displayName && (
+                      <span className="inline-block mt-1 px-3 py-0.5 bg-rose-500/30 text-rose-300 rounded-full font-bold text-xs uppercase tracking-wider border border-rose-500/50">
+                        Tilhører: {displayName}
+                      </span>
+                    )}
+                    <p className="text-xs text-zinc-300 mt-2 font-medium">
+                      Popcorn er allerede levert ut for denne bongen. Det skal ikke være mulig å gi ut popcorn to ganger på samme bong.
+                    </p>
+                    {selectedBong.usedAt && (
+                      <span className="text-xs text-rose-400 font-mono font-bold mt-2 block">
+                        Levert ut kl.{' '}
+                        {new Date(selectedBong.usedAt).toLocaleTimeString('no-NO', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                      </span>
+                    )}
+                  </div>
 
                   <button
                     type="button"
                     onClick={() => setSelectedBong(null)}
-                    className="w-full py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-zinc-300 text-xs font-black uppercase tracking-wider hover:border-zinc-700 shadow-artistic-sm"
+                    className="w-full py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white text-xs font-black uppercase tracking-wider hover:border-zinc-700 shadow-artistic-sm"
                   >
-                    Avbryt
+                    Lukk advarsel
                   </button>
                 </div>
-              </div>
-            )}
-
-            {/* CASE 2: RØD BONG (FORSØK PÅ DOBBEL UTLEVERING - Section 8) */}
-            {selectedBong.status === 'used' && (
-              <div>
-                <div className="w-16 h-16 rounded-2xl bg-rose-500 text-zinc-950 flex items-center justify-center mx-auto mb-4 shadow-artistic-sm rotate-2">
-                  <AlertTriangle className="w-8 h-8" />
-                </div>
-
-                <div className="text-center mb-6">
-                  <div className="p-3 rounded-2xl bg-rose-500/20 border-2 border-rose-500 mb-3 text-rose-200">
-                    <h3 className="font-black text-sm uppercase tracking-wider">
-                      ⚠️ DENNE BONGEN ER ALLEREDE BRUKT
-                    </h3>
-                  </div>
-
-                  <h2 className="text-4xl font-black text-white uppercase tracking-tight font-mono">
-                    BONG #{selectedBong.number}
-                  </h2>
-                  {selectedBong.userName && (
-                    <span className="inline-block mt-1 px-3 py-0.5 bg-rose-500/30 text-rose-300 rounded-full font-bold text-xs uppercase tracking-wider border border-rose-500/50">
-                      Tilhører: {selectedBong.userName}
-                    </span>
-                  )}
-                  <p className="text-xs text-zinc-300 mt-2 font-medium">
-                    Popcorn er allerede levert ut for denne bongen. Det skal ikke være mulig å gi ut popcorn to ganger på samme bong.
-                  </p>
-                  {selectedBong.usedAt && (
-                    <span className="text-xs text-rose-400 font-mono font-bold mt-2 block">
-                      Levert ut kl.{' '}
-                      {new Date(selectedBong.usedAt).toLocaleTimeString('no-NO', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                      })}
-                    </span>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedBong(null)}
-                  className="w-full py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white text-xs font-black uppercase tracking-wider hover:border-zinc-700 shadow-artistic-sm"
-                >
-                  Lukk advarsel
-                </button>
-              </div>
-            )}
+              );
+            })()}
 
             {/* CASE 3: BLANK / NØYTRAL BONG (IKKE AKTIVERT ENDA) */}
             {selectedBong.status === 'blank' && (

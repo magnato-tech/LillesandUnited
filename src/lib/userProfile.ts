@@ -1,6 +1,37 @@
 // Shared anonymous user profile utilities for Lillesand United
 // Reuses the exact same token and identity mechanism as the popcorn bong engine
 
+export const ACTIVE_PERSON_ID_KEY = 'lillesand_active_person_id';
+export const ACTIVE_PERSON_TOKEN_KEY = 'lillesand_active_person_token';
+
+export function getActivePersonId(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(ACTIVE_PERSON_ID_KEY);
+}
+
+export function setActivePersonId(id: string | null): void {
+  if (typeof window === 'undefined') return;
+  if (id) {
+    localStorage.setItem(ACTIVE_PERSON_ID_KEY, id);
+  } else {
+    localStorage.removeItem(ACTIVE_PERSON_ID_KEY);
+  }
+}
+
+export function getActivePersonToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(ACTIVE_PERSON_TOKEN_KEY);
+}
+
+export function setActivePersonToken(token: string | null): void {
+  if (typeof window === 'undefined') return;
+  if (token) {
+    localStorage.setItem(ACTIVE_PERSON_TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(ACTIVE_PERSON_TOKEN_KEY);
+  }
+}
+
 export function getUserToken(userName?: string | null, guestIdOverride?: string): string {
   if (typeof window === 'undefined') return 'server_token';
 

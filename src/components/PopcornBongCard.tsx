@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Popcorn, CheckCircle, Sparkles, AlertCircle, Loader2, User, UserPlus, ArrowRightLeft } from 'lucide-react';
-import { PopcornData, PopcornBong, Participant } from '../types';
+import { PopcornData, PopcornBong, Participant, Person } from '../types';
 import { activatePopcornBong } from '../services/api';
 
 interface PopcornBongCardProps {
@@ -11,6 +11,8 @@ interface PopcornBongCardProps {
   userName?: string | null;
   onSelectUser?: (name: string | null) => void;
   participants?: Participant[];
+  activePersonId?: string | null;
+  persons?: Person[];
 }
 
 export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
@@ -21,6 +23,8 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
   userName = null,
   onSelectUser,
   participants = [],
+  activePersonId = null,
+  persons = [],
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,12 +34,21 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
   const [customNameInput, setCustomNameInput] = useState('');
   const [showNameModal, setShowNameModal] = useState(false);
 
+  // Active Person resolution
+  const activePerson = useMemo(() => {
+    if (!activePersonId || !Array.isArray(persons)) return null;
+    return persons.find((p) => p.id === activePersonId) || null;
+  }, [activePersonId, persons]);
+
   // Active user name normalized
-  const currentUserName = (userName && userName.trim()) ? userName.trim() : null;
+  const currentUserName = activePerson?.firstName || ((userName && userName.trim()) ? userName.trim() : null);
 
   // Resolve client token for the current user
   const clientToken = useMemo(() => {
     if (typeof window === 'undefined') return '';
+    if (activePerson?.anonymousToken) {
+      return activePerson.anonymousToken;
+    }
     if (currentUserName) {
       const key = `lillesand_popcorn_token_${currentUserName.toLowerCase()}`;
       let tok = localStorage.getItem(key);
@@ -53,18 +66,16 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
       }
       return tok;
     }
-  }, [currentUserName, guestId]);
+  }, [activePerson, currentUserName, guestId]);
 
   // Find this user's active or used bong
   const userBong = useMemo(() => {
     if (!popcorn?.bongs || !Array.isArray(popcorn.bongs)) return null;
 
-    // 1. If named user (e.g. Oliver, Emma, Sander)
-    if (currentUserName && currentUserName.toLowerCase() !== 'gjest') {
-      const byName = popcorn.bongs.find(
-        (b) => b.userName && b.userName.toLowerCase() === currentUserName.toLowerCase()
-      );
-      if (byName) return byName;
+    // 1. Primary technical lookup by Person.id
+    if (activePersonId) {
+      const byPersonId = popcorn.bongs.find((b) => b.personId === activePersonId);
+      if (byPersonId) return byPersonId;
     }
 
     // 2. Fallback to client token
@@ -73,8 +84,16 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
       if (byToken) return byToken;
     }
 
+    // 3. Fallback to named user if legacy
+    if (currentUserName && currentUserName.toLowerCase() !== 'gjest') {
+      const byName = popcorn.bongs.find(
+        (b) => b.userName && b.userName.toLowerCase() === currentUserName.toLowerCase()
+      );
+      if (byName) return byName;
+    }
+
     return null;
-  }, [popcorn, currentUserName, clientToken]);
+  }, [popcorn, activePersonId, currentUserName, clientToken]);
 
   const totalCapacity = popcorn?.totalCapacity || 100;
   const blankBongsCount =
@@ -86,7 +105,9 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const res = await activatePopcornBong(clientToken, currentUserName || undefined);
+      const tokenToUse = activePerson?.anonymousToken || clientToken;
+      const nameToUse = activePerson?.firstName || currentUserName || undefined;
+      const res = await activatePopcornBong(tokenToUse, nameToUse, activePersonId || undefined);
       if (onBongClaimed) {
         onBongClaimed(res.bong);
       }
@@ -127,7 +148,7 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
           </div>
           <span className="text-zinc-400 font-medium">Aktiv bruker:</span>
           <strong className="text-white font-black bg-zinc-950 px-2.5 py-1 rounded-lg border border-zinc-800">
-            {currentUserName || 'Gjest / Ikke valgt'}
+            {activePerson?.displayId || currentUserName || 'Gjest / Ikke valgt'}
           </strong>
         </div>
 
@@ -226,9 +247,9 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
             🍿 POPCORN HENTET ✓
           </h3>
           <p className="text-zinc-400 text-sm mt-2 max-w-md mx-auto">
-            {currentUserName ? (
+            {activePerson?.displayId || currentUserName ? (
               <>
-                <strong className="text-white">{currentUserName}</strong> har hentet gratis popcorn med{' '}
+                <strong className="text-white">{activePerson?.displayId || currentUserName}</strong> har hentet gratis popcorn med{' '}
                 <span className="font-bold text-white">bong #{userBong.number}</span>.
               </>
             ) : (
@@ -261,11 +282,15 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
 
           <h4 className="text-xs font-extrabold uppercase tracking-widest text-amber-400">
             🍿 DIN POPCORN-BONG
-            {userBong.userName && (
+            {activePerson?.displayId ? (
+              <span className="text-zinc-300 block text-xs font-bold mt-0.5">
+                (Tilhører: {activePerson.displayId})
+              </span>
+            ) : userBong.userName ? (
               <span className="text-zinc-300 block text-xs font-bold mt-0.5">
                 (Tilhører: {userBong.userName})
               </span>
-            )}
+            ) : null}
           </h4>
 
           <div className="my-4">

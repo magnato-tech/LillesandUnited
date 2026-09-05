@@ -1,6 +1,6 @@
 import React from 'react';
 import { Utensils } from 'lucide-react';
-import { AppState } from '../types';
+import { AppState, Person } from '../types';
 import { PopcornBongCard } from './PopcornBongCard';
 
 interface KioskSectionProps {
@@ -9,6 +9,8 @@ interface KioskSectionProps {
   myPlayerName?: string | null;
   onSetMyPlayer?: (name: string | null) => void;
   onBongClaimed?: () => void;
+  activePersonId?: string | null;
+  persons?: Person[];
 }
 
 export const KioskSection: React.FC<KioskSectionProps> = ({
@@ -16,6 +18,8 @@ export const KioskSection: React.FC<KioskSectionProps> = ({
   myPlayerName,
   onSetMyPlayer,
   onBongClaimed,
+  activePersonId = null,
+  persons = [],
 }) => {
   const kioskItems = [
     { name: 'Nypoppet Popcorn', desc: 'Første 100 beger gratis med digital bong!', price: 'Gratis bong / 20 kr', icon: '🍿', free: true },
@@ -37,6 +41,8 @@ export const KioskSection: React.FC<KioskSectionProps> = ({
         onSelectUser={onSetMyPlayer}
         participants={state.tournament.participants}
         onBongClaimed={onBongClaimed}
+        activePersonId={activePersonId}
+        persons={persons}
       />
 
       {/* Kiosk Menu List */}

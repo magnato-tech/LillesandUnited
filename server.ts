@@ -1,8 +1,9 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
-import { AppState, Match, Participant, AlphaInterest } from './src/types';
+import { AppState, Match, Participant, AlphaInterest, Person } from './src/types';
 import {
   generateBracket,
   recordMatchResult,
@@ -45,7 +46,43 @@ function loadState(): AppState {
         (b: any) => b.status === 'activated' || b.status === 'used'
       ).length;
 
-      return {
+      const rawPersons = Array.isArray(parsed.persons) ? parsed.persons : [];
+      let personsMigrated = false;
+      const nameMaxNumber: Record<string, number> = {};
+
+      for (const p of rawPersons) {
+        const key = (p.firstName || '').toLowerCase();
+        if (typeof p.nameNumber === 'number' && p.displayId) {
+          nameMaxNumber[key] = Math.max(nameMaxNumber[key] || 0, p.nameNumber);
+        }
+      }
+
+      const persons: Person[] = rawPersons.map((p: any) => {
+        const key = (p.firstName || '').toLowerCase();
+        let nameNumber = p.nameNumber;
+        let displayId = p.displayId;
+
+        if (typeof nameNumber !== 'number' || !displayId) {
+          const next = (nameMaxNumber[key] || 0) + 1;
+          nameMaxNumber[key] = next;
+          nameNumber = next;
+          displayId = `${p.firstName}_${next}`;
+          personsMigrated = true;
+        }
+
+        return {
+          id: p.id,
+          firstName: p.firstName,
+          nameNumber,
+          displayId,
+          anonymousToken: p.anonymousToken,
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+          isSimulated: Boolean(p.isSimulated),
+        };
+      });
+
+      const loadedState = {
         ...parsed,
         event: {
           ...INITIAL_STATE.event,
@@ -54,7 +91,18 @@ function loadState(): AppState {
         },
         popcorn,
         activities: INITIAL_ACTIVITIES,
+        persons,
       };
+
+      if (personsMigrated) {
+        try {
+          fs.writeFileSync(DB_FILE, JSON.stringify(loadedState, null, 2), 'utf-8');
+        } catch (e) {
+          console.error('Failed to write back migrated persons:', e);
+        }
+      }
+
+      return loadedState;
     }
   } catch (err) {
     console.error('Error loading db.json, using initial state:', err);
@@ -87,31 +135,156 @@ app.get('/api/state', (req, res) => {
   res.json(state);
 });
 
-// Register participant for Table tennis
-app.post('/api/register', (req, res) => {
-  const { firstName, userId } = req.body;
+// ----------------------------------------------------
+// PERSON ROUTES
+// ----------------------------------------------------
+
+// Create a new anonymous person (Central Person Model with permanent nameNumber and displayId)
+app.post('/api/persons', (req, res) => {
+  const { firstName, anonymousToken } = req.body;
   if (!firstName || typeof firstName !== 'string' || !firstName.trim()) {
     return res.status(400).json({ error: 'Fornavn er påkrevd.' });
   }
 
   const cleanName = firstName.trim();
-  const cleanUserId = typeof userId === 'string' && userId.trim() ? userId.trim() : undefined;
+  const id = crypto.randomUUID();
+  const token = (typeof anonymousToken === 'string' && anonymousToken.trim())
+    ? anonymousToken.trim()
+    : 'tok_' + crypto.randomUUID().replace(/-/g, '').substring(0, 16);
 
-  // Check if already registered by userId or firstName
-  const existing = state.tournament.participants.find(
-    (p) => (cleanUserId && p.userId === cleanUserId) || p.firstName.toLowerCase() === cleanName.toLowerCase()
+  // Synchronous sequence (Steps 1 through 6):
+  // 1. Read existing persons
+  if (!state.persons) {
+    state.persons = [];
+  }
+
+  // 2. Find highest nameNumber for firstName (case-insensitive comparison)
+  const key = cleanName.toLowerCase();
+  const sameNamePersons = state.persons.filter(
+    (p) => (p.firstName || '').toLowerCase() === key
   );
+  const highestNumber = sameNamePersons.reduce(
+    (max, p) => Math.max(max, typeof p.nameNumber === 'number' ? p.nameNumber : 0),
+    0
+  );
+
+  // 3. Compute next sequential number and displayId
+  const nextNumber = highestNumber + 1;
+  const displayId = `${cleanName}_${nextNumber}`;
+
+  // 4. Create Person entity with persistent nameNumber and displayId
+  const now = new Date().toISOString();
+  const person: Person = {
+    id,
+    firstName: cleanName,
+    nameNumber: nextNumber,
+    displayId,
+    anonymousToken: token,
+    createdAt: now,
+    updatedAt: now,
+    isSimulated: false,
+  };
+
+  // 5. Synchronously append to state
+  state.persons.push(person);
+
+  // 6. Synchronously flush to disk
+  saveState();
+
+  res.json({ success: true, person, state });
+});
+
+// Get all persons (Public - used by person selector)
+app.get('/api/persons', (req, res) => {
+  res.json({ success: true, persons: state.persons || [] });
+});
+
+// Get single person by ID
+app.get('/api/persons/:id', (req, res) => {
+  const person = (state.persons || []).find((p) => p.id === req.params.id);
+  if (!person) {
+    return res.status(404).json({ error: 'Person ikke funnet.' });
+  }
+  res.json({ success: true, person });
+});
+
+// Register participant for Table tennis
+app.post('/api/register', (req, res) => {
+  const { firstName, userId, personId, anonymousToken } = req.body;
+  const cleanPersonId = typeof personId === 'string' && personId.trim() ? personId.trim() : null;
+  const cleanUserId = typeof userId === 'string' && userId.trim() ? userId.trim() : undefined;
+  const cleanToken = typeof anonymousToken === 'string' && anonymousToken.trim() ? anonymousToken.trim() : null;
+  const cleanName = typeof firstName === 'string' && firstName.trim() ? firstName.trim() : '';
+
+  let resolvedPerson: Person | null = null;
+
+  if (cleanPersonId) {
+    resolvedPerson = (state.persons || []).find((p) => p.id === cleanPersonId) || null;
+    if (!resolvedPerson) {
+      console.warn(`[/api/register] Person with personId "${cleanPersonId}" not found in state.persons.`);
+      return res.status(404).json({ error: 'Personen ble ikke funnet. Vennligst velg eller opprett profil på nytt.' });
+    }
+  } else {
+    // Legacy fallback path: personId is missing
+    // Rule: Attempt to find unambiguous existing Person; NEVER silently create a new Person.
+    console.warn(`[/api/register] Legacy call received without personId. Payload:`, { firstName, userId });
+
+    if (cleanToken) {
+      const matchByToken = (state.persons || []).filter((p) => p.anonymousToken === cleanToken);
+      if (matchByToken.length === 1) {
+        resolvedPerson = matchByToken[0];
+      }
+    }
+
+    if (!resolvedPerson && cleanName) {
+      const matchesByName = (state.persons || []).filter(
+        (p) => p.firstName.toLowerCase() === cleanName.toLowerCase()
+      );
+      if (matchesByName.length === 1) {
+        resolvedPerson = matchesByName[0];
+      } else if (matchesByName.length > 1) {
+        console.error(`[/api/register] Ambiguous match: ${matchesByName.length} persons found with name "${cleanName}". Cannot resolve personId automatically.`);
+        return res.status(400).json({
+          error: `Det finnes flere profiler med fornavn "${cleanName}". Vennligst velg din spesifikke profil (f.eks. ${matchesByName[0].displayId}).`,
+          ambiguous: true,
+        });
+      }
+    }
+
+    if (!resolvedPerson) {
+      console.error(`[/api/register] Rejected legacy call: No matching Person found for name="${cleanName}" / token="${cleanToken}". Silent person creation is forbidden.`);
+      return res.status(400).json({
+        error: 'Ugyldig påmelding: Ingen eksisterende profil funnet. Du må velge hvem du er før du melder deg på.',
+      });
+    }
+  }
+
+  // Idempotency check:
+  // Check if this Person (or legacy participant) is already registered
+  const existing = state.tournament.participants.find(
+    (p) =>
+      (resolvedPerson && p.personId === resolvedPerson.id) ||
+      (cleanUserId && p.userId === cleanUserId)
+  );
+
   if (existing) {
+    if (resolvedPerson) {
+      existing.personId = resolvedPerson.id;
+      existing.displayId = resolvedPerson.displayId;
+      existing.firstName = resolvedPerson.firstName;
+    }
     if (cleanUserId && !existing.userId) {
       existing.userId = cleanUserId;
-      saveState();
     }
+    saveState();
     return res.json({ success: true, participant: existing, state, alreadyRegistered: true });
   }
 
   const participant: Participant = {
     id: 'p_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-    firstName: cleanName,
+    personId: resolvedPerson ? resolvedPerson.id : null,
+    displayId: resolvedPerson ? resolvedPerson.displayId : cleanName,
+    firstName: resolvedPerson ? resolvedPerson.firstName : cleanName,
     registeredAt: new Date().toISOString(),
     userId: cleanUserId,
   };
@@ -294,11 +467,52 @@ app.post('/api/tournament/simulate', requireAdmin, (req, res) => {
   const { count = 16 } = req.body;
   const names = count === 31 ? SIMULATION_NAMES_31 : SIMULATION_NAMES_16.slice(0, count);
 
-  const participants: Participant[] = names.map((name, i) => ({
-    id: `sim_${i + 1}_${Math.random().toString(36).substring(2, 6)}`,
-    firstName: name,
-    registeredAt: new Date(Date.now() - (names.length - i) * 60000).toISOString(),
-  }));
+  if (!state.persons) {
+    state.persons = [];
+  }
+
+  const participants: Participant[] = [];
+  const now = new Date();
+
+  names.forEach((name, i) => {
+    const cleanName = name.trim();
+    const id = crypto.randomUUID();
+    const token = 'tok_sim_' + crypto.randomUUID().replace(/-/g, '').substring(0, 12);
+
+    // Compute sequential nameNumber for this name
+    const key = cleanName.toLowerCase();
+    const sameNamePersons = state.persons.filter(
+      (p) => (p.firstName || '').toLowerCase() === key
+    );
+    const highestNumber = sameNamePersons.reduce(
+      (max, p) => Math.max(max, typeof p.nameNumber === 'number' ? p.nameNumber : 0),
+      0
+    );
+    const nextNumber = highestNumber + 1;
+    const displayId = `${cleanName}_${nextNumber}`;
+
+    const createdAt = new Date(now.getTime() - (names.length - i) * 60000).toISOString();
+    const person: Person = {
+      id,
+      firstName: cleanName,
+      nameNumber: nextNumber,
+      displayId,
+      anonymousToken: token,
+      createdAt,
+      updatedAt: createdAt,
+      isSimulated: true, // Marked explicitly as simulated test person
+    };
+
+    state.persons.push(person);
+
+    participants.push({
+      id: `sim_${i + 1}_${Math.random().toString(36).substring(2, 6)}`,
+      personId: person.id,
+      displayId: person.displayId,
+      firstName: person.firstName,
+      registeredAt: createdAt,
+    });
+  });
 
   state.tournament.participants = participants;
   const matches = generateBracket(participants);
@@ -417,15 +631,22 @@ app.post('/api/user/rename', (req, res) => {
 app.get('/api/user/status', (req, res) => {
   const userId = req.query.userId as string;
   const userName = req.query.userName as string;
+  const personId = req.query.personId as string;
+  const cleanPersonId = typeof personId === 'string' && personId.trim() ? personId.trim() : null;
   const cleanUserId = typeof userId === 'string' && userId.trim() ? userId.trim() : null;
   const cleanUserName = typeof userName === 'string' && userName.trim() ? userName.trim() : null;
 
   const participant = state.tournament.participants.find(
-    (p) => (cleanUserId && p.userId === cleanUserId) || (cleanUserName && p.firstName.toLowerCase() === cleanUserName.toLowerCase())
+    (p) =>
+      (cleanPersonId && p.personId === cleanPersonId) ||
+      (cleanUserId && p.userId === cleanUserId) ||
+      (!cleanPersonId && cleanUserName && p.firstName.toLowerCase() === cleanUserName.toLowerCase())
   ) || null;
 
   const popcornBong = state.popcorn.bongs.find(
-    (b) => (cleanUserId && b.clientToken === cleanUserId) || (cleanUserName && b.userName && b.userName.toLowerCase() === cleanUserName.toLowerCase())
+    (b) => (cleanPersonId && b.personId === cleanPersonId) ||
+           (cleanUserId && b.clientToken === cleanUserId) ||
+           (!cleanPersonId && cleanUserName && b.userName && b.userName.toLowerCase() === cleanUserName.toLowerCase())
   ) || null;
 
   const alphaInterest = state.alphaInterests.find(
@@ -465,10 +686,57 @@ app.post('/api/alpha/reset', requireAdmin, (req, res) => {
 
 // User activates popcorn bong (Public)
 app.post('/api/popcorn/activate', (req, res) => {
-  const { clientToken, userName } = req.body;
+  const { personId, anonymousToken, clientToken, userName } = req.body;
+  const cleanPersonId = typeof personId === 'string' && personId.trim() ? personId.trim() : null;
+  const cleanToken = typeof anonymousToken === 'string' && anonymousToken.trim()
+    ? anonymousToken.trim()
+    : typeof clientToken === 'string' && clientToken.trim()
+    ? clientToken.trim()
+    : null;
   const trimmedName = typeof userName === 'string' && userName.trim() ? userName.trim() : null;
 
-  // 1. If user already has an active or used bong with this userName (unless anonymous/guest), return it
+  // 1. Primary technical lookup by Person.id
+  if (cleanPersonId) {
+    const person = (state.persons || []).find((p) => p.id === cleanPersonId);
+    if (!person) {
+      return res.status(404).json({ error: 'Person ikke funnet.' });
+    }
+
+    // Check if this specific Person already has an active or used bong
+    const existingForPerson = state.popcorn.bongs.find((b) => b.personId === cleanPersonId);
+    if (existingForPerson) {
+      return res.json({ success: true, bong: existingForPerson, state, alreadyActivated: true });
+    }
+
+    // Find lowest available blank bong (chronological #1, #2, #3...)
+    const availableBong = state.popcorn.bongs
+      .filter((b) => b.status === 'blank' && b.number <= state.popcorn.totalCapacity)
+      .sort((a, b) => a.number - b.number)[0];
+
+    if (!availableBong) {
+      return res.status(400).json({
+        error: `Alle de ${state.popcorn.totalCapacity} popcornbongene er delt ut.`,
+        code: 'ALL_CLAIMED',
+        totalCapacity: state.popcorn.totalCapacity,
+      });
+    }
+
+    // Synchronously assign to person
+    availableBong.status = 'activated';
+    availableBong.activatedAt = new Date().toISOString();
+    availableBong.personId = person.id; // Primary technical ID
+    availableBong.userName = person.firstName; // Legacy display fallback
+    availableBong.clientToken = cleanToken || person.anonymousToken;
+
+    state.event.popcornClaimedCount = state.popcorn.bongs.filter(
+      (b) => b.status === 'activated' || b.status === 'used'
+    ).length;
+
+    saveState();
+    return res.json({ success: true, bong: availableBong, state });
+  }
+
+  // 2. Legacy fallback if no personId was provided:
   if (trimmedName && trimmedName.toLowerCase() !== 'gjest' && !trimmedName.toLowerCase().startsWith('gjest_')) {
     const existingByName = state.popcorn.bongs.find(
       (b) => b.userName && b.userName.toLowerCase() === trimmedName.toLowerCase()
@@ -478,15 +746,13 @@ app.post('/api/popcorn/activate', (req, res) => {
     }
   }
 
-  // 2. If client token already has a bong
-  if (clientToken) {
-    const existingByToken = state.popcorn.bongs.find((b) => b.clientToken === clientToken);
+  if (cleanToken) {
+    const existingByToken = state.popcorn.bongs.find((b) => b.clientToken === cleanToken);
     if (existingByToken) {
       return res.json({ success: true, bong: existingByToken, state, alreadyActivated: true });
     }
   }
 
-  // 3. Find lowest available blank bong (strictly chronological #1, #2, #3...)
   const availableBong = state.popcorn.bongs
     .filter((b) => b.status === 'blank' && b.number <= state.popcorn.totalCapacity)
     .sort((a, b) => a.number - b.number)[0];
@@ -499,10 +765,9 @@ app.post('/api/popcorn/activate', (req, res) => {
     });
   }
 
-  // 4. Atomically assign next chronological number
   availableBong.status = 'activated';
   availableBong.activatedAt = new Date().toISOString();
-  availableBong.clientToken = clientToken || `usr_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  availableBong.clientToken = cleanToken || `usr_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
   availableBong.userName = trimmedName || null;
 
   state.event.popcornClaimedCount = state.popcorn.bongs.filter(
@@ -515,18 +780,26 @@ app.post('/api/popcorn/activate', (req, res) => {
 
 // Get user's active bong (Public)
 app.get('/api/popcorn/my-bong', (req, res) => {
+  const personId = req.query.personId as string;
   const clientToken = req.query.clientToken as string;
   const userName = req.query.userName as string;
+  const cleanPersonId = typeof personId === 'string' && personId.trim() ? personId.trim() : null;
   const trimmedName = typeof userName === 'string' && userName.trim() ? userName.trim() : null;
 
   let bong = null;
-  if (trimmedName && trimmedName.toLowerCase() !== 'gjest' && !trimmedName.toLowerCase().startsWith('gjest_')) {
+  // 1. Primary lookup by Person.id
+  if (cleanPersonId) {
+    bong = state.popcorn.bongs.find((b) => b.personId === cleanPersonId) || null;
+  }
+  // 2. Fallback to clientToken
+  if (!bong && clientToken) {
+    bong = state.popcorn.bongs.find((b) => b.clientToken === clientToken) || null;
+  }
+  // 3. Fallback to legacy userName
+  if (!bong && trimmedName && trimmedName.toLowerCase() !== 'gjest' && !trimmedName.toLowerCase().startsWith('gjest_')) {
     bong = state.popcorn.bongs.find(
       (b) => b.userName && b.userName.toLowerCase() === trimmedName.toLowerCase()
     ) || null;
-  }
-  if (!bong && clientToken) {
-    bong = state.popcorn.bongs.find((b) => b.clientToken === clientToken) || null;
   }
 
   res.json({ success: true, bong });
@@ -617,7 +890,7 @@ app.post('/api/activity/toggle', requireAdmin, (req, res) => {
   res.json({ success: true, activity: act, state });
 });
 
-// Reset test data (Popcorn, Tournament, Alpha) while preserving event info (Admin)
+// Reset test data (Popcorn, Tournament, Alpha, and Simulated Persons) while preserving event info and real persons (Admin)
 app.post('/api/admin/reset-testdata', requireAdmin, (req, res) => {
   // 1. Reset popcorn
   state.popcorn = {
@@ -625,6 +898,9 @@ app.post('/api/admin/reset-testdata', requireAdmin, (req, res) => {
     bongs: Array.from({ length: 100 }, (_, i) => ({
       number: i + 1,
       status: 'blank',
+      userName: null,
+      clientToken: null,
+      personId: null,
     })),
   };
   state.event.freePopcornLimit = 100;
@@ -644,6 +920,11 @@ app.post('/api/admin/reset-testdata', requireAdmin, (req, res) => {
 
   // 3. Reset Alpha interests
   state.alphaInterests = [];
+
+  // 4. Clean simulated persons, strictly preserving all real persons (isSimulated = false / undefined)
+  if (state.persons && Array.isArray(state.persons)) {
+    state.persons = state.persons.filter((p) => !p.isSimulated);
+  }
 
   saveState();
   res.json({ success: true, state });
