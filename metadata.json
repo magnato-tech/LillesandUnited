@@ -1,0 +1,6 @@
+{
+  "name": "Lillesand United",
+  "description": "App for Lillesand United ungdomskveld med bordtenniscup, kampoversikt, aktiviteter og påmelding til UngdomsAlpha.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
