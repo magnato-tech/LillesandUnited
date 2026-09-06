@@ -793,7 +793,15 @@
     "status": "registration",
     "startedAt": null,
     "completedAt": null,
-    "participants": [],
+    "participants": [
+      {
+        "id": "p_1788727104020_8ujj",
+        "personId": "75d2c399-d596-48a8-b78e-daa6a817a83d",
+        "displayId": "Sander_1",
+        "firstName": "Sander",
+        "registeredAt": "2026-09-06T20:38:24.020Z"
+      }
+    ],
     "matches": [],
     "winner": null,
     "estimatedMinutesPerMatch": 10,
@@ -829,6 +837,16 @@
       "anonymousToken": "tok_3816dd584c124b07",
       "createdAt": "2026-09-06T20:29:22.809Z",
       "updatedAt": "2026-09-06T20:29:22.809Z",
+      "isSimulated": false
+    },
+    {
+      "id": "75d2c399-d596-48a8-b78e-daa6a817a83d",
+      "firstName": "Sander",
+      "nameNumber": 1,
+      "displayId": "Sander_1",
+      "anonymousToken": "tok_24c6a2687bfc4231",
+      "createdAt": "2026-09-06T20:38:16.792Z",
+      "updatedAt": "2026-09-06T20:38:16.792Z",
       "isSimulated": false
     }
   ]
