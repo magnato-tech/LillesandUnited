@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trophy, UserPlus, Zap, Clock, Users, ChevronRight, AlertCircle, CheckCircle, ShieldAlert } from 'lucide-react';
-import { AppState, Participant, Match } from '../types';
+import { AppState, Participant, Match, Person } from '../types';
 import { BracketView } from './BracketView';
 import { calculateTournamentStats } from '../lib/tournament';
 
@@ -42,11 +42,12 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
   const stats = calculateTournamentStats(tournament.matches, tournament.estimatedMinutesPerMatch);
 
   const isAlreadyRegistered = Boolean(
-    (activePersonId && tournament.participants.some((p) => p.personId === activePersonId)) ||
-    (myPlayerName &&
-      tournament.participants.some(
-        (p) => p.firstName.toLowerCase() === myPlayerName.toLowerCase()
-      ))
+    activePersonId
+      ? tournament.participants.some((p) => p.personId === activePersonId)
+      : (myPlayerName &&
+          tournament.participants.some(
+            (p) => p.firstName.toLowerCase() === myPlayerName.toLowerCase()
+          ))
   );
 
   // Active matches on tables
@@ -82,8 +83,9 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
     // Find participant object
     const myParticipant = tournament.participants.find(
       (p) =>
-        (activePersonId && p.personId === activePersonId) ||
-        (nameLower && p.firstName.toLowerCase() === nameLower)
+        activePersonId
+          ? p.personId === activePersonId
+          : (nameLower && p.firstName.toLowerCase() === nameLower)
     );
 
     if (!myParticipant) {
@@ -471,9 +473,9 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
 
             <div className="flex flex-wrap gap-2">
               {tournament.participants.map((p) => {
-                const isMe =
-                  (activePersonId && p.personId === activePersonId) ||
-                  (myPlayerName && myPlayerName.toLowerCase() === p.firstName.toLowerCase());
+                const isMe = activePersonId
+                  ? p.personId === activePersonId
+                  : (myPlayerName && myPlayerName.toLowerCase() === p.firstName.toLowerCase());
                 return (
                   <span
                     key={p.id}

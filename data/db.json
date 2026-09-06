@@ -12,415 +12,714 @@
       "Baptistkirken"
     ],
     "freePopcornLimit": 100,
-    "popcornClaimedCount": 1
+    "popcornClaimedCount": 4
   },
   "popcorn": {
     "totalCapacity": 100,
     "bongs": [
       {
         "number": 1,
-        "status": "used",
-        "activatedAt": "2026-09-05T18:11:18.530Z",
-        "personId": "4e204cdf-1eeb-4d7a-9b2c-924828e6e1a3",
-        "userName": "Emma",
-        "clientToken": "tok_57a8bffd860b42f1",
-        "usedAt": "2026-09-05T18:11:18.539Z"
+        "status": "activated",
+        "userName": "Sander",
+        "clientToken": "usr_sander_1788685565654_8nc7",
+        "personId": null,
+        "activatedAt": "2026-09-06T09:06:10.414Z"
       },
       {
         "number": 2,
-        "status": "blank"
+        "status": "activated",
+        "userName": "Oliver",
+        "clientToken": "tok_7c359955247a46df",
+        "personId": "9872eb2c-717f-4b77-ace0-9a5754dbc120",
+        "activatedAt": "2026-09-06T09:06:50.429Z"
       },
       {
         "number": 3,
-        "status": "blank"
+        "status": "activated",
+        "userName": "Simen",
+        "clientToken": "tok_ba0c638bf24c40b0",
+        "personId": "ea527adb-856e-47cc-b559-f83d39764a3e",
+        "activatedAt": "2026-09-06T09:08:01.835Z"
       },
       {
         "number": 4,
-        "status": "blank"
+        "status": "activated",
+        "userName": "Oliver",
+        "clientToken": "tok_71b48bd5feab4965",
+        "personId": "fcf96f9b-e73f-44f2-a322-54b764c5952f",
+        "activatedAt": "2026-09-06T09:23:10.391Z"
       },
       {
         "number": 5,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 6,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 7,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 8,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 9,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 10,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 11,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 12,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 13,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 14,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 15,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 16,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 17,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 18,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 19,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 20,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 21,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 22,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 23,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 24,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 25,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 26,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 27,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 28,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 29,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 30,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 31,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 32,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 33,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 34,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 35,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 36,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 37,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 38,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 39,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 40,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 41,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 42,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 43,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 44,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 45,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 46,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 47,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 48,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 49,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 50,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 51,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 52,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 53,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 54,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 55,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 56,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 57,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 58,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 59,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 60,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 61,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 62,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 63,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 64,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 65,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 66,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 67,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 68,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 69,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 70,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 71,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 72,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 73,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 74,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 75,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 76,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 77,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 78,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 79,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 80,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 81,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 82,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 83,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 84,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 85,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 86,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 87,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 88,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 89,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 90,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 91,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 92,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 93,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 94,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 95,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 96,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 97,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 98,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 99,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       },
       {
         "number": 100,
-        "status": "blank"
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
       }
     ]
   },
@@ -500,44 +799,60 @@
     "completedAt": null,
     "participants": [
       {
-        "id": "p1",
-        "firstName": "Oliver",
-        "registeredAt": "2026-09-18T17:02:00Z"
-      },
-      {
-        "id": "p2",
-        "firstName": "Emma",
-        "registeredAt": "2026-09-18T17:04:15Z"
-      },
-      {
-        "id": "p3",
+        "id": "p_1788685574255_dwzm",
+        "personId": "9cb7abba-4d44-46ce-8566-c9f2c383f8d7",
+        "displayId": "Sander_2",
         "firstName": "Sander",
-        "registeredAt": "2026-09-18T17:05:30Z"
+        "registeredAt": "2026-09-06T09:06:14.255Z"
       },
       {
-        "id": "p4",
-        "firstName": "Thea",
-        "registeredAt": "2026-09-18T17:07:00Z"
+        "id": "p_1788685604999_10k4",
+        "personId": "235d028a-b8e1-4921-bc93-b8f35f8f402c",
+        "displayId": "Oliver_4",
+        "firstName": "Oliver",
+        "registeredAt": "2026-09-06T09:06:44.999Z"
       },
       {
-        "id": "p5",
-        "firstName": "Lukas",
-        "registeredAt": "2026-09-18T17:09:40Z"
-      },
-      {
-        "id": "p6",
-        "firstName": "Mathias",
-        "registeredAt": "2026-09-18T17:11:10Z"
-      },
-      {
-        "id": "p7",
+        "id": "p_1788685619882_10zk",
+        "personId": "97db7b3a-fdc3-409b-8d5d-707f6dd45597",
+        "displayId": "Nora_1",
         "firstName": "Nora",
-        "registeredAt": "2026-09-18T17:12:50Z"
+        "registeredAt": "2026-09-06T09:06:59.882Z"
       },
       {
-        "id": "p8",
-        "firstName": "Jakob",
-        "registeredAt": "2026-09-18T17:14:20Z"
+        "id": "p_1788685628547_wvnu",
+        "personId": "e94c4f7d-7d17-4093-bdb9-c6c89b79db3b",
+        "displayId": "Kari_3",
+        "firstName": "Kari",
+        "registeredAt": "2026-09-06T09:07:08.547Z"
+      },
+      {
+        "id": "p_1788685677553_8xdl",
+        "personId": "ea527adb-856e-47cc-b559-f83d39764a3e",
+        "displayId": "Simen_1",
+        "firstName": "Simen",
+        "registeredAt": "2026-09-06T09:07:57.553Z"
+      },
+      {
+        "id": "p_1788685704432_2eto",
+        "personId": "f0a85665-91c4-4d9e-8ae7-a66abcbe15a2",
+        "displayId": "Oliver_3",
+        "firstName": "Oliver",
+        "registeredAt": "2026-09-06T09:08:24.432Z"
+      },
+      {
+        "id": "p_1788686590384_atex",
+        "personId": "fcf96f9b-e73f-44f2-a322-54b764c5952f",
+        "displayId": "Oliver_17",
+        "firstName": "Oliver",
+        "registeredAt": "2026-09-06T09:23:10.384Z"
+      },
+      {
+        "id": "p_1788686590387_ldnd",
+        "personId": "821710fe-d141-4540-9d1b-753945c82518",
+        "displayId": "Oliver_18",
+        "firstName": "Oliver",
+        "registeredAt": "2026-09-06T09:23:10.387Z"
       }
     ],
     "matches": [],
@@ -546,21 +861,32 @@
   },
   "alphaInterests": [
     {
-      "id": "a1",
-      "firstName": "Sofie",
-      "phone": "91234567",
-      "registeredAt": "2026-09-18T17:10:00Z"
+      "id": "alpha_1788685578221_hig3",
+      "personId": "6be70855-4fb8-43fa-a151-18b2cc83b73b",
+      "displayId": "Sander_1",
+      "firstName": "Sander",
+      "registeredAt": "2026-09-06T09:06:18.221Z"
     },
     {
-      "id": "a2",
-      "firstName": "Noah",
-      "registeredAt": "2026-09-18T17:15:30Z"
+      "id": "alpha_1788685608193_p4dm",
+      "personId": "9872eb2c-717f-4b77-ace0-9a5754dbc120",
+      "displayId": "Oliver_1",
+      "firstName": "Oliver",
+      "registeredAt": "2026-09-06T09:06:48.193Z"
     },
     {
-      "id": "a3",
-      "firstName": "Amalie",
-      "phone": "48011223",
-      "registeredAt": "2026-09-18T17:18:00Z"
+      "id": "alpha_1788685679286_qnd1",
+      "personId": "ea527adb-856e-47cc-b559-f83d39764a3e",
+      "displayId": "Simen_1",
+      "firstName": "Simen",
+      "registeredAt": "2026-09-06T09:07:59.286Z"
+    },
+    {
+      "id": "alpha_1788686021968_y046",
+      "personId": "70ac0743-3b3e-4137-ab7e-1f319d1d62b6",
+      "displayId": "Oliver_5",
+      "firstName": "Oliver",
+      "registeredAt": "2026-09-06T09:13:41.968Z"
     }
   ],
   "persons": [
@@ -571,7 +897,8 @@
       "displayId": "Oliver_1",
       "anonymousToken": "tok_7c359955247a46df",
       "createdAt": "2026-09-05T17:45:39.713Z",
-      "updatedAt": "2026-09-05T17:45:39.713Z"
+      "updatedAt": "2026-09-05T17:45:39.713Z",
+      "isSimulated": false
     },
     {
       "id": "1bb1a443-488f-4e54-9e4b-d5003bcbc3b6",
@@ -580,7 +907,8 @@
       "displayId": "Oliver_2",
       "anonymousToken": "tok_ed31f945fcb94f48",
       "createdAt": "2026-09-05T17:45:39.725Z",
-      "updatedAt": "2026-09-05T17:45:39.725Z"
+      "updatedAt": "2026-09-05T17:45:39.725Z",
+      "isSimulated": false
     },
     {
       "id": "af209405-3c0d-43f9-841b-04027621ee50",
@@ -589,7 +917,8 @@
       "displayId": "Kari_1",
       "anonymousToken": "tok_7de7ca0772774e2a",
       "createdAt": "2026-09-05T17:45:39.731Z",
-      "updatedAt": "2026-09-05T17:45:39.731Z"
+      "updatedAt": "2026-09-05T17:45:39.731Z",
+      "isSimulated": false
     },
     {
       "id": "f0a85665-91c4-4d9e-8ae7-a66abcbe15a2",
@@ -598,7 +927,8 @@
       "displayId": "Oliver_3",
       "anonymousToken": "tok_7eb4d9d871af48fa",
       "createdAt": "2026-09-05T17:48:36.168Z",
-      "updatedAt": "2026-09-05T17:48:36.168Z"
+      "updatedAt": "2026-09-05T17:48:36.168Z",
+      "isSimulated": false
     },
     {
       "id": "235d028a-b8e1-4921-bc93-b8f35f8f402c",
@@ -607,7 +937,8 @@
       "displayId": "Oliver_4",
       "anonymousToken": "tok_198a7a2f4b564833",
       "createdAt": "2026-09-05T17:48:36.180Z",
-      "updatedAt": "2026-09-05T17:48:36.180Z"
+      "updatedAt": "2026-09-05T17:48:36.180Z",
+      "isSimulated": false
     },
     {
       "id": "8e486bf7-e67d-4e65-b20e-352798f149a1",
@@ -616,7 +947,8 @@
       "displayId": "Kari_2",
       "anonymousToken": "tok_aa73c5ace198411f",
       "createdAt": "2026-09-05T17:48:36.186Z",
-      "updatedAt": "2026-09-05T17:48:36.186Z"
+      "updatedAt": "2026-09-05T17:48:36.186Z",
+      "isSimulated": false
     },
     {
       "id": "6be70855-4fb8-43fa-a151-18b2cc83b73b",
@@ -625,7 +957,8 @@
       "displayId": "Sander_1",
       "anonymousToken": "tok_b74c0e6d47a44cab",
       "createdAt": "2026-09-05T17:49:00.923Z",
-      "updatedAt": "2026-09-05T17:49:00.923Z"
+      "updatedAt": "2026-09-05T17:49:00.923Z",
+      "isSimulated": false
     },
     {
       "id": "9cb7abba-4d44-46ce-8566-c9f2c383f8d7",
@@ -634,7 +967,8 @@
       "displayId": "Sander_2",
       "anonymousToken": "tok_f181c995146a4546",
       "createdAt": "2026-09-05T17:49:00.925Z",
-      "updatedAt": "2026-09-05T17:49:00.925Z"
+      "updatedAt": "2026-09-05T17:49:00.925Z",
+      "isSimulated": false
     },
     {
       "id": "97db7b3a-fdc3-409b-8d5d-707f6dd45597",
@@ -643,7 +977,8 @@
       "displayId": "Nora_1",
       "anonymousToken": "tok_8710113a501b437f",
       "createdAt": "2026-09-05T18:02:15.296Z",
-      "updatedAt": "2026-09-05T18:02:15.296Z"
+      "updatedAt": "2026-09-05T18:02:15.296Z",
+      "isSimulated": false
     },
     {
       "id": "70ac0743-3b3e-4137-ab7e-1f319d1d62b6",
@@ -652,7 +987,8 @@
       "displayId": "Oliver_5",
       "anonymousToken": "tok_6d0c22a5f6df487f",
       "createdAt": "2026-09-05T18:02:15.309Z",
-      "updatedAt": "2026-09-05T18:02:15.309Z"
+      "updatedAt": "2026-09-05T18:02:15.309Z",
+      "isSimulated": false
     },
     {
       "id": "f5b861b5-6822-4fbc-a861-c558ac22e443",
@@ -661,7 +997,8 @@
       "displayId": "Nora_2",
       "anonymousToken": "tok_d6b89df1b25a472e",
       "createdAt": "2026-09-05T18:03:05.644Z",
-      "updatedAt": "2026-09-05T18:03:05.644Z"
+      "updatedAt": "2026-09-05T18:03:05.644Z",
+      "isSimulated": false
     },
     {
       "id": "ec173cc3-0443-49da-8291-1f22d6a09775",
@@ -670,7 +1007,8 @@
       "displayId": "Oliver_6",
       "anonymousToken": "tok_00e06d0030104dad",
       "createdAt": "2026-09-05T18:03:05.656Z",
-      "updatedAt": "2026-09-05T18:03:05.656Z"
+      "updatedAt": "2026-09-05T18:03:05.656Z",
+      "isSimulated": false
     },
     {
       "id": "a5fc41b4-ff46-4c8c-a781-3af0705dbb82",
@@ -679,7 +1017,8 @@
       "displayId": "Nora_3",
       "anonymousToken": "tok_4a6f89d424ba42a7",
       "createdAt": "2026-09-05T18:03:25.744Z",
-      "updatedAt": "2026-09-05T18:03:25.744Z"
+      "updatedAt": "2026-09-05T18:03:25.744Z",
+      "isSimulated": false
     },
     {
       "id": "853f2fda-8f64-4ddc-83ec-832c98cebadd",
@@ -688,7 +1027,8 @@
       "displayId": "Oliver_7",
       "anonymousToken": "tok_26f107f7423640c8",
       "createdAt": "2026-09-05T18:03:25.756Z",
-      "updatedAt": "2026-09-05T18:03:25.756Z"
+      "updatedAt": "2026-09-05T18:03:25.756Z",
+      "isSimulated": false
     },
     {
       "id": "e94c4f7d-7d17-4093-bdb9-c6c89b79db3b",
@@ -697,7 +1037,8 @@
       "displayId": "Kari_3",
       "anonymousToken": "tok_d97a15d959854dd8",
       "createdAt": "2026-09-05T18:03:25.791Z",
-      "updatedAt": "2026-09-05T18:03:25.791Z"
+      "updatedAt": "2026-09-05T18:03:25.791Z",
+      "isSimulated": false
     },
     {
       "id": "ea527adb-856e-47cc-b559-f83d39764a3e",
@@ -706,7 +1047,8 @@
       "displayId": "Simen_1",
       "anonymousToken": "tok_ba0c638bf24c40b0",
       "createdAt": "2026-09-05T18:03:25.801Z",
-      "updatedAt": "2026-09-05T18:03:25.801Z"
+      "updatedAt": "2026-09-05T18:03:25.801Z",
+      "isSimulated": false
     },
     {
       "id": "510984da-bb73-41ee-911d-4f4e7367b5ca",
@@ -715,7 +1057,8 @@
       "displayId": "Thea_1",
       "anonymousToken": "tok_3950e14dbc024cc7",
       "createdAt": "2026-09-05T18:03:25.802Z",
-      "updatedAt": "2026-09-05T18:03:25.802Z"
+      "updatedAt": "2026-09-05T18:03:25.802Z",
+      "isSimulated": false
     },
     {
       "id": "eb866300-497b-433e-b7c3-5e21bd906f36",
@@ -724,7 +1067,8 @@
       "displayId": "Nora_4",
       "anonymousToken": "tok_65cd251bd13d4907",
       "createdAt": "2026-09-05T18:03:42.231Z",
-      "updatedAt": "2026-09-05T18:03:42.231Z"
+      "updatedAt": "2026-09-05T18:03:42.231Z",
+      "isSimulated": false
     },
     {
       "id": "ddaaed69-b2ff-49a9-a247-e3e8cc043273",
@@ -733,7 +1077,8 @@
       "displayId": "Oliver_8",
       "anonymousToken": "tok_d51f0e70817a4024",
       "createdAt": "2026-09-05T18:03:42.247Z",
-      "updatedAt": "2026-09-05T18:03:42.247Z"
+      "updatedAt": "2026-09-05T18:03:42.247Z",
+      "isSimulated": false
     },
     {
       "id": "e9df1b08-5fd9-4953-99db-ef2daf031e88",
@@ -742,7 +1087,8 @@
       "displayId": "Kari_4",
       "anonymousToken": "tok_0eae0adcafbc4603",
       "createdAt": "2026-09-05T18:03:42.280Z",
-      "updatedAt": "2026-09-05T18:03:42.280Z"
+      "updatedAt": "2026-09-05T18:03:42.280Z",
+      "isSimulated": false
     },
     {
       "id": "0862afbd-4c9c-46fa-9a7d-8d76ab47cf54",
@@ -751,7 +1097,8 @@
       "displayId": "Simen_2",
       "anonymousToken": "tok_878f28a62c3b4f72",
       "createdAt": "2026-09-05T18:03:42.287Z",
-      "updatedAt": "2026-09-05T18:03:42.287Z"
+      "updatedAt": "2026-09-05T18:03:42.287Z",
+      "isSimulated": false
     },
     {
       "id": "68474501-00bc-495f-8cb6-3d13045cd72b",
@@ -760,7 +1107,8 @@
       "displayId": "Thea_2",
       "anonymousToken": "tok_9b89686f15914944",
       "createdAt": "2026-09-05T18:03:42.288Z",
-      "updatedAt": "2026-09-05T18:03:42.288Z"
+      "updatedAt": "2026-09-05T18:03:42.288Z",
+      "isSimulated": false
     },
     {
       "id": "4e204cdf-1eeb-4d7a-9b2c-924828e6e1a3",
@@ -769,7 +1117,148 @@
       "displayId": "Emma_1",
       "anonymousToken": "tok_57a8bffd860b42f1",
       "createdAt": "2026-09-05T18:11:18.517Z",
-      "updatedAt": "2026-09-05T18:11:18.517Z"
+      "updatedAt": "2026-09-05T18:11:18.517Z",
+      "isSimulated": false
+    },
+    {
+      "id": "02e8a6fc-ee03-4a9b-a95b-59e0fdeb26c7",
+      "firstName": "Oliver",
+      "nameNumber": 9,
+      "displayId": "Oliver_9",
+      "anonymousToken": "tok_cd30f6024e9549ea",
+      "createdAt": "2026-09-06T08:13:16.165Z",
+      "updatedAt": "2026-09-06T08:13:16.165Z",
+      "isSimulated": false
+    },
+    {
+      "id": "033cd18a-60ff-47c2-a32a-c78ca8a0c3c7",
+      "firstName": "Oliver",
+      "nameNumber": 10,
+      "displayId": "Oliver_10",
+      "anonymousToken": "tok_27e1ff74864d4b04",
+      "createdAt": "2026-09-06T08:13:16.179Z",
+      "updatedAt": "2026-09-06T08:13:16.179Z",
+      "isSimulated": false
+    },
+    {
+      "id": "82a9bd66-63a1-4953-aff5-4e81de05bcc2",
+      "firstName": "Oliver",
+      "nameNumber": 11,
+      "displayId": "Oliver_11",
+      "anonymousToken": "tok_dad165efb7344448",
+      "createdAt": "2026-09-06T08:13:36.136Z",
+      "updatedAt": "2026-09-06T08:13:36.136Z",
+      "isSimulated": false
+    },
+    {
+      "id": "cb480045-dc80-414a-bad5-7b074e593b60",
+      "firstName": "Oliver",
+      "nameNumber": 12,
+      "displayId": "Oliver_12",
+      "anonymousToken": "tok_612bb430bdd84306",
+      "createdAt": "2026-09-06T08:13:36.150Z",
+      "updatedAt": "2026-09-06T08:13:36.150Z",
+      "isSimulated": false
+    },
+    {
+      "id": "7dd2ac28-198f-4441-8fe0-71b37445632a",
+      "firstName": "Oliver",
+      "nameNumber": 13,
+      "displayId": "Oliver_13",
+      "anonymousToken": "tok_453561bf9d174847",
+      "createdAt": "2026-09-06T08:13:54.218Z",
+      "updatedAt": "2026-09-06T08:13:54.218Z",
+      "isSimulated": false
+    },
+    {
+      "id": "0cfca2c3-6261-41d5-a92b-f97b5cf1f820",
+      "firstName": "Oliver",
+      "nameNumber": 14,
+      "displayId": "Oliver_14",
+      "anonymousToken": "tok_8755ffa0d1704b9b",
+      "createdAt": "2026-09-06T08:13:54.234Z",
+      "updatedAt": "2026-09-06T08:13:54.234Z",
+      "isSimulated": false
+    },
+    {
+      "id": "3a05e5ec-d358-4d02-93e1-1913bfac9a0d",
+      "firstName": "Nora",
+      "nameNumber": 5,
+      "displayId": "Nora_5",
+      "anonymousToken": "tok_1106abc2cba441e3",
+      "createdAt": "2026-09-06T08:13:54.261Z",
+      "updatedAt": "2026-09-06T08:13:54.261Z",
+      "isSimulated": false
+    },
+    {
+      "id": "1c30c31e-e08f-46c0-b438-c5bd39648989",
+      "firstName": "Kasper",
+      "nameNumber": 1,
+      "displayId": "Kasper_1",
+      "anonymousToken": "tok_f1db0f3ba6ce4a1a",
+      "createdAt": "2026-09-06T08:13:54.273Z",
+      "updatedAt": "2026-09-06T08:13:54.273Z",
+      "isSimulated": false
+    },
+    {
+      "id": "faf559d0-2dc4-476a-80a0-4bfaf57f2945",
+      "firstName": "Anette",
+      "nameNumber": 1,
+      "displayId": "Anette_1",
+      "anonymousToken": "tok_e1dac61e36224a98",
+      "createdAt": "2026-09-06T08:25:09.529Z",
+      "updatedAt": "2026-09-06T08:25:09.529Z",
+      "isSimulated": false
+    },
+    {
+      "id": "3baa2b31-0cd5-4253-891f-56dddd57142a",
+      "firstName": "Oliver",
+      "nameNumber": 15,
+      "displayId": "Oliver_15",
+      "anonymousToken": "tok_7c5493c92a094a6e",
+      "createdAt": "2026-09-06T08:25:09.543Z",
+      "updatedAt": "2026-09-06T08:25:09.543Z",
+      "isSimulated": false
+    },
+    {
+      "id": "ac8d4137-b970-46e9-9422-84f9dac4f161",
+      "firstName": "Oliver",
+      "nameNumber": 16,
+      "displayId": "Oliver_16",
+      "anonymousToken": "tok_eff0f4e5fcdf43fc",
+      "createdAt": "2026-09-06T08:25:09.545Z",
+      "updatedAt": "2026-09-06T08:25:09.545Z",
+      "isSimulated": false
+    },
+    {
+      "id": "523d2b5b-2a01-4d86-8418-1ec11aa7af3d",
+      "firstName": "Sindre",
+      "nameNumber": 1,
+      "displayId": "Sindre_1",
+      "anonymousToken": "tok_822479226b014560",
+      "createdAt": "2026-09-06T08:25:09.553Z",
+      "updatedAt": "2026-09-06T08:25:09.553Z",
+      "isSimulated": false
+    },
+    {
+      "id": "fcf96f9b-e73f-44f2-a322-54b764c5952f",
+      "firstName": "Oliver",
+      "nameNumber": 17,
+      "displayId": "Oliver_17",
+      "anonymousToken": "tok_71b48bd5feab4965",
+      "createdAt": "2026-09-06T09:23:10.375Z",
+      "updatedAt": "2026-09-06T09:23:10.375Z",
+      "isSimulated": false
+    },
+    {
+      "id": "821710fe-d141-4540-9d1b-753945c82518",
+      "firstName": "Oliver",
+      "nameNumber": 18,
+      "displayId": "Oliver_18",
+      "anonymousToken": "tok_cfcc1ac62d5b4ea5",
+      "createdAt": "2026-09-06T09:23:10.382Z",
+      "updatedAt": "2026-09-06T09:23:10.382Z",
+      "isSimulated": false
     }
   ]
 }

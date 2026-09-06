@@ -528,36 +528,49 @@ app.post('/api/tournament/simulate', requireAdmin, (req, res) => {
 
 // Register interest for Alpha (Public)
 app.post('/api/alpha/interest', (req, res) => {
-  const { firstName, phone, notes, userId } = req.body;
-  if (!firstName || typeof firstName !== 'string' || !firstName.trim()) {
-    return res.status(400).json({ error: 'Fornavn er påkrevd.' });
+  const { personId, anonymousToken, firstName } = req.body;
+  const cleanPersonId = typeof personId === 'string' && personId.trim() ? personId.trim() : null;
+
+  let resolvedPerson: Person | null = null;
+
+  if (cleanPersonId) {
+    resolvedPerson = (state.persons || []).find((p) => p.id === cleanPersonId) || null;
+    if (!resolvedPerson) {
+      return res.status(400).json({ error: 'Ugyldig påmelding: Person ikke funnet.' });
+    }
+  } else if (firstName && typeof firstName === 'string' && firstName.trim()) {
+    const cleanName = firstName.trim();
+    const matchingPersons = (state.persons || []).filter(
+      (p) => p.firstName.toLowerCase() === cleanName.toLowerCase()
+    );
+    if (matchingPersons.length === 1) {
+      resolvedPerson = matchingPersons[0];
+    } else if (matchingPersons.length > 1) {
+      return res.status(400).json({
+        error: `Det finnes flere profiler med fornavn "${cleanName}". Vennligst velg din spesifikke profil (f.eks. Oliver_1).`,
+        ambiguous: true,
+      });
+    } else {
+      return res.status(400).json({
+        error: 'Ugyldig påmelding: Ingen eksisterende profil funnet. Du må velge hvem du er før du melder deg på.',
+      });
+    }
+  } else {
+    return res.status(400).json({ error: 'personId er påkrevd for å melde interesse for Alpha.' });
   }
 
-  const cleanName = firstName.trim();
-  const cleanUserId = typeof userId === 'string' && userId.trim() ? userId.trim() : undefined;
-
-  // Check if already registered by userId or name
-  const existing = state.alphaInterests.find(
-    (a) => (cleanUserId && a.userId === cleanUserId) || a.firstName.toLowerCase() === cleanName.toLowerCase()
-  );
+  // Check if already registered by personId
+  const existing = state.alphaInterests.find((a) => a.personId === resolvedPerson!.id);
   if (existing) {
-    if (cleanUserId && !existing.userId) {
-      existing.userId = cleanUserId;
-    }
-    if (phone && !existing.phone) {
-      existing.phone = phone.trim();
-    }
-    saveState();
     return res.json({ success: true, interest: existing, state, alreadyRegistered: true });
   }
 
   const interest: AlphaInterest = {
     id: 'alpha_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-    firstName: cleanName,
-    phone: phone ? phone.trim() : undefined,
+    personId: resolvedPerson.id,
+    displayId: resolvedPerson.displayId,
+    firstName: resolvedPerson.firstName,
     registeredAt: new Date().toISOString(),
-    notes: notes ? notes.trim() : undefined,
-    userId: cleanUserId,
   };
 
   state.alphaInterests.push(interest);
@@ -616,9 +629,8 @@ app.post('/api/user/rename', (req, res) => {
 
   // 3. Update Alpha interests
   state.alphaInterests.forEach((a) => {
-    if ((cleanUserId && a.userId === cleanUserId) || (cleanOldName && a.firstName.toLowerCase() === cleanOldName.toLowerCase())) {
+    if (cleanOldName && a.firstName.toLowerCase() === cleanOldName.toLowerCase()) {
       a.firstName = cleanNewName;
-      if (cleanUserId && !a.userId) a.userId = cleanUserId;
       changesMade = true;
     }
   });
@@ -636,28 +648,35 @@ app.get('/api/user/status', (req, res) => {
   const cleanUserId = typeof userId === 'string' && userId.trim() ? userId.trim() : null;
   const cleanUserName = typeof userName === 'string' && userName.trim() ? userName.trim() : null;
 
+  const person = cleanPersonId ? state.persons.find((p) => p.id === cleanPersonId) || null : null;
+
   const participant = state.tournament.participants.find(
     (p) =>
       (cleanPersonId && p.personId === cleanPersonId) ||
-      (cleanUserId && p.userId === cleanUserId) ||
-      (!cleanPersonId && cleanUserName && p.firstName.toLowerCase() === cleanUserName.toLowerCase())
+      (!cleanPersonId && cleanUserId && p.userId === cleanUserId) ||
+      (!cleanPersonId && !cleanUserId && cleanUserName && p.firstName.toLowerCase() === cleanUserName.toLowerCase())
   ) || null;
 
   const popcornBong = state.popcorn.bongs.find(
-    (b) => (cleanPersonId && b.personId === cleanPersonId) ||
-           (cleanUserId && b.clientToken === cleanUserId) ||
-           (!cleanPersonId && cleanUserName && b.userName && b.userName.toLowerCase() === cleanUserName.toLowerCase())
+    (b) =>
+      (cleanPersonId && b.personId === cleanPersonId) ||
+      (!cleanPersonId && cleanUserId && b.clientToken === cleanUserId) ||
+      (!cleanPersonId && !cleanUserId && cleanUserName && b.userName && b.userName.toLowerCase() === cleanUserName.toLowerCase())
   ) || null;
 
   const alphaInterest = state.alphaInterests.find(
-    (a) => (cleanUserId && a.userId === cleanUserId) || (cleanUserName && a.firstName.toLowerCase() === cleanUserName.toLowerCase())
+    (a) =>
+      (cleanPersonId && a.personId === cleanPersonId) ||
+      (!cleanPersonId && cleanUserId && (a as any).userId === cleanUserId) ||
+      (!cleanPersonId && !cleanUserId && cleanUserName && a.firstName.toLowerCase() === cleanUserName.toLowerCase())
   ) || null;
 
   res.json({
     success: true,
     status: {
+      person,
       userId: cleanUserId,
-      firstName: cleanUserName || participant?.firstName || popcornBong?.userName || alphaInterest?.firstName || null,
+      firstName: person?.firstName || cleanUserName || participant?.firstName || popcornBong?.userName || alphaInterest?.firstName || null,
       tableTennis: {
         isRegistered: Boolean(participant),
         participant,

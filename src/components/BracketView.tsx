@@ -104,7 +104,7 @@ export const BracketView: React.FC<BracketViewProps> = ({
                   {roundMatches.map((match) => {
                     const isPlayerMe = (player: Participant | null) => {
                       if (!player) return false;
-                      if (activePersonId && player.personId === activePersonId) return true;
+                      if (activePersonId) return player.personId === activePersonId;
                       if (myPlayerName && player.firstName.toLowerCase() === myPlayerName.toLowerCase()) return true;
                       return false;
                     };

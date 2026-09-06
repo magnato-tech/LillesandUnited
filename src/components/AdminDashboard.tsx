@@ -346,9 +346,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const text = alphaInterests
       .map(
         (a, i) =>
-          `${i + 1}. ${a.firstName} ${a.phone ? `(tlf: ${a.phone})` : ''} - registrert: ${new Date(
+          `${i + 1}. ${a.displayId || a.firstName} - registrert: ${new Date(
             a.registeredAt
-          ).toLocaleTimeString('no-NO')}`
+          ).toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })}`
       )
       .join('\n');
     navigator.clipboard.writeText(text);
@@ -767,8 +767,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </span>
                         <div className="flex items-center justify-between">
                           <strong className="text-white text-base">
-                            {match.playerA?.firstName || 'TBD'} vs{' '}
-                            {match.playerB?.firstName || 'TBD'}
+                            {match.playerA?.displayId || match.playerA?.firstName || 'TBD'} vs{' '}
+                            {match.playerB?.displayId || match.playerB?.firstName || 'TBD'}
                           </strong>
                           <button
                             onClick={() => {
@@ -822,11 +822,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                     <div className="text-sm font-black text-white">
                       <span className={m.winnerId === m.playerA?.id ? 'text-lime-400 font-black' : ''}>
-                        {m.playerA?.firstName || 'TBD'}
+                        {m.playerA?.displayId || m.playerA?.firstName || 'TBD'}
                       </span>
                       <span className="text-zinc-600 mx-2">vs</span>
                       <span className={m.winnerId === m.playerB?.id ? 'text-lime-400 font-black' : ''}>
-                        {m.playerB?.firstName || (m.isWalkover ? '(Walkover)' : 'TBD')}
+                        {m.playerB?.displayId || m.playerB?.firstName || (m.isWalkover ? '(Walkover)' : 'TBD')}
                       </span>
                       {(m.scoreA !== null || m.scoreB !== null) && (
                         <span className="ml-3 font-mono text-xs bg-zinc-900 px-2.5 py-0.5 rounded-lg border border-zinc-800 text-lime-400 font-black">
@@ -924,7 +924,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <div>
                   <span className="text-[10px] font-black text-zinc-500 block uppercase">#{idx + 1}</span>
-                  <strong className="text-sm font-black text-white">{p.firstName}</strong>
+                  <strong className="text-sm font-black text-white">{p.displayId || p.firstName}</strong>
                 </div>
 
                 <button
@@ -1017,10 +1017,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <div>
                   <strong className="text-white text-sm font-black block">
-                    {idx + 1}. {item.firstName}
+                    {idx + 1}. {item.displayId || item.firstName}
                   </strong>
                   <span className="text-zinc-400 font-medium">
-                    {item.phone ? `Tlf: ${item.phone}` : 'Uten telefonnummer'}
+                    Fornavn: {item.firstName}
                   </span>
                 </div>
                 <span className="text-zinc-500 text-[11px] font-mono">
@@ -1420,7 +1420,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="space-y-4 mb-6">
               <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-between shadow-artistic-sm">
                 <span className="text-base font-black text-white truncate max-w-[60%]">
-                  {selectedMatch.playerA?.firstName}
+                  {selectedMatch.playerA?.displayId || selectedMatch.playerA?.firstName}
                 </span>
                 <input
                   type="number"
@@ -1434,7 +1434,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-between shadow-artistic-sm">
                 <span className="text-base font-black text-white truncate max-w-[60%]">
-                  {selectedMatch.playerB?.firstName}
+                  {selectedMatch.playerB?.displayId || selectedMatch.playerB?.firstName}
                 </span>
                 <input
                   type="number"

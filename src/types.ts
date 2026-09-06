@@ -42,11 +42,10 @@ export interface Tournament {
 
 export interface AlphaInterest {
   id: string;
+  personId: string;
+  displayId: string;
   firstName: string;
-  phone?: string;
   registeredAt: string;
-  notes?: string;
-  userId?: string;
 }
 
 export interface Person {

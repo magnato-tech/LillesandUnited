@@ -111,7 +111,13 @@ export default function App() {
   };
 
   const handleRegisterPlayer = async (name: string) => {
-    const updatedState = await registerParticipant(name);
+    const activePerson = (state.persons || []).find((p) => p.id === activePersonId);
+    const updatedState = await registerParticipant(
+      name,
+      undefined,
+      activePerson?.id,
+      activePerson?.anonymousToken
+    );
     setState(updatedState);
   };
 
@@ -190,12 +196,16 @@ export default function App() {
               onSetMyPlayer={handleSetMyPlayer}
               onRegister={handleRegisterPlayer}
               onGoToAdmin={() => setCurrentTab('admin')}
+              activePersonId={activePersonId}
+              persons={state.persons || []}
             />
           )}
 
           {currentTab === 'alpha' && (
             <AlphaView
-              myPlayerName={myPlayerName}
+              activePersonId={activePersonId}
+              persons={state.persons || []}
+              alphaInterests={state.alphaInterests || []}
               onSuccessRegistered={() => {
                 loadLatestState();
               }}

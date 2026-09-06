@@ -27,6 +27,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectPerson,
   onCreatePerson,
 }) => {
+  const activePerson = persons.find((p) => p.id === activePersonId);
+  const activeUserLabel = activePerson ? activePerson.displayId : myPlayerName;
   return (
     <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b-2 border-zinc-800">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
@@ -81,9 +83,9 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <User className="w-4 h-4" />
               <span>Min side</span>
-              {myPlayerName && (
+              {activeUserLabel && (
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-zinc-950/20 font-mono font-bold">
-                  {myPlayerName}
+                  {activeUserLabel}
                 </span>
               )}
             </button>
@@ -270,7 +272,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            {myPlayerName ? myPlayerName : 'Min side'}
+            {activeUserLabel ? activeUserLabel : 'Min side'}
           </button>
           <button
             onClick={() => setCurrentTab('tabletennis')}

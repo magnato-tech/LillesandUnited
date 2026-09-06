@@ -111,11 +111,7 @@ export const INITIAL_STATE: AppState = {
     winner: null,
     estimatedMinutesPerMatch: 10,
   },
-  alphaInterests: [
-    { id: 'a1', firstName: 'Sofie', phone: '91234567', registeredAt: '2026-09-18T17:10:00Z' },
-    { id: 'a2', firstName: 'Noah', registeredAt: '2026-09-18T17:15:30Z' },
-    { id: 'a3', firstName: 'Amalie', phone: '48011223', registeredAt: '2026-09-18T17:18:00Z' },
-  ],
+  alphaInterests: [],
   persons: [],
 };
 

@@ -15,7 +15,7 @@ import {
   Edit2,
   ChevronRight,
 } from 'lucide-react';
-import { AppState, PopcornBong, Person } from '../types';
+import { AppState, PopcornBong, Person, Participant } from '../types';
 import { getUserToken, saveUserTokenForName, startNewGuestSession } from '../lib/userProfile';
 import { activatePopcornBong, registerParticipant, registerAlphaInterest, renameUser } from '../services/api';
 
@@ -63,6 +63,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
     if (activePersonId) {
       const byPersonId = state.popcorn.bongs.find((b) => b.personId === activePersonId);
       if (byPersonId) return byPersonId;
+      return null;
     }
     // 2. Fallback to clientToken
     if (userToken) {
@@ -81,23 +82,47 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
 
   // Find user's table tennis registration
   const participant = useMemo(() => {
-    if (!currentUserName) return null;
-    return state.tournament?.participants.find(
-      (p) =>
-        (p.userId && p.userId === userToken) ||
-        p.firstName.toLowerCase() === currentUserName.toLowerCase()
-    ) || null;
-  }, [state.tournament, currentUserName, userToken]);
+    if (!currentUserName && !activePersonId) return null;
+    // 1. Primary lookup by Person.id
+    if (activePersonId) {
+      const byPersonId = state.tournament?.participants.find((p) => p.personId === activePersonId);
+      if (byPersonId) return byPersonId;
+      return null;
+    }
+    // 2. Fallback to token / name if activePersonId is not set
+    return (
+      state.tournament?.participants.find(
+        (p) =>
+          (p.userId && p.userId === userToken) ||
+          (currentUserName && p.firstName.toLowerCase() === currentUserName.toLowerCase())
+      ) || null
+    );
+  }, [state.tournament, activePersonId, currentUserName, userToken]);
 
   // Find user's Alpha interest
   const alphaInterest = useMemo(() => {
-    if (!currentUserName) return null;
-    return state.alphaInterests?.find(
-      (a) =>
-        (a.userId && a.userId === userToken) ||
-        a.firstName.toLowerCase() === currentUserName.toLowerCase()
-    ) || null;
-  }, [state.alphaInterests, currentUserName, userToken]);
+    if (!state.alphaInterests) return null;
+    // 1. Primary lookup by activePersonId
+    if (activePersonId) {
+      const byPersonId = state.alphaInterests.find((a) => a.personId === activePersonId);
+      if (byPersonId) return byPersonId;
+    }
+    // 2. Fallback to token / name if activePersonId is not set
+    if (!activePersonId) {
+      if (userToken) {
+        const byToken = state.alphaInterests.find((a) => (a as any).userId === userToken);
+        if (byToken) return byToken;
+      }
+      if (currentUserName) {
+        return (
+          state.alphaInterests.find(
+            (a) => a.firstName.toLowerCase() === currentUserName.toLowerCase()
+          ) || null
+        );
+      }
+    }
+    return null;
+  }, [state.alphaInterests, activePersonId, currentUserName, userToken]);
 
   // Table tennis match / turn details
   const tableTennisStatus = useMemo(() => {
@@ -113,7 +138,15 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
       };
     }
 
-    if (tour.winner && tour.winner.firstName.toLowerCase() === nameLower) {
+    const isPlayerMe = (p: Participant | null) => {
+      if (!p) return false;
+      if (activePersonId) return p.personId === activePersonId;
+      if (p.id === participant.id) return true;
+      if (nameLower && p.firstName.toLowerCase() === nameLower) return true;
+      return false;
+    };
+
+    if (tour.winner && isPlayerMe(tour.winner)) {
       return {
         stage: 'champion',
         title: '🏆 TURNERINGSVINNER!',
@@ -122,17 +155,13 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
     }
 
     const myMatches = tour.matches.filter(
-      (m) =>
-        (m.playerA && m.playerA.firstName.toLowerCase() === nameLower) ||
-        (m.playerB && m.playerB.firstName.toLowerCase() === nameLower)
+      (m) => isPlayerMe(m.playerA) || isPlayerMe(m.playerB)
     );
 
     const playingNow = myMatches.find((m) => m.status === 'in_progress');
     if (playingNow) {
-      const opponent =
-        playingNow.playerA?.firstName.toLowerCase() === nameLower
-          ? playingNow.playerB?.firstName
-          : playingNow.playerA?.firstName;
+      const opp = isPlayerMe(playingNow.playerA) ? playingNow.playerB : playingNow.playerA;
+      const opponent = opp?.displayId || opp?.firstName;
       return {
         stage: 'playing_now',
         title: `🚨 SPILLES NÅ: BORD ${playingNow.tableNumber || 1}!`,
@@ -142,10 +171,8 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
 
     const readyTable = myMatches.find((m) => m.status === 'ready' && m.tableNumber);
     if (readyTable) {
-      const opponent =
-        readyTable.playerA?.firstName.toLowerCase() === nameLower
-          ? readyTable.playerB?.firstName
-          : readyTable.playerA?.firstName;
+      const opp = isPlayerMe(readyTable.playerA) ? readyTable.playerB : readyTable.playerA;
+      const opponent = opp?.displayId || opp?.firstName;
       return {
         stage: 'ready_table',
         title: `🔔 NESTE KAMP PÅ BORD ${readyTable.tableNumber}!`,
@@ -157,10 +184,8 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
       (m) => m.status === 'ready' || (m.status === 'not_ready' && !m.winnerId)
     );
     if (waitingMatch) {
-      const opponent =
-        waitingMatch.playerA?.firstName.toLowerCase() === nameLower
-          ? waitingMatch.playerB?.firstName
-          : waitingMatch.playerA?.firstName;
+      const opp = isPlayerMe(waitingMatch.playerA) ? waitingMatch.playerB : waitingMatch.playerA;
+      const opponent = opp?.displayId || opp?.firstName;
       return {
         stage: 'in_queue',
         title: `I turneringskø (${waitingMatch.roundName})`,
@@ -202,14 +227,19 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
   };
 
   const handleRegisterTableTennis = async () => {
-    if (!currentUserName) {
+    if (!currentUserName && !activePerson) {
       setEditingName(true);
       return;
     }
     setLoadingAction('tabletennis');
     setActionError(null);
     try {
-      await registerParticipant(currentUserName, userToken);
+      await registerParticipant(
+        activePerson?.firstName || currentUserName || '',
+        userToken,
+        activePerson?.id || activePersonId || undefined,
+        activePerson?.anonymousToken
+      );
       onRefreshState();
     } catch (err: any) {
       setActionError(err.message || 'Kunne ikke melde på til bordtennis.');
@@ -219,14 +249,18 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
   };
 
   const handleRegisterAlpha = async () => {
-    if (!currentUserName) {
+    if (!activePerson && !currentUserName) {
       setEditingName(true);
       return;
     }
     setLoadingAction('alpha');
     setActionError(null);
     try {
-      await registerAlphaInterest(currentUserName, undefined, undefined, userToken);
+      await registerAlphaInterest(
+        activePerson?.id || activePersonId || null,
+        activePerson?.anonymousToken || userToken,
+        activePerson?.firstName || currentUserName || undefined
+      );
       onRefreshState();
     } catch (err: any) {
       setActionError(err.message || 'Kunne ikke melde interesse for Alpha.');
@@ -289,7 +323,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase mt-0.5 flex items-center gap-3">
-                👤 {currentUserName || 'Gjest (ikke navngitt)'}
+                👤 {activePerson ? activePerson.displayId : (currentUserName || 'Gjest (ikke navngitt)')}
               </h1>
               <p className="text-xs text-zinc-400 mt-1">
                 Felles profil for bordtenniscup, gratis popcorn og UngdomsAlpha.
@@ -648,11 +682,11 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
               {alphaInterest ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-400 text-zinc-950 font-black text-xs uppercase tracking-wider shadow-artistic-sm">
                   <CheckCircle2 className="w-4 h-4" />
-                  Jeg er interessert ✓
+                  ✓ Du har meldt interesse
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 font-bold text-xs uppercase tracking-wider border border-zinc-700">
-                  Ikke registrert interesse
+                  Du har ikke meldt interesse
                 </span>
               )}
             </div>

@@ -194,8 +194,9 @@ export async function renameUser(
   return data;
 }
 
-export async function getUserStatus(userId?: string, userName?: string): Promise<any> {
+export async function getUserStatus(personId?: string, userId?: string, userName?: string): Promise<any> {
   const params = new URLSearchParams();
+  if (personId) params.set('personId', personId);
   if (userId) params.set('userId', userId);
   if (userName) params.set('userName', userName);
   const res = await fetch(`/api/user/status?${params.toString()}`);
@@ -312,15 +313,18 @@ export async function simulateTournament(count: 16 | 31): Promise<AppState> {
 // ----------------------------------------------------
 
 export async function registerAlphaInterest(
-  firstName: string,
-  phone?: string,
-  notes?: string,
-  userId?: string
+  personId?: string | null,
+  anonymousToken?: string,
+  firstNameFallback?: string
 ): Promise<AppState> {
   const res = await fetch('/api/alpha/interest', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ firstName, phone, notes, userId }),
+    body: JSON.stringify({
+      personId: personId || undefined,
+      anonymousToken: anonymousToken || undefined,
+      firstName: firstNameFallback || undefined,
+    }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke registrere Alpha-interesse');

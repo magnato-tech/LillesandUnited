@@ -49,6 +49,15 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
     if (activePerson?.anonymousToken) {
       return activePerson.anonymousToken;
     }
+    if (activePersonId) {
+      const key = `lillesand_popcorn_token_person_${activePersonId}`;
+      let tok = localStorage.getItem(key);
+      if (!tok) {
+        tok = `usr_person_${activePersonId}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        localStorage.setItem(key, tok);
+      }
+      return tok;
+    }
     if (currentUserName) {
       const key = `lillesand_popcorn_token_${currentUserName.toLowerCase()}`;
       let tok = localStorage.getItem(key);
@@ -66,7 +75,7 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
       }
       return tok;
     }
-  }, [activePerson, currentUserName, guestId]);
+  }, [activePerson, activePersonId, currentUserName, guestId]);
 
   // Find this user's active or used bong
   const userBong = useMemo(() => {
@@ -75,10 +84,11 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
     // 1. Primary technical lookup by Person.id
     if (activePersonId) {
       const byPersonId = popcorn.bongs.find((b) => b.personId === activePersonId);
-      if (byPersonId) return byPersonId;
+      // Strictly return byPersonId if found, or null otherwise. NO fallback to name or token.
+      return byPersonId || null;
     }
 
-    // 2. Fallback to client token
+    // 2. Fallback to client token for non-person sessions
     if (clientToken) {
       const byToken = popcorn.bongs.find((b) => b.clientToken === clientToken);
       if (byToken) return byToken;
