@@ -1,0 +1,835 @@
+{
+  "event": {
+    "name": "Lillesand United",
+    "date": "Fredag 18. september 2026",
+    "time": "17:00 – 22:45 (Aktiviteter fra 18:45)",
+    "location": "Møglestuhallen, Lillesand",
+    "organizers": [
+      "KRIK",
+      "Den Norske Kirke",
+      "Filadelfia",
+      "Misjonskirken",
+      "Baptistkirken"
+    ],
+    "freePopcornLimit": 100,
+    "popcornClaimedCount": 0
+  },
+  "popcorn": {
+    "totalCapacity": 100,
+    "bongs": [
+      {
+        "number": 1,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 2,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 3,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 4,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 5,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 6,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 7,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 8,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 9,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 10,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 11,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 12,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 13,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 14,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 15,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 16,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 17,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 18,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 19,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 20,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 21,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 22,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 23,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 24,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 25,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 26,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 27,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 28,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 29,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 30,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 31,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 32,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 33,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 34,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 35,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 36,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 37,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 38,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 39,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 40,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 41,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 42,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 43,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 44,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 45,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 46,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 47,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 48,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 49,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 50,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 51,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 52,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 53,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 54,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 55,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 56,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 57,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 58,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 59,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 60,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 61,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 62,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 63,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 64,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 65,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 66,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 67,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 68,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 69,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 70,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 71,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 72,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 73,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 74,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 75,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 76,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 77,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 78,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 79,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 80,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 81,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 82,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 83,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 84,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 85,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 86,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 87,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 88,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 89,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 90,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 91,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 92,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 93,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 94,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 95,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 96,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 97,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 98,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 99,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      },
+      {
+        "number": 100,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "personId": null
+      }
+    ]
+  },
+  "activities": [
+    {
+      "id": "act-tabletennis",
+      "name": "Bordtenniscup",
+      "shortDesc": "Digital påmelding ved ankomst! Single elimination cup på 2 bord. Premieutdeling kl. 22:30!",
+      "fullDesc": "Klassisk bordtennisturnering med digital påmelding ved ankomst og digital turneringsflyt! Kampene starter kl. 18:45, og spilles først til 21 poeng med 5 server hver (2 poengs ledelse ved 20–20). Semifinaler og finale spilles fra kl. 22:00, og høytidelig premieutdeling skjer kl. 22:30!",
+      "iconName": "Trophy",
+      "time": "Digital påmelding fra 17:00 • Kampstart 18:45",
+      "location": "Bordtennis-sonen (2 bord)",
+      "enabled": true,
+      "badge": "Digital påmelding",
+      "highlight": true
+    },
+    {
+      "id": "act-football",
+      "name": "Lillesand United Fotball",
+      "shortDesc": "5-er turnering i hallen. Fysisk organisering og lagpåmelding ved ankomst fra kl. 17:00!",
+      "fullDesc": "Rå 5-er innendørs fotballturnering! Turneringen organiseres fysisk i hallen (har foreløpig ikke digital turneringsmotor). Sett sammen et lag med venner eller meld deg på et lag ved ankomst. Kampene starter kl. 18:45, semifinaler/finaler kl. 22:00 og premieutdeling kl. 22:30.",
+      "iconName": "CircleDot",
+      "time": "Fysisk lagpåmelding fra 17:00 • Kampstart 18:45",
+      "location": "Hovedbanen, Møglestuhallen",
+      "enabled": true,
+      "badge": "Fysisk organisering"
+    },
+    {
+      "id": "act-gaming",
+      "name": "Mario Kart & Gaming Lounge",
+      "shortDesc": "Påmelding enkeltvis ved ankomst! Konkurranser, Mario Kart på storskjerm og lounge.",
+      "fullDesc": "Gaming på storskjerm og dedikerte spillstasjoner! Påmelding skjer enkeltvis ved ankomst i gaming-sonen (har foreløpig ikke digital turneringsmotor). Gaming og turnering starter kl. 18:45, finaler kl. 22:00 og premieutdeling kl. 22:30.",
+      "iconName": "Gamepad2",
+      "time": "Påmelding fra 17:00 • Gaming starter 18:45",
+      "location": "Gaming-hjørnet",
+      "enabled": true,
+      "badge": "Påmelding ved ankomst"
+    },
+    {
+      "id": "act-gathering",
+      "name": "Kveldens fellesmøte",
+      "shortDesc": "Lovsang, lek, Moshpit-sanger og tale ved Eivind Galdal (SALT Bergen)!",
+      "fullDesc": "Kveldens store felles samlingsstund for hele hallen! Fellesmøte med lovsang, morsomme leker, energiske Moshpit-sanger og inspirerende tale ved Eivind Galdal fra SALT Bergen. Starter kl. 21:00 og varer til ca. 21:45.",
+      "iconName": "Music",
+      "time": "Kl. 21:00 – ca. 21:45",
+      "location": "Hovedscenen / Tribunen",
+      "enabled": true,
+      "badge": "Kveldens fellesmøte"
+    },
+    {
+      "id": "act-kiosk",
+      "name": "Kiosk & Varmmat",
+      "shortDesc": "Gratis popcorn til de første 100! Salg av pølser, brus og kioskvarer hele kvelden.",
+      "fullDesc": "De første 100 som kommer inn døra fra kl. 17:00 får gratis nypoppet popcorn! I kiosken kan du kjøpe varme pølser, iskald brus, sjokolade og snacks til ungdomsvennlige priser gjennom hele kvelden helt til avslutning kl. 22:45.",
+      "iconName": "Utensils",
+      "time": "Kl. 17:00 – 22:45",
+      "location": "Kioskområdet ved inngangen",
+      "enabled": true,
+      "badge": "Gratis popcorn!"
+    },
+    {
+      "id": "act-alpha",
+      "name": "UngdomsAlpha",
+      "shortDesc": "Starter fredag 25. september kl. 19:00. Uformelt og gøy med god mat!",
+      "fullDesc": "Hva er egentlig meningen med livet? UngdomsAlpha er for deg mellom 13 og 19 år som vil henge, spise digg mat, se morsomme filmer og prate om de store spørsmålene uten fasitsvar og press. Oppstart 25. september kl 19:00!",
+      "iconName": "Sparkles",
+      "time": "Oppstart: Fredag 25. sept kl. 19:00",
+      "location": "Lillesand",
+      "enabled": true,
+      "badge": "Oppstart 25. sept"
+    }
+  ],
+  "tournament": {
+    "id": "tour-lillesand-2026",
+    "status": "registration",
+    "startedAt": null,
+    "completedAt": null,
+    "participants": [],
+    "matches": [],
+    "winner": null,
+    "estimatedMinutesPerMatch": 10,
+    "bracketCapacity": 16
+  },
+  "alphaInterests": [],
+  "persons": [
+    {
+      "id": "9051652a-47a5-48bf-92eb-12d06715eb89",
+      "firstName": "Oliver",
+      "nameNumber": 1,
+      "displayId": "Oliver_1",
+      "anonymousToken": "tok_0770ac32cbe64276",
+      "createdAt": "2026-09-06T20:29:22.805Z",
+      "updatedAt": "2026-09-06T20:29:22.805Z",
+      "isSimulated": false
+    },
+    {
+      "id": "d4bd21d0-c202-4ac0-9529-0dfcc95f1cea",
+      "firstName": "Oliver",
+      "nameNumber": 2,
+      "displayId": "Oliver_2",
+      "anonymousToken": "tok_ac84af2a9cd74d77",
+      "createdAt": "2026-09-06T20:29:22.807Z",
+      "updatedAt": "2026-09-06T20:29:22.807Z",
+      "isSimulated": false
+    },
+    {
+      "id": "75ec2cb5-64d6-41e5-9e55-0f7fca58afe2",
+      "firstName": "Oliver",
+      "nameNumber": 3,
+      "displayId": "Oliver_3",
+      "anonymousToken": "tok_3816dd584c124b07",
+      "createdAt": "2026-09-06T20:29:22.809Z",
+      "updatedAt": "2026-09-06T20:29:22.809Z",
+      "isSimulated": false
+    }
+  ]
+}
