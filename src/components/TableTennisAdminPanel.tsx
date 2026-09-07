@@ -8,7 +8,7 @@ import {
   resolveBracketCapacity,
 } from '../lib/tournament';
 
-function RoundStructurePreview({ capacity }: { capacity: 16 | 32 | 64 }) {
+function RoundStructurePreview({ capacity }: { capacity: number }) {
   const steps: { label: string; matches: number }[] = [];
   let matches = capacity / 2;
   let round = 1;

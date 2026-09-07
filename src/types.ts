@@ -49,6 +49,7 @@ export interface AlphaInterest {
   registeredAt: string;
   notes?: string;
   userId?: string;
+  personId?: string;
 }
 
 export interface Person {

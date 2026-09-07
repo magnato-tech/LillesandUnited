@@ -1,19 +1,1662 @@
 {
   "event": {
-    "name": "Lillesand United",
+    "popcornClaimedCount": 0,
     "date": "Fredag 18. september 2026",
-    "time": "17:00 – 22:45 (Aktiviteter fra 18:45)",
+    "freePopcornLimit": 100,
+    "name": "Lillesand United",
     "location": "Møglestuhallen, Lillesand",
+    "time": "17:00 – 22:45 (Aktiviteter fra 18:45)",
     "organizers": [
       "KRIK",
       "Den Norske Kirke",
       "Filadelfia",
       "Misjonskirken",
       "Baptistkirken"
-    ],
-    "freePopcornLimit": 100,
-    "popcornClaimedCount": 0
+    ]
   },
+  "updatedAt": "2026-09-07T21:01:41.817Z",
+  "activities": [
+    {
+      "badge": "Digital påmelding",
+      "shortDesc": "Digital påmelding ved ankomst! Single elimination cup på 2 bord. Premieutdeling kl. 22:30!",
+      "name": "Bordtenniscup",
+      "highlight": true,
+      "id": "act-tabletennis",
+      "time": "Digital påmelding fra 17:00 • Kampstart 18:45",
+      "iconName": "Trophy",
+      "location": "Bordtennis-sonen (2 bord)",
+      "enabled": true,
+      "fullDesc": "Klassisk bordtennisturnering med digital påmelding ved ankomst og digital turneringsflyt! Kampene starter kl. 18:45, og spilles først til 21 poeng med 5 server hver (2 poengs ledelse ved 20–20). Semifinaler og finale spilles fra kl. 22:00, og høytidelig premieutdeling skjer kl. 22:30!"
+    },
+    {
+      "time": "Fysisk lagpåmelding fra 17:00 • Kampstart 18:45",
+      "id": "act-football",
+      "badge": "Fysisk organisering",
+      "iconName": "CircleDot",
+      "location": "Hovedbanen, Møglestuhallen",
+      "fullDesc": "Rå 5-er innendørs fotballturnering! Turneringen organiseres fysisk i hallen (har foreløpig ikke digital turneringsmotor). Sett sammen et lag med venner eller meld deg på et lag ved ankomst. Kampene starter kl. 18:45, semifinaler/finaler kl. 22:00 og premieutdeling kl. 22:30.",
+      "name": "Lillesand United Fotball",
+      "shortDesc": "5-er turnering i hallen. Fysisk organisering og lagpåmelding ved ankomst fra kl. 17:00!",
+      "enabled": true
+    },
+    {
+      "enabled": true,
+      "time": "Påmelding fra 17:00 • Gaming starter 18:45",
+      "shortDesc": "Påmelding enkeltvis ved ankomst! Konkurranser, Mario Kart på storskjerm og lounge.",
+      "location": "Gaming-hjørnet",
+      "iconName": "Gamepad2",
+      "fullDesc": "Gaming på storskjerm og dedikerte spillstasjoner! Påmelding skjer enkeltvis ved ankomst i gaming-sonen (har foreløpig ikke digital turneringsmotor). Gaming og turnering starter kl. 18:45, finaler kl. 22:00 og premieutdeling kl. 22:30.",
+      "badge": "Påmelding ved ankomst",
+      "name": "Mario Kart & Gaming Lounge",
+      "id": "act-gaming"
+    },
+    {
+      "name": "Kveldens fellesmøte",
+      "fullDesc": "Kveldens store felles samlingsstund for hele hallen! Fellesmøte med lovsang, morsomme leker, energiske Moshpit-sanger og inspirerende tale ved Eivind Galdal fra SALT Bergen. Starter kl. 21:00 og varer til ca. 21:45.",
+      "shortDesc": "Lovsang, lek, Moshpit-sanger og tale ved Eivind Galdal (SALT Bergen)!",
+      "location": "Hovedscenen / Tribunen",
+      "iconName": "Music",
+      "badge": "Kveldens fellesmøte",
+      "time": "Kl. 21:00 – ca. 21:45",
+      "enabled": true,
+      "id": "act-gathering"
+    },
+    {
+      "fullDesc": "De første 100 som kommer inn døra fra kl. 17:00 får gratis nypoppet popcorn! I kiosken kan du kjøpe varme pølser, iskald brus, sjokolade og snacks til ungdomsvennlige priser gjennom hele kvelden helt til avslutning kl. 22:45.",
+      "time": "Kl. 17:00 – 22:45",
+      "iconName": "Utensils",
+      "location": "Kioskområdet ved inngangen",
+      "id": "act-kiosk",
+      "enabled": true,
+      "badge": "Gratis popcorn!",
+      "name": "Kiosk & Varmmat",
+      "shortDesc": "Gratis popcorn til de første 100! Salg av pølser, brus og kioskvarer hele kvelden."
+    },
+    {
+      "badge": "Oppstart 25. sept",
+      "shortDesc": "Starter fredag 25. september kl. 19:00. Uformelt og gøy med god mat!",
+      "enabled": true,
+      "name": "UngdomsAlpha",
+      "id": "act-alpha",
+      "time": "Oppstart: Fredag 25. sept kl. 19:00",
+      "fullDesc": "Hva er egentlig meningen med livet? UngdomsAlpha er for deg mellom 13 og 19 år som vil henge, spise digg mat, se morsomme filmer og prate om de store spørsmålene uten fasitsvar og press. Oppstart 25. september kl 19:00!",
+      "location": "Lillesand",
+      "iconName": "Sparkles"
+    }
+  ],
+  "tournament": {
+    "id": "tour-lillesand-2026",
+    "status": "completed",
+    "startedAt": "2026-09-07T21:08:37.437Z",
+    "completedAt": "2026-09-07T21:08:37.598Z",
+    "participants": [
+      {
+        "id": "p_1788815317373_nzf1",
+        "personId": "3c5016e8-9fff-4693-9faa-471e087e83a6",
+        "displayId": "NySpiller_1_7312_1",
+        "firstName": "NySpiller_1_7312",
+        "registeredAt": "2026-09-07T21:08:37.373Z"
+      },
+      {
+        "id": "p_1788815317377_b03x",
+        "personId": "abd3558e-6f2e-40ef-a7ae-831f2ba329e4",
+        "displayId": "NySpiller_2_7312_1",
+        "firstName": "NySpiller_2_7312",
+        "registeredAt": "2026-09-07T21:08:37.377Z"
+      },
+      {
+        "id": "p_1788815317380_w1mg",
+        "personId": "28d22c64-c5fd-4f15-97ca-60418a48a9ec",
+        "displayId": "NySpiller_3_7312_1",
+        "firstName": "NySpiller_3_7312",
+        "registeredAt": "2026-09-07T21:08:37.380Z"
+      },
+      {
+        "id": "p_1788815317384_1l5r",
+        "personId": "24d0af32-a2a0-4c7b-bb30-1fd718fce2bd",
+        "displayId": "NySpiller_4_7312_1",
+        "firstName": "NySpiller_4_7312",
+        "registeredAt": "2026-09-07T21:08:37.384Z"
+      },
+      {
+        "id": "p_1788815317388_o075",
+        "personId": "77a74f77-a8b9-4a5e-9c99-3115a4323d3d",
+        "displayId": "NySpiller_5_7312_1",
+        "firstName": "NySpiller_5_7312",
+        "registeredAt": "2026-09-07T21:08:37.388Z"
+      },
+      {
+        "id": "p_1788815317393_n8wj",
+        "personId": "0c2259d5-52d2-44d5-8152-bed9ddd7b7c4",
+        "displayId": "NySpiller_6_7312_1",
+        "firstName": "NySpiller_6_7312",
+        "registeredAt": "2026-09-07T21:08:37.393Z"
+      },
+      {
+        "id": "p_1788815317396_jqlz",
+        "personId": "dd42b29d-bcb8-4336-8c86-9f3a586f6be7",
+        "displayId": "NySpiller_7_7312_1",
+        "firstName": "NySpiller_7_7312",
+        "registeredAt": "2026-09-07T21:08:37.396Z"
+      },
+      {
+        "id": "p_1788815317400_fioq",
+        "personId": "c6fbc5d0-6481-46a7-bad8-473c14339f91",
+        "displayId": "NySpiller_8_7312_1",
+        "firstName": "NySpiller_8_7312",
+        "registeredAt": "2026-09-07T21:08:37.400Z"
+      },
+      {
+        "id": "p_1788815317403_6cmv",
+        "personId": "517dcaaa-dcf5-493e-832f-e14209610a8e",
+        "displayId": "NySpiller_9_7312_1",
+        "firstName": "NySpiller_9_7312",
+        "registeredAt": "2026-09-07T21:08:37.403Z"
+      },
+      {
+        "id": "p_1788815317408_nmnd",
+        "personId": "47df3493-99bd-4fe6-be01-dd06b7dac7a7",
+        "displayId": "NySpiller_10_7312_1",
+        "firstName": "NySpiller_10_7312",
+        "registeredAt": "2026-09-07T21:08:37.408Z"
+      },
+      {
+        "id": "p_1788815317413_1px2",
+        "personId": "295018c6-b113-4947-bf84-b382534bacae",
+        "displayId": "NySpiller_11_7312_1",
+        "firstName": "NySpiller_11_7312",
+        "registeredAt": "2026-09-07T21:08:37.413Z"
+      },
+      {
+        "id": "p_1788815317417_rubd",
+        "personId": "6bb748c5-9d6a-4705-af00-7139e6bdff58",
+        "displayId": "NySpiller_12_7312_1",
+        "firstName": "NySpiller_12_7312",
+        "registeredAt": "2026-09-07T21:08:37.417Z"
+      },
+      {
+        "id": "p_1788815317419_s0o5",
+        "personId": "531530ca-4acf-45bc-a5a2-5a6e30da17bc",
+        "displayId": "NySpiller_13_7312_1",
+        "firstName": "NySpiller_13_7312",
+        "registeredAt": "2026-09-07T21:08:37.419Z"
+      },
+      {
+        "id": "p_1788815317423_9m3g",
+        "personId": "68d44b33-3bf7-4103-993e-0ef62e319407",
+        "displayId": "NySpiller_14_7312_1",
+        "firstName": "NySpiller_14_7312",
+        "registeredAt": "2026-09-07T21:08:37.423Z"
+      },
+      {
+        "id": "p_1788815317427_kjwn",
+        "personId": "7314adde-cd76-42b3-8ed6-4fef8c209649",
+        "displayId": "NySpiller_15_7312_1",
+        "firstName": "NySpiller_15_7312",
+        "registeredAt": "2026-09-07T21:08:37.427Z"
+      },
+      {
+        "id": "p_1788815317430_anc8",
+        "personId": "a1ddb68f-ad0a-492f-971c-9867dae83b97",
+        "displayId": "NySpiller_16_7312_1",
+        "firstName": "NySpiller_16_7312",
+        "registeredAt": "2026-09-07T21:08:37.430Z"
+      }
+    ],
+    "matches": [
+      {
+        "id": "match_r1_p0",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 0,
+        "playerA": {
+          "id": "p_1788815317393_n8wj",
+          "personId": "0c2259d5-52d2-44d5-8152-bed9ddd7b7c4",
+          "displayId": "NySpiller_6_7312_1",
+          "firstName": "NySpiller_6_7312",
+          "registeredAt": "2026-09-07T21:08:37.393Z"
+        },
+        "playerB": {
+          "id": "p_1788815317388_o075",
+          "personId": "77a74f77-a8b9-4a5e-9c99-3115a4323d3d",
+          "displayId": "NySpiller_5_7312_1",
+          "firstName": "NySpiller_5_7312",
+          "registeredAt": "2026-09-07T21:08:37.388Z"
+        },
+        "winnerId": "p_1788815317393_n8wj",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p0",
+        "nextMatchSlot": "A",
+        "completedAt": "2026-09-07T21:08:37.449Z"
+      },
+      {
+        "id": "match_r1_p1",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 1,
+        "playerA": {
+          "id": "p_1788815317427_kjwn",
+          "personId": "7314adde-cd76-42b3-8ed6-4fef8c209649",
+          "displayId": "NySpiller_15_7312_1",
+          "firstName": "NySpiller_15_7312",
+          "registeredAt": "2026-09-07T21:08:37.427Z"
+        },
+        "playerB": {
+          "id": "p_1788815317413_1px2",
+          "personId": "295018c6-b113-4947-bf84-b382534bacae",
+          "displayId": "NySpiller_11_7312_1",
+          "firstName": "NySpiller_11_7312",
+          "registeredAt": "2026-09-07T21:08:37.413Z"
+        },
+        "winnerId": "p_1788815317413_1px2",
+        "scoreA": 17,
+        "scoreB": 21,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p0",
+        "nextMatchSlot": "B",
+        "completedAt": "2026-09-07T21:08:37.459Z"
+      },
+      {
+        "id": "match_r1_p2",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 2,
+        "playerA": {
+          "id": "p_1788815317423_9m3g",
+          "personId": "68d44b33-3bf7-4103-993e-0ef62e319407",
+          "displayId": "NySpiller_14_7312_1",
+          "firstName": "NySpiller_14_7312",
+          "registeredAt": "2026-09-07T21:08:37.423Z"
+        },
+        "playerB": {
+          "id": "p_1788815317400_fioq",
+          "personId": "c6fbc5d0-6481-46a7-bad8-473c14339f91",
+          "displayId": "NySpiller_8_7312_1",
+          "firstName": "NySpiller_8_7312",
+          "registeredAt": "2026-09-07T21:08:37.400Z"
+        },
+        "winnerId": "p_1788815317423_9m3g",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p1",
+        "nextMatchSlot": "A",
+        "completedAt": "2026-09-07T21:08:37.469Z"
+      },
+      {
+        "id": "match_r1_p3",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 3,
+        "playerA": {
+          "id": "p_1788815317377_b03x",
+          "personId": "abd3558e-6f2e-40ef-a7ae-831f2ba329e4",
+          "displayId": "NySpiller_2_7312_1",
+          "firstName": "NySpiller_2_7312",
+          "registeredAt": "2026-09-07T21:08:37.377Z"
+        },
+        "playerB": {
+          "id": "p_1788815317384_1l5r",
+          "personId": "24d0af32-a2a0-4c7b-bb30-1fd718fce2bd",
+          "displayId": "NySpiller_4_7312_1",
+          "firstName": "NySpiller_4_7312",
+          "registeredAt": "2026-09-07T21:08:37.384Z"
+        },
+        "winnerId": "p_1788815317384_1l5r",
+        "scoreA": 17,
+        "scoreB": 21,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p1",
+        "nextMatchSlot": "B",
+        "completedAt": "2026-09-07T21:08:37.479Z"
+      },
+      {
+        "id": "match_r1_p4",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 4,
+        "playerA": {
+          "id": "p_1788815317408_nmnd",
+          "personId": "47df3493-99bd-4fe6-be01-dd06b7dac7a7",
+          "displayId": "NySpiller_10_7312_1",
+          "firstName": "NySpiller_10_7312",
+          "registeredAt": "2026-09-07T21:08:37.408Z"
+        },
+        "playerB": {
+          "id": "p_1788815317373_nzf1",
+          "personId": "3c5016e8-9fff-4693-9faa-471e087e83a6",
+          "displayId": "NySpiller_1_7312_1",
+          "firstName": "NySpiller_1_7312",
+          "registeredAt": "2026-09-07T21:08:37.373Z"
+        },
+        "winnerId": "p_1788815317408_nmnd",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p2",
+        "nextMatchSlot": "A",
+        "completedAt": "2026-09-07T21:08:37.489Z"
+      },
+      {
+        "id": "match_r1_p5",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 5,
+        "playerA": {
+          "id": "p_1788815317419_s0o5",
+          "personId": "531530ca-4acf-45bc-a5a2-5a6e30da17bc",
+          "displayId": "NySpiller_13_7312_1",
+          "firstName": "NySpiller_13_7312",
+          "registeredAt": "2026-09-07T21:08:37.419Z"
+        },
+        "playerB": {
+          "id": "p_1788815317380_w1mg",
+          "personId": "28d22c64-c5fd-4f15-97ca-60418a48a9ec",
+          "displayId": "NySpiller_3_7312_1",
+          "firstName": "NySpiller_3_7312",
+          "registeredAt": "2026-09-07T21:08:37.380Z"
+        },
+        "winnerId": "p_1788815317380_w1mg",
+        "scoreA": 17,
+        "scoreB": 21,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p2",
+        "nextMatchSlot": "B",
+        "completedAt": "2026-09-07T21:08:37.498Z"
+      },
+      {
+        "id": "match_r1_p6",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 6,
+        "playerA": {
+          "id": "p_1788815317417_rubd",
+          "personId": "6bb748c5-9d6a-4705-af00-7139e6bdff58",
+          "displayId": "NySpiller_12_7312_1",
+          "firstName": "NySpiller_12_7312",
+          "registeredAt": "2026-09-07T21:08:37.417Z"
+        },
+        "playerB": {
+          "id": "p_1788815317396_jqlz",
+          "personId": "dd42b29d-bcb8-4336-8c86-9f3a586f6be7",
+          "displayId": "NySpiller_7_7312_1",
+          "firstName": "NySpiller_7_7312",
+          "registeredAt": "2026-09-07T21:08:37.396Z"
+        },
+        "winnerId": "p_1788815317417_rubd",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p3",
+        "nextMatchSlot": "A",
+        "completedAt": "2026-09-07T21:08:37.508Z"
+      },
+      {
+        "id": "match_r1_p7",
+        "round": 1,
+        "roundName": "Åttedelsfinale",
+        "position": 7,
+        "playerA": {
+          "id": "p_1788815317430_anc8",
+          "personId": "a1ddb68f-ad0a-492f-971c-9867dae83b97",
+          "displayId": "NySpiller_16_7312_1",
+          "firstName": "NySpiller_16_7312",
+          "registeredAt": "2026-09-07T21:08:37.430Z"
+        },
+        "playerB": {
+          "id": "p_1788815317403_6cmv",
+          "personId": "517dcaaa-dcf5-493e-832f-e14209610a8e",
+          "displayId": "NySpiller_9_7312_1",
+          "firstName": "NySpiller_9_7312",
+          "registeredAt": "2026-09-07T21:08:37.403Z"
+        },
+        "winnerId": "p_1788815317403_6cmv",
+        "scoreA": 17,
+        "scoreB": 21,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p3",
+        "nextMatchSlot": "B",
+        "completedAt": "2026-09-07T21:08:37.517Z"
+      },
+      {
+        "id": "match_r2_p0",
+        "round": 2,
+        "roundName": "Kvartfinale",
+        "position": 0,
+        "playerA": {
+          "id": "p_1788815317393_n8wj",
+          "personId": "0c2259d5-52d2-44d5-8152-bed9ddd7b7c4",
+          "displayId": "NySpiller_6_7312_1",
+          "firstName": "NySpiller_6_7312",
+          "registeredAt": "2026-09-07T21:08:37.393Z"
+        },
+        "playerB": {
+          "id": "p_1788815317413_1px2",
+          "personId": "295018c6-b113-4947-bf84-b382534bacae",
+          "displayId": "NySpiller_11_7312_1",
+          "firstName": "NySpiller_11_7312",
+          "registeredAt": "2026-09-07T21:08:37.413Z"
+        },
+        "winnerId": "p_1788815317393_n8wj",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r3_p0",
+        "nextMatchSlot": "A",
+        "completedAt": "2026-09-07T21:08:37.530Z"
+      },
+      {
+        "id": "match_r2_p1",
+        "round": 2,
+        "roundName": "Kvartfinale",
+        "position": 1,
+        "playerA": {
+          "id": "p_1788815317423_9m3g",
+          "personId": "68d44b33-3bf7-4103-993e-0ef62e319407",
+          "displayId": "NySpiller_14_7312_1",
+          "firstName": "NySpiller_14_7312",
+          "registeredAt": "2026-09-07T21:08:37.423Z"
+        },
+        "playerB": {
+          "id": "p_1788815317384_1l5r",
+          "personId": "24d0af32-a2a0-4c7b-bb30-1fd718fce2bd",
+          "displayId": "NySpiller_4_7312_1",
+          "firstName": "NySpiller_4_7312",
+          "registeredAt": "2026-09-07T21:08:37.384Z"
+        },
+        "winnerId": "p_1788815317384_1l5r",
+        "scoreA": 17,
+        "scoreB": 21,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r3_p0",
+        "nextMatchSlot": "B",
+        "completedAt": "2026-09-07T21:08:37.539Z"
+      },
+      {
+        "id": "match_r2_p2",
+        "round": 2,
+        "roundName": "Kvartfinale",
+        "position": 2,
+        "playerA": {
+          "id": "p_1788815317408_nmnd",
+          "personId": "47df3493-99bd-4fe6-be01-dd06b7dac7a7",
+          "displayId": "NySpiller_10_7312_1",
+          "firstName": "NySpiller_10_7312",
+          "registeredAt": "2026-09-07T21:08:37.408Z"
+        },
+        "playerB": {
+          "id": "p_1788815317380_w1mg",
+          "personId": "28d22c64-c5fd-4f15-97ca-60418a48a9ec",
+          "displayId": "NySpiller_3_7312_1",
+          "firstName": "NySpiller_3_7312",
+          "registeredAt": "2026-09-07T21:08:37.380Z"
+        },
+        "winnerId": "p_1788815317408_nmnd",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r3_p1",
+        "nextMatchSlot": "A",
+        "completedAt": "2026-09-07T21:08:37.549Z"
+      },
+      {
+        "id": "match_r2_p3",
+        "round": 2,
+        "roundName": "Kvartfinale",
+        "position": 3,
+        "playerA": {
+          "id": "p_1788815317417_rubd",
+          "personId": "6bb748c5-9d6a-4705-af00-7139e6bdff58",
+          "displayId": "NySpiller_12_7312_1",
+          "firstName": "NySpiller_12_7312",
+          "registeredAt": "2026-09-07T21:08:37.417Z"
+        },
+        "playerB": {
+          "id": "p_1788815317403_6cmv",
+          "personId": "517dcaaa-dcf5-493e-832f-e14209610a8e",
+          "displayId": "NySpiller_9_7312_1",
+          "firstName": "NySpiller_9_7312",
+          "registeredAt": "2026-09-07T21:08:37.403Z"
+        },
+        "winnerId": "p_1788815317403_6cmv",
+        "scoreA": 17,
+        "scoreB": 21,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r3_p1",
+        "nextMatchSlot": "B",
+        "completedAt": "2026-09-07T21:08:37.559Z"
+      },
+      {
+        "id": "match_r3_p0",
+        "round": 3,
+        "roundName": "Semifinale",
+        "position": 0,
+        "playerA": {
+          "id": "p_1788815317393_n8wj",
+          "personId": "0c2259d5-52d2-44d5-8152-bed9ddd7b7c4",
+          "displayId": "NySpiller_6_7312_1",
+          "firstName": "NySpiller_6_7312",
+          "registeredAt": "2026-09-07T21:08:37.393Z"
+        },
+        "playerB": {
+          "id": "p_1788815317384_1l5r",
+          "personId": "24d0af32-a2a0-4c7b-bb30-1fd718fce2bd",
+          "displayId": "NySpiller_4_7312_1",
+          "firstName": "NySpiller_4_7312",
+          "registeredAt": "2026-09-07T21:08:37.384Z"
+        },
+        "winnerId": "p_1788815317393_n8wj",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r4_p0",
+        "nextMatchSlot": "A",
+        "completedAt": "2026-09-07T21:08:37.573Z"
+      },
+      {
+        "id": "match_r3_p1",
+        "round": 3,
+        "roundName": "Semifinale",
+        "position": 1,
+        "playerA": {
+          "id": "p_1788815317408_nmnd",
+          "personId": "47df3493-99bd-4fe6-be01-dd06b7dac7a7",
+          "displayId": "NySpiller_10_7312_1",
+          "firstName": "NySpiller_10_7312",
+          "registeredAt": "2026-09-07T21:08:37.408Z"
+        },
+        "playerB": {
+          "id": "p_1788815317403_6cmv",
+          "personId": "517dcaaa-dcf5-493e-832f-e14209610a8e",
+          "displayId": "NySpiller_9_7312_1",
+          "firstName": "NySpiller_9_7312",
+          "registeredAt": "2026-09-07T21:08:37.403Z"
+        },
+        "winnerId": "p_1788815317403_6cmv",
+        "scoreA": 17,
+        "scoreB": 21,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r4_p0",
+        "nextMatchSlot": "B",
+        "completedAt": "2026-09-07T21:08:37.584Z"
+      },
+      {
+        "id": "match_r4_p0",
+        "round": 4,
+        "roundName": "Finale",
+        "position": 0,
+        "playerA": {
+          "id": "p_1788815317393_n8wj",
+          "personId": "0c2259d5-52d2-44d5-8152-bed9ddd7b7c4",
+          "displayId": "NySpiller_6_7312_1",
+          "firstName": "NySpiller_6_7312",
+          "registeredAt": "2026-09-07T21:08:37.393Z"
+        },
+        "playerB": {
+          "id": "p_1788815317403_6cmv",
+          "personId": "517dcaaa-dcf5-493e-832f-e14209610a8e",
+          "displayId": "NySpiller_9_7312_1",
+          "firstName": "NySpiller_9_7312",
+          "registeredAt": "2026-09-07T21:08:37.403Z"
+        },
+        "winnerId": "p_1788815317393_n8wj",
+        "scoreA": 21,
+        "scoreB": 17,
+        "tableNumber": null,
+        "status": "completed",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": null,
+        "nextMatchSlot": null,
+        "completedAt": "2026-09-07T21:08:37.598Z"
+      }
+    ],
+    "winner": {
+      "id": "p_1788815317393_n8wj",
+      "personId": "0c2259d5-52d2-44d5-8152-bed9ddd7b7c4",
+      "displayId": "NySpiller_6_7312_1",
+      "firstName": "NySpiller_6_7312",
+      "registeredAt": "2026-09-07T21:08:37.393Z"
+    },
+    "estimatedMinutesPerMatch": 10,
+    "bracketCapacity": 16
+  },
+  "persons": [
+    {
+      "id": "056c59f8-b320-4b3a-9226-6f474f84db58",
+      "updatedAt": "2026-09-07T14:49:20.623Z",
+      "isSimulated": false,
+      "firstName": "Oliver",
+      "anonymousToken": "tok_43feaa889dbe4f8f",
+      "displayId": "Oliver_1",
+      "createdAt": "2026-09-07T14:49:20.623Z",
+      "nameNumber": 1
+    },
+    {
+      "firstName": "Oliver",
+      "anonymousToken": "tok_e6a6731d32b34a69",
+      "nameNumber": 2,
+      "isSimulated": false,
+      "createdAt": "2026-09-07T14:49:20.630Z",
+      "id": "5289e37a-a17d-4ce9-97e7-0676e2650ad4",
+      "displayId": "Oliver_2",
+      "updatedAt": "2026-09-07T14:49:20.630Z"
+    },
+    {
+      "updatedAt": "2026-09-07T14:49:20.637Z",
+      "nameNumber": 3,
+      "id": "4bd7557e-c5f3-4f58-8753-1e9472de70da",
+      "firstName": "Oliver",
+      "displayId": "Oliver_3",
+      "anonymousToken": "tok_2ac7f63fd3a34f81",
+      "createdAt": "2026-09-07T14:49:20.637Z",
+      "isSimulated": false
+    },
+    {
+      "displayId": "CupSpiller_1_1",
+      "createdAt": "2026-09-07T20:41:50.199Z",
+      "nameNumber": 1,
+      "id": "f07e0d33-fa3a-47fa-b250-1acfd46affac",
+      "firstName": "CupSpiller_1",
+      "updatedAt": "2026-09-07T20:41:50.199Z",
+      "anonymousToken": "tok_aab2b9c775854dff",
+      "isSimulated": false
+    },
+    {
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T20:41:50.211Z",
+      "isSimulated": false,
+      "id": "5e76a779-e2d2-4280-aa6c-c5455dffedd9",
+      "firstName": "CupSpiller_2",
+      "displayId": "CupSpiller_2_1",
+      "createdAt": "2026-09-07T20:41:50.211Z",
+      "anonymousToken": "tok_71a296a4439f4c80"
+    },
+    {
+      "updatedAt": "2026-09-07T20:41:50.222Z",
+      "isSimulated": false,
+      "anonymousToken": "tok_14214b1690664c82",
+      "id": "d2e0c0f9-03ff-44d7-a1fc-06279fbfa5fc",
+      "displayId": "CupSpiller_3_1",
+      "createdAt": "2026-09-07T20:41:50.222Z",
+      "nameNumber": 1,
+      "firstName": "CupSpiller_3"
+    },
+    {
+      "anonymousToken": "tok_4f2ee926709749c2",
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T20:41:50.231Z",
+      "id": "98e1a4ce-13fa-4fad-925e-b084b7424494",
+      "firstName": "CupSpiller_4",
+      "displayId": "CupSpiller_4_1",
+      "createdAt": "2026-09-07T20:41:50.231Z",
+      "isSimulated": false
+    },
+    {
+      "updatedAt": "2026-09-07T20:41:50.241Z",
+      "nameNumber": 1,
+      "id": "5c105104-449d-4927-9150-37188b36f7a4",
+      "displayId": "CupSpiller_5_1",
+      "createdAt": "2026-09-07T20:41:50.241Z",
+      "anonymousToken": "tok_1c7710669ad2494d",
+      "isSimulated": false,
+      "firstName": "CupSpiller_5"
+    },
+    {
+      "id": "56418f57-d271-4b20-9f58-667a0fa7dcd0",
+      "nameNumber": 1,
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:41:50.247Z",
+      "firstName": "CupSpiller_6",
+      "displayId": "CupSpiller_6_1",
+      "anonymousToken": "tok_ae72d787276b4ed1",
+      "createdAt": "2026-09-07T20:41:50.247Z"
+    },
+    {
+      "nameNumber": 1,
+      "id": "2ca40870-4be3-43f1-a75c-9fdeb68d115f",
+      "updatedAt": "2026-09-07T20:41:50.254Z",
+      "isSimulated": false,
+      "createdAt": "2026-09-07T20:41:50.254Z",
+      "displayId": "CupSpiller_7_1",
+      "anonymousToken": "tok_f3ff862917a94b7f",
+      "firstName": "CupSpiller_7"
+    },
+    {
+      "displayId": "CupSpiller_8_1",
+      "anonymousToken": "tok_32429597e7f94c71",
+      "createdAt": "2026-09-07T20:41:50.260Z",
+      "nameNumber": 1,
+      "firstName": "CupSpiller_8",
+      "updatedAt": "2026-09-07T20:41:50.260Z",
+      "id": "7ca25c07-0dce-4574-8bb4-4ee1953bba80",
+      "isSimulated": false
+    },
+    {
+      "displayId": "CupSpiller_9_1",
+      "createdAt": "2026-09-07T20:41:50.268Z",
+      "firstName": "CupSpiller_9",
+      "updatedAt": "2026-09-07T20:41:50.268Z",
+      "anonymousToken": "tok_3800ad804baa4daa",
+      "isSimulated": false,
+      "id": "0306600e-0d94-4bb0-a9b8-36c0571e226f",
+      "nameNumber": 1
+    },
+    {
+      "anonymousToken": "tok_b851e97e3bb345e5",
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T20:41:50.276Z",
+      "firstName": "CupSpiller_10",
+      "isSimulated": false,
+      "createdAt": "2026-09-07T20:41:50.276Z",
+      "id": "01c9a241-45e7-4288-ba50-c4a6403c8432",
+      "displayId": "CupSpiller_10_1"
+    },
+    {
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T20:41:50.284Z",
+      "id": "6e8bc7d3-0ec1-404c-ad03-54a66c87ff4b",
+      "anonymousToken": "tok_6a554b751f31498a",
+      "firstName": "CupSpiller_11",
+      "isSimulated": false,
+      "displayId": "CupSpiller_11_1",
+      "createdAt": "2026-09-07T20:41:50.284Z"
+    },
+    {
+      "id": "d945dfda-6067-48a8-825d-cd668e8b0778",
+      "updatedAt": "2026-09-07T20:41:50.290Z",
+      "createdAt": "2026-09-07T20:41:50.290Z",
+      "nameNumber": 1,
+      "displayId": "CupSpiller_12_1",
+      "firstName": "CupSpiller_12",
+      "isSimulated": false,
+      "anonymousToken": "tok_259bb5ba2b3a4512"
+    },
+    {
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:41:50.294Z",
+      "firstName": "CupSpiller_13",
+      "id": "a2f5c1bf-fbca-48f2-91c2-cd3745abf28a",
+      "nameNumber": 1,
+      "anonymousToken": "tok_4b585cb272964718",
+      "displayId": "CupSpiller_13_1",
+      "createdAt": "2026-09-07T20:41:50.294Z"
+    },
+    {
+      "firstName": "CupSpiller_14",
+      "createdAt": "2026-09-07T20:41:50.301Z",
+      "displayId": "CupSpiller_14_1",
+      "anonymousToken": "tok_6c6b4929c9864bd0",
+      "isSimulated": false,
+      "id": "0fad4c88-0f92-45ad-a4a8-fb353b7e3c99",
+      "updatedAt": "2026-09-07T20:41:50.301Z",
+      "nameNumber": 1
+    },
+    {
+      "updatedAt": "2026-09-07T20:41:50.306Z",
+      "anonymousToken": "tok_156aa1a5fda441e8",
+      "isSimulated": false,
+      "nameNumber": 1,
+      "displayId": "CupSpiller_15_1",
+      "createdAt": "2026-09-07T20:41:50.306Z",
+      "id": "26f34800-6046-4da0-9545-96ad1a3c14c5",
+      "firstName": "CupSpiller_15"
+    },
+    {
+      "displayId": "CupSpiller_16_1",
+      "createdAt": "2026-09-07T20:41:50.314Z",
+      "nameNumber": 1,
+      "anonymousToken": "tok_c4e4f1573bbb4a31",
+      "firstName": "CupSpiller_16",
+      "updatedAt": "2026-09-07T20:41:50.314Z",
+      "id": "efa0c0a7-3f9b-4e4d-a3dd-69796cbb6b39",
+      "isSimulated": false
+    },
+    {
+      "id": "c8ed605c-e453-4015-8224-5526ad7d4f40",
+      "nameNumber": 2,
+      "updatedAt": "2026-09-07T20:42:00.603Z",
+      "firstName": "CupSpiller_1",
+      "isSimulated": false,
+      "displayId": "CupSpiller_1_2",
+      "anonymousToken": "tok_6111f529986149ad",
+      "createdAt": "2026-09-07T20:42:00.603Z"
+    },
+    {
+      "nameNumber": 2,
+      "updatedAt": "2026-09-07T20:42:00.617Z",
+      "anonymousToken": "tok_2eb7e74e51244856",
+      "displayId": "CupSpiller_2_2",
+      "id": "30e997c8-43b6-436f-beb6-5109ac7ee13d",
+      "createdAt": "2026-09-07T20:42:00.617Z",
+      "isSimulated": false,
+      "firstName": "CupSpiller_2"
+    },
+    {
+      "createdAt": "2026-09-07T20:42:00.627Z",
+      "displayId": "CupSpiller_3_2",
+      "nameNumber": 2,
+      "firstName": "CupSpiller_3",
+      "anonymousToken": "tok_0986f7a77b1f446a",
+      "id": "46fe1f13-6f7b-4e02-80ca-113b1fd2d7e9",
+      "updatedAt": "2026-09-07T20:42:00.627Z",
+      "isSimulated": false
+    },
+    {
+      "isSimulated": false,
+      "displayId": "CupSpiller_4_2",
+      "createdAt": "2026-09-07T20:42:00.636Z",
+      "nameNumber": 2,
+      "id": "e497f5cd-9aa7-4e8c-8bba-f7e7c025025c",
+      "firstName": "CupSpiller_4",
+      "updatedAt": "2026-09-07T20:42:00.636Z",
+      "anonymousToken": "tok_86bfb445712745ec"
+    },
+    {
+      "updatedAt": "2026-09-07T20:42:00.647Z",
+      "nameNumber": 2,
+      "anonymousToken": "tok_6a3fdbe9983e4dc8",
+      "id": "667eac90-7c97-4391-a2a8-90cb8cf8c698",
+      "displayId": "CupSpiller_5_2",
+      "createdAt": "2026-09-07T20:42:00.647Z",
+      "isSimulated": false,
+      "firstName": "CupSpiller_5"
+    },
+    {
+      "createdAt": "2026-09-07T20:42:00.656Z",
+      "isSimulated": false,
+      "displayId": "CupSpiller_6_2",
+      "firstName": "CupSpiller_6",
+      "nameNumber": 2,
+      "updatedAt": "2026-09-07T20:42:00.656Z",
+      "id": "3a34cc82-03a6-40f6-8e58-b19690f955d7",
+      "anonymousToken": "tok_a3397b943acb4333"
+    },
+    {
+      "firstName": "CupSpiller_7",
+      "displayId": "CupSpiller_7_2",
+      "anonymousToken": "tok_6b26d90ae4c24bf9",
+      "createdAt": "2026-09-07T20:42:00.662Z",
+      "id": "24eef511-ca1c-4528-b8a4-557cc7f6b5ae",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:42:00.662Z",
+      "nameNumber": 2
+    },
+    {
+      "updatedAt": "2026-09-07T20:42:00.671Z",
+      "nameNumber": 2,
+      "anonymousToken": "tok_5c76b4b3e3824d5b",
+      "isSimulated": false,
+      "displayId": "CupSpiller_8_2",
+      "id": "9dc209d6-ba84-4fcb-a35f-b089ad3431cd",
+      "createdAt": "2026-09-07T20:42:00.671Z",
+      "firstName": "CupSpiller_8"
+    },
+    {
+      "nameNumber": 2,
+      "updatedAt": "2026-09-07T20:42:00.678Z",
+      "id": "3f28c6ac-774c-4a5b-a49c-f1150c12d30c",
+      "anonymousToken": "tok_b9ef5ef059c74f64",
+      "createdAt": "2026-09-07T20:42:00.678Z",
+      "displayId": "CupSpiller_9_2",
+      "isSimulated": false,
+      "firstName": "CupSpiller_9"
+    },
+    {
+      "updatedAt": "2026-09-07T20:42:00.688Z",
+      "anonymousToken": "tok_a21562cdf5c94b2f",
+      "id": "319e3ad0-38b8-4e51-9556-a1c9be1b467d",
+      "isSimulated": false,
+      "nameNumber": 2,
+      "firstName": "CupSpiller_10",
+      "displayId": "CupSpiller_10_2",
+      "createdAt": "2026-09-07T20:42:00.688Z"
+    },
+    {
+      "firstName": "CupSpiller_11",
+      "createdAt": "2026-09-07T20:42:00.696Z",
+      "displayId": "CupSpiller_11_2",
+      "id": "c5921de7-084f-4c5d-a90c-a5b2eadc76a9",
+      "nameNumber": 2,
+      "anonymousToken": "tok_ec797b2e417d4b9e",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:42:00.696Z"
+    },
+    {
+      "isSimulated": false,
+      "anonymousToken": "tok_7496bfb1c5d543b6",
+      "updatedAt": "2026-09-07T20:42:00.706Z",
+      "firstName": "CupSpiller_12",
+      "nameNumber": 2,
+      "createdAt": "2026-09-07T20:42:00.706Z",
+      "displayId": "CupSpiller_12_2",
+      "id": "1fc0590e-e801-4549-9efb-d67ec34aa5d0"
+    },
+    {
+      "isSimulated": false,
+      "id": "3c5a0bbb-cd02-46a3-bb8a-947531007490",
+      "anonymousToken": "tok_8d57bc62b2bb4da1",
+      "updatedAt": "2026-09-07T20:42:00.729Z",
+      "firstName": "CupSpiller_13",
+      "nameNumber": 2,
+      "createdAt": "2026-09-07T20:42:00.729Z",
+      "displayId": "CupSpiller_13_2"
+    },
+    {
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:42:00.737Z",
+      "firstName": "CupSpiller_14",
+      "nameNumber": 2,
+      "id": "52e6c983-5c57-4d77-8671-acecee5bb097",
+      "displayId": "CupSpiller_14_2",
+      "createdAt": "2026-09-07T20:42:00.737Z",
+      "anonymousToken": "tok_9f58ade326be46cf"
+    },
+    {
+      "updatedAt": "2026-09-07T20:42:00.746Z",
+      "nameNumber": 2,
+      "isSimulated": false,
+      "createdAt": "2026-09-07T20:42:00.746Z",
+      "displayId": "CupSpiller_15_2",
+      "firstName": "CupSpiller_15",
+      "id": "fafa9b1c-6038-4c74-8871-7837ab2cdece",
+      "anonymousToken": "tok_54112b55078e46a7"
+    },
+    {
+      "anonymousToken": "tok_884c4c72427143bf",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:42:00.754Z",
+      "firstName": "CupSpiller_16",
+      "nameNumber": 2,
+      "displayId": "CupSpiller_16_2",
+      "createdAt": "2026-09-07T20:42:00.754Z",
+      "id": "19d5a11e-b2b3-47e5-b9b5-feb4795b9249"
+    },
+    {
+      "id": "a7123463-4179-45bc-88bd-f90d21ddd7ff",
+      "updatedAt": "2026-09-07T20:42:30.046Z",
+      "firstName": "CupSpiller_1",
+      "anonymousToken": "tok_84fbdf4f269f4d0e",
+      "isSimulated": false,
+      "displayId": "CupSpiller_1_3",
+      "createdAt": "2026-09-07T20:42:30.046Z",
+      "nameNumber": 3
+    },
+    {
+      "firstName": "CupSpiller_2",
+      "anonymousToken": "tok_e6347c083b8045c8",
+      "displayId": "CupSpiller_2_3",
+      "id": "ccf50a78-8ea7-4526-b89e-3677fd96b586",
+      "createdAt": "2026-09-07T20:42:30.060Z",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:42:30.060Z",
+      "nameNumber": 3
+    },
+    {
+      "isSimulated": false,
+      "id": "fd1da452-fcce-467f-b316-3e65171ee4c3",
+      "updatedAt": "2026-09-07T20:42:30.070Z",
+      "anonymousToken": "tok_82d62cc903d9428c",
+      "firstName": "CupSpiller_3",
+      "nameNumber": 3,
+      "displayId": "CupSpiller_3_3",
+      "createdAt": "2026-09-07T20:42:30.070Z"
+    },
+    {
+      "nameNumber": 3,
+      "updatedAt": "2026-09-07T20:42:30.078Z",
+      "isSimulated": false,
+      "anonymousToken": "tok_056205b0e15941ab",
+      "createdAt": "2026-09-07T20:42:30.078Z",
+      "displayId": "CupSpiller_4_3",
+      "firstName": "CupSpiller_4",
+      "id": "05f4ffd7-51f6-4cd0-92cc-80ce6f1102e3"
+    },
+    {
+      "displayId": "CupSpiller_5_3",
+      "createdAt": "2026-09-07T20:42:30.090Z",
+      "isSimulated": false,
+      "nameNumber": 3,
+      "firstName": "CupSpiller_5",
+      "anonymousToken": "tok_12f9dd928fe3412b",
+      "id": "1157ce9b-3e01-4f0f-8aca-d7de483509bb",
+      "updatedAt": "2026-09-07T20:42:30.090Z"
+    },
+    {
+      "firstName": "CupSpiller_6",
+      "id": "64a868b2-3ef9-45d2-95b9-8a23f107f0e6",
+      "displayId": "CupSpiller_6_3",
+      "createdAt": "2026-09-07T20:42:30.099Z",
+      "nameNumber": 3,
+      "updatedAt": "2026-09-07T20:42:30.099Z",
+      "isSimulated": false,
+      "anonymousToken": "tok_52e9aba785e044d6"
+    },
+    {
+      "nameNumber": 3,
+      "updatedAt": "2026-09-07T20:42:30.105Z",
+      "id": "46decbae-7198-446f-9a51-4fa5924933bc",
+      "createdAt": "2026-09-07T20:42:30.105Z",
+      "displayId": "CupSpiller_7_3",
+      "isSimulated": false,
+      "firstName": "CupSpiller_7",
+      "anonymousToken": "tok_8c67b9553ce343f6"
+    },
+    {
+      "id": "744bd1a0-21f7-448f-a5f3-40400f1c6e80",
+      "updatedAt": "2026-09-07T20:42:30.113Z",
+      "anonymousToken": "tok_8c501585acc24c27",
+      "isSimulated": false,
+      "firstName": "CupSpiller_8",
+      "nameNumber": 3,
+      "displayId": "CupSpiller_8_3",
+      "createdAt": "2026-09-07T20:42:30.113Z"
+    },
+    {
+      "firstName": "CupSpiller_9",
+      "id": "7a0c32d0-bb8c-4bf8-adab-6b4a32d9466c",
+      "displayId": "CupSpiller_9_3",
+      "createdAt": "2026-09-07T20:42:30.121Z",
+      "anonymousToken": "tok_eb940ed091174b11",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:42:30.121Z",
+      "nameNumber": 3
+    },
+    {
+      "createdAt": "2026-09-07T20:42:30.129Z",
+      "nameNumber": 3,
+      "displayId": "CupSpiller_10_3",
+      "anonymousToken": "tok_175fe11d29244009",
+      "firstName": "CupSpiller_10",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T20:42:30.129Z",
+      "id": "a08874e1-e666-4704-a813-358413803285"
+    },
+    {
+      "displayId": "CupSpiller_11_3",
+      "createdAt": "2026-09-07T20:42:30.138Z",
+      "id": "f9de7f44-3c14-487a-aee6-1a20dd36baed",
+      "nameNumber": 3,
+      "firstName": "CupSpiller_11",
+      "anonymousToken": "tok_4521c4ea537d4e25",
+      "updatedAt": "2026-09-07T20:42:30.138Z",
+      "isSimulated": false
+    },
+    {
+      "createdAt": "2026-09-07T20:42:30.145Z",
+      "displayId": "CupSpiller_12_3",
+      "firstName": "CupSpiller_12",
+      "isSimulated": false,
+      "anonymousToken": "tok_a3163a4d651c41c7",
+      "id": "da4f0a68-ae2c-4af7-adbd-c832a9f8bc2c",
+      "updatedAt": "2026-09-07T20:42:30.145Z",
+      "nameNumber": 3
+    },
+    {
+      "displayId": "CupSpiller_13_3",
+      "id": "68d5f8c7-cc68-4986-b1ff-de5edafcf276",
+      "createdAt": "2026-09-07T20:42:30.153Z",
+      "anonymousToken": "tok_7bfb3ef61088465c",
+      "firstName": "CupSpiller_13",
+      "updatedAt": "2026-09-07T20:42:30.153Z",
+      "isSimulated": false,
+      "nameNumber": 3
+    },
+    {
+      "nameNumber": 3,
+      "updatedAt": "2026-09-07T20:42:30.161Z",
+      "firstName": "CupSpiller_14",
+      "anonymousToken": "tok_591b03d6a9cd4726",
+      "createdAt": "2026-09-07T20:42:30.161Z",
+      "isSimulated": false,
+      "id": "92ff31db-64a4-40c8-b204-3fd14c4bfafb",
+      "displayId": "CupSpiller_14_3"
+    },
+    {
+      "updatedAt": "2026-09-07T20:42:30.169Z",
+      "isSimulated": false,
+      "id": "a4aa1360-7fe5-43d6-a6c6-67984ffedac9",
+      "anonymousToken": "tok_43a93ef63bfa4f09",
+      "nameNumber": 3,
+      "displayId": "CupSpiller_15_3",
+      "createdAt": "2026-09-07T20:42:30.169Z",
+      "firstName": "CupSpiller_15"
+    },
+    {
+      "id": "3c0fdd80-3f58-4b7f-b057-852a4eebb2c9",
+      "displayId": "CupSpiller_16_3",
+      "createdAt": "2026-09-07T20:42:30.177Z",
+      "anonymousToken": "tok_b259b29edc22427f",
+      "firstName": "CupSpiller_16",
+      "updatedAt": "2026-09-07T20:42:30.177Z",
+      "isSimulated": false,
+      "nameNumber": 3
+    },
+    {
+      "id": "97901a22-d24e-4c30-8339-118937fb0532",
+      "firstName": "NySpiller_1_0614",
+      "anonymousToken": "tok_1c51aefab4764b53",
+      "createdAt": "2026-09-07T21:01:10.617Z",
+      "nameNumber": 1,
+      "displayId": "NySpiller_1_0614_1",
+      "updatedAt": "2026-09-07T21:01:10.617Z",
+      "isSimulated": false
+    },
+    {
+      "updatedAt": "2026-09-07T21:01:10.620Z",
+      "nameNumber": 1,
+      "isSimulated": false,
+      "id": "822d00f3-b59a-4a28-902a-5b33dd4db1eb",
+      "displayId": "NySpiller_2_0614_1",
+      "createdAt": "2026-09-07T21:01:10.620Z",
+      "firstName": "NySpiller_2_0614",
+      "anonymousToken": "tok_f15dc73d23e84365"
+    },
+    {
+      "displayId": "NySpiller_3_0614_1",
+      "createdAt": "2026-09-07T21:01:10.624Z",
+      "nameNumber": 1,
+      "isSimulated": false,
+      "firstName": "NySpiller_3_0614",
+      "id": "15c5e857-2783-428b-9850-c7543cfbd6f2",
+      "anonymousToken": "tok_1e2cc052979b4991",
+      "updatedAt": "2026-09-07T21:01:10.624Z"
+    },
+    {
+      "id": "80fe8d9e-bac4-4ab8-a0f2-529e014b1dbc",
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T21:01:10.628Z",
+      "isSimulated": false,
+      "createdAt": "2026-09-07T21:01:10.628Z",
+      "displayId": "NySpiller_4_0614_1",
+      "firstName": "NySpiller_4_0614",
+      "anonymousToken": "tok_2882af3a350a4cfa"
+    },
+    {
+      "firstName": "NySpiller_5_0614",
+      "createdAt": "2026-09-07T21:01:10.633Z",
+      "nameNumber": 1,
+      "displayId": "NySpiller_5_0614_1",
+      "id": "221bf8b2-6114-442f-bb9f-4a6df0dbe1aa",
+      "anonymousToken": "tok_9c1538549ec347a8",
+      "updatedAt": "2026-09-07T21:01:10.633Z",
+      "isSimulated": false
+    },
+    {
+      "firstName": "NySpiller_6_0614",
+      "nameNumber": 1,
+      "anonymousToken": "tok_a2914d154cdb48d8",
+      "createdAt": "2026-09-07T21:01:10.636Z",
+      "id": "e4e964f8-482c-4f81-8c75-aed9e29ac785",
+      "displayId": "NySpiller_6_0614_1",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T21:01:10.636Z"
+    },
+    {
+      "updatedAt": "2026-09-07T21:01:10.639Z",
+      "nameNumber": 1,
+      "anonymousToken": "tok_a8a5141b11464cbb",
+      "createdAt": "2026-09-07T21:01:10.639Z",
+      "displayId": "NySpiller_7_0614_1",
+      "id": "6bda3d95-8af8-401c-9176-3fc78f3a332b",
+      "firstName": "NySpiller_7_0614",
+      "isSimulated": false
+    },
+    {
+      "id": "e736e362-72ba-4555-8759-ac5a65d5e05c",
+      "anonymousToken": "tok_a8473c1aac4a4685",
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T21:01:10.643Z",
+      "firstName": "NySpiller_8_0614",
+      "isSimulated": false,
+      "displayId": "NySpiller_8_0614_1",
+      "createdAt": "2026-09-07T21:01:10.643Z"
+    },
+    {
+      "anonymousToken": "tok_7b92bb0292b7465d",
+      "id": "9e30f397-a99d-4dbd-bb87-ccf7223c9963",
+      "updatedAt": "2026-09-07T21:01:10.649Z",
+      "nameNumber": 1,
+      "firstName": "NySpiller_9_0614",
+      "createdAt": "2026-09-07T21:01:10.649Z",
+      "isSimulated": false,
+      "displayId": "NySpiller_9_0614_1"
+    },
+    {
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T21:01:10.651Z",
+      "displayId": "NySpiller_10_0614_1",
+      "nameNumber": 1,
+      "createdAt": "2026-09-07T21:01:10.651Z",
+      "anonymousToken": "tok_40cf72f432e6431e",
+      "id": "9afc5e6f-8079-4d1c-98e7-4f95b493967f",
+      "firstName": "NySpiller_10_0614"
+    },
+    {
+      "createdAt": "2026-09-07T21:01:10.655Z",
+      "isSimulated": false,
+      "displayId": "NySpiller_11_0614_1",
+      "firstName": "NySpiller_11_0614",
+      "updatedAt": "2026-09-07T21:01:10.655Z",
+      "id": "51b9b464-bc5b-43fa-b5a5-3bb3fca3b52a",
+      "anonymousToken": "tok_b5cb8ab603e244d4",
+      "nameNumber": 1
+    },
+    {
+      "createdAt": "2026-09-07T21:01:10.658Z",
+      "anonymousToken": "tok_a7fb48e577ed40be",
+      "displayId": "NySpiller_12_0614_1",
+      "firstName": "NySpiller_12_0614",
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T21:01:10.658Z",
+      "id": "cdc03547-0507-4047-abd5-45dd3f1e4a35",
+      "isSimulated": false
+    },
+    {
+      "displayId": "NySpiller_13_0614_1",
+      "createdAt": "2026-09-07T21:01:10.662Z",
+      "nameNumber": 1,
+      "id": "b6dce902-bdc9-4df5-a8b3-918a5e91f507",
+      "firstName": "NySpiller_13_0614",
+      "updatedAt": "2026-09-07T21:01:10.662Z",
+      "anonymousToken": "tok_57d79ca2f5d44995",
+      "isSimulated": false
+    },
+    {
+      "displayId": "NySpiller_14_0614_1",
+      "anonymousToken": "tok_4c4a3553a9254ccd",
+      "isSimulated": false,
+      "createdAt": "2026-09-07T21:01:10.665Z",
+      "firstName": "NySpiller_14_0614",
+      "id": "0038b50b-386d-4704-9660-01533fa2758d",
+      "updatedAt": "2026-09-07T21:01:10.665Z",
+      "nameNumber": 1
+    },
+    {
+      "firstName": "NySpiller_15_0614",
+      "nameNumber": 1,
+      "createdAt": "2026-09-07T21:01:10.674Z",
+      "displayId": "NySpiller_15_0614_1",
+      "isSimulated": false,
+      "id": "11b08919-6cdf-4b37-a8ec-d36ee73e99b4",
+      "anonymousToken": "tok_5dc9099794c34ed2",
+      "updatedAt": "2026-09-07T21:01:10.674Z"
+    },
+    {
+      "updatedAt": "2026-09-07T21:01:10.676Z",
+      "createdAt": "2026-09-07T21:01:10.676Z",
+      "anonymousToken": "tok_907f03ca0a18479b",
+      "displayId": "NySpiller_16_0614_1",
+      "id": "768ef8d1-f443-4639-9b3e-87c565ff88b4",
+      "firstName": "NySpiller_16_0614",
+      "nameNumber": 1,
+      "isSimulated": false
+    },
+    {
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T21:01:41.462Z",
+      "anonymousToken": "tok_9f85116b6c2b47fb",
+      "firstName": "NySpiller_1_1460",
+      "id": "43695e60-9646-4120-9583-be492ae82b2b",
+      "displayId": "NySpiller_1_1460_1",
+      "isSimulated": false,
+      "createdAt": "2026-09-07T21:01:41.462Z"
+    },
+    {
+      "isSimulated": false,
+      "anonymousToken": "tok_0389dd24a3f04e81",
+      "id": "9cec4919-0d0f-4099-a6aa-b18a44a038d5",
+      "updatedAt": "2026-09-07T21:01:41.465Z",
+      "firstName": "NySpiller_2_1460",
+      "nameNumber": 1,
+      "createdAt": "2026-09-07T21:01:41.465Z",
+      "displayId": "NySpiller_2_1460_1"
+    },
+    {
+      "firstName": "NySpiller_3_1460",
+      "displayId": "NySpiller_3_1460_1",
+      "anonymousToken": "tok_8e7382b2757a4f1d",
+      "id": "cbddc655-f679-48d1-a2a7-f048f9b63806",
+      "createdAt": "2026-09-07T21:01:41.469Z",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T21:01:41.469Z",
+      "nameNumber": 1
+    },
+    {
+      "id": "4c1d58db-6fb6-4373-83e1-d259d9d57e9a",
+      "updatedAt": "2026-09-07T21:01:41.472Z",
+      "isSimulated": false,
+      "firstName": "NySpiller_4_1460",
+      "nameNumber": 1,
+      "anonymousToken": "tok_984ae039530d492a",
+      "displayId": "NySpiller_4_1460_1",
+      "createdAt": "2026-09-07T21:01:41.472Z"
+    },
+    {
+      "createdAt": "2026-09-07T21:01:41.475Z",
+      "displayId": "NySpiller_5_1460_1",
+      "firstName": "NySpiller_5_1460",
+      "id": "f3cb8daf-cc23-4de0-8bb7-1ca84255e008",
+      "isSimulated": false,
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T21:01:41.475Z",
+      "anonymousToken": "tok_adcb0e803c4a46e3"
+    },
+    {
+      "anonymousToken": "tok_1d41706facc643cc",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T21:01:41.479Z",
+      "id": "8aba4575-1c4f-474a-8619-43474a9d0c33",
+      "firstName": "NySpiller_6_1460",
+      "nameNumber": 1,
+      "createdAt": "2026-09-07T21:01:41.479Z",
+      "displayId": "NySpiller_6_1460_1"
+    },
+    {
+      "firstName": "NySpiller_7_1460",
+      "displayId": "NySpiller_7_1460_1",
+      "createdAt": "2026-09-07T21:01:41.482Z",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T21:01:41.482Z",
+      "anonymousToken": "tok_49b64220d2e845c1",
+      "nameNumber": 1,
+      "id": "0658c9d6-7c6a-4d3b-bf7b-61f0921e7a45"
+    },
+    {
+      "isSimulated": false,
+      "createdAt": "2026-09-07T21:01:41.486Z",
+      "nameNumber": 1,
+      "displayId": "NySpiller_8_1460_1",
+      "id": "bc64a7fb-6777-415a-b5ab-a2566c9111af",
+      "firstName": "NySpiller_8_1460",
+      "anonymousToken": "tok_854ac845524843be",
+      "updatedAt": "2026-09-07T21:01:41.486Z"
+    },
+    {
+      "createdAt": "2026-09-07T21:01:41.488Z",
+      "isSimulated": false,
+      "displayId": "NySpiller_9_1460_1",
+      "anonymousToken": "tok_10a5e58922824a66",
+      "id": "ba695740-d84b-40aa-acfb-fb10cdbf54c0",
+      "firstName": "NySpiller_9_1460",
+      "updatedAt": "2026-09-07T21:01:41.488Z",
+      "nameNumber": 1
+    },
+    {
+      "displayId": "NySpiller_10_1460_1",
+      "createdAt": "2026-09-07T21:01:41.492Z",
+      "id": "f07639db-b8bc-4477-86b0-0afb92aa36a9",
+      "nameNumber": 1,
+      "firstName": "NySpiller_10_1460",
+      "updatedAt": "2026-09-07T21:01:41.492Z",
+      "anonymousToken": "tok_84d57a659ef24b36",
+      "isSimulated": false
+    },
+    {
+      "firstName": "NySpiller_11_1460",
+      "createdAt": "2026-09-07T21:01:41.495Z",
+      "isSimulated": false,
+      "nameNumber": 1,
+      "displayId": "NySpiller_11_1460_1",
+      "anonymousToken": "tok_b2f68ea533314207",
+      "id": "e229068b-ed17-407f-98cb-ebb2d3296f60",
+      "updatedAt": "2026-09-07T21:01:41.495Z"
+    },
+    {
+      "anonymousToken": "tok_6697609bf3444744",
+      "isSimulated": false,
+      "updatedAt": "2026-09-07T21:01:41.499Z",
+      "id": "d889956f-c509-4d33-b65e-16080a39d8b8",
+      "createdAt": "2026-09-07T21:01:41.499Z",
+      "nameNumber": 1,
+      "displayId": "NySpiller_12_1460_1",
+      "firstName": "NySpiller_12_1460"
+    },
+    {
+      "createdAt": "2026-09-07T21:01:41.502Z",
+      "nameNumber": 1,
+      "displayId": "NySpiller_13_1460_1",
+      "firstName": "NySpiller_13_1460",
+      "anonymousToken": "tok_758a77f21f4f4d2b",
+      "updatedAt": "2026-09-07T21:01:41.502Z",
+      "isSimulated": false,
+      "id": "e6904026-d94a-4667-9b1f-980d3a58876f"
+    },
+    {
+      "nameNumber": 1,
+      "updatedAt": "2026-09-07T21:01:41.505Z",
+      "id": "79243d5c-304b-4fc2-a80b-03a87dbfb491",
+      "createdAt": "2026-09-07T21:01:41.505Z",
+      "displayId": "NySpiller_14_1460_1",
+      "anonymousToken": "tok_861c324ed5bd4059",
+      "isSimulated": false,
+      "firstName": "NySpiller_14_1460"
+    },
+    {
+      "updatedAt": "2026-09-07T21:01:41.509Z",
+      "anonymousToken": "tok_8c553e58340447a5",
+      "id": "00dbfdab-5e4d-41e1-8b04-37175664fafc",
+      "isSimulated": false,
+      "nameNumber": 1,
+      "createdAt": "2026-09-07T21:01:41.509Z",
+      "displayId": "NySpiller_15_1460_1",
+      "firstName": "NySpiller_15_1460"
+    },
+    {
+      "createdAt": "2026-09-07T21:01:41.513Z",
+      "displayId": "NySpiller_16_1460_1",
+      "firstName": "NySpiller_16_1460",
+      "isSimulated": false,
+      "anonymousToken": "tok_7ad1c87f1079474a",
+      "updatedAt": "2026-09-07T21:01:41.513Z",
+      "nameNumber": 1,
+      "id": "ca7ac0c3-8b13-4bc3-8d55-61fe212b2ad5"
+    },
+    {
+      "id": "3c5016e8-9fff-4693-9faa-471e087e83a6",
+      "firstName": "NySpiller_1_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_1_7312_1",
+      "anonymousToken": "tok_9ea4b74f740b424c",
+      "createdAt": "2026-09-07T21:08:37.315Z",
+      "updatedAt": "2026-09-07T21:08:37.315Z",
+      "isSimulated": false
+    },
+    {
+      "id": "abd3558e-6f2e-40ef-a7ae-831f2ba329e4",
+      "firstName": "NySpiller_2_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_2_7312_1",
+      "anonymousToken": "tok_e3e273f90eff483c",
+      "createdAt": "2026-09-07T21:08:37.318Z",
+      "updatedAt": "2026-09-07T21:08:37.318Z",
+      "isSimulated": false
+    },
+    {
+      "id": "28d22c64-c5fd-4f15-97ca-60418a48a9ec",
+      "firstName": "NySpiller_3_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_3_7312_1",
+      "anonymousToken": "tok_61f5012351534495",
+      "createdAt": "2026-09-07T21:08:37.322Z",
+      "updatedAt": "2026-09-07T21:08:37.322Z",
+      "isSimulated": false
+    },
+    {
+      "id": "24d0af32-a2a0-4c7b-bb30-1fd718fce2bd",
+      "firstName": "NySpiller_4_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_4_7312_1",
+      "anonymousToken": "tok_18d13e0d33a14b32",
+      "createdAt": "2026-09-07T21:08:37.325Z",
+      "updatedAt": "2026-09-07T21:08:37.325Z",
+      "isSimulated": false
+    },
+    {
+      "id": "77a74f77-a8b9-4a5e-9c99-3115a4323d3d",
+      "firstName": "NySpiller_5_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_5_7312_1",
+      "anonymousToken": "tok_07c4fe0fb4ee46e6",
+      "createdAt": "2026-09-07T21:08:37.328Z",
+      "updatedAt": "2026-09-07T21:08:37.328Z",
+      "isSimulated": false
+    },
+    {
+      "id": "0c2259d5-52d2-44d5-8152-bed9ddd7b7c4",
+      "firstName": "NySpiller_6_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_6_7312_1",
+      "anonymousToken": "tok_dc5484e0d2cf4f1c",
+      "createdAt": "2026-09-07T21:08:37.332Z",
+      "updatedAt": "2026-09-07T21:08:37.332Z",
+      "isSimulated": false
+    },
+    {
+      "id": "dd42b29d-bcb8-4336-8c86-9f3a586f6be7",
+      "firstName": "NySpiller_7_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_7_7312_1",
+      "anonymousToken": "tok_f133ea5132434714",
+      "createdAt": "2026-09-07T21:08:37.335Z",
+      "updatedAt": "2026-09-07T21:08:37.335Z",
+      "isSimulated": false
+    },
+    {
+      "id": "c6fbc5d0-6481-46a7-bad8-473c14339f91",
+      "firstName": "NySpiller_8_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_8_7312_1",
+      "anonymousToken": "tok_661ea271a90446d2",
+      "createdAt": "2026-09-07T21:08:37.339Z",
+      "updatedAt": "2026-09-07T21:08:37.339Z",
+      "isSimulated": false
+    },
+    {
+      "id": "517dcaaa-dcf5-493e-832f-e14209610a8e",
+      "firstName": "NySpiller_9_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_9_7312_1",
+      "anonymousToken": "tok_ad9c80676d2d42ee",
+      "createdAt": "2026-09-07T21:08:37.342Z",
+      "updatedAt": "2026-09-07T21:08:37.342Z",
+      "isSimulated": false
+    },
+    {
+      "id": "47df3493-99bd-4fe6-be01-dd06b7dac7a7",
+      "firstName": "NySpiller_10_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_10_7312_1",
+      "anonymousToken": "tok_8fea18ed17d542bf",
+      "createdAt": "2026-09-07T21:08:37.346Z",
+      "updatedAt": "2026-09-07T21:08:37.346Z",
+      "isSimulated": false
+    },
+    {
+      "id": "295018c6-b113-4947-bf84-b382534bacae",
+      "firstName": "NySpiller_11_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_11_7312_1",
+      "anonymousToken": "tok_8e1e4a343a9f4e73",
+      "createdAt": "2026-09-07T21:08:37.349Z",
+      "updatedAt": "2026-09-07T21:08:37.349Z",
+      "isSimulated": false
+    },
+    {
+      "id": "6bb748c5-9d6a-4705-af00-7139e6bdff58",
+      "firstName": "NySpiller_12_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_12_7312_1",
+      "anonymousToken": "tok_224a3cf8fa154ae0",
+      "createdAt": "2026-09-07T21:08:37.353Z",
+      "updatedAt": "2026-09-07T21:08:37.353Z",
+      "isSimulated": false
+    },
+    {
+      "id": "531530ca-4acf-45bc-a5a2-5a6e30da17bc",
+      "firstName": "NySpiller_13_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_13_7312_1",
+      "anonymousToken": "tok_2a682f6672a54599",
+      "createdAt": "2026-09-07T21:08:37.358Z",
+      "updatedAt": "2026-09-07T21:08:37.358Z",
+      "isSimulated": false
+    },
+    {
+      "id": "68d44b33-3bf7-4103-993e-0ef62e319407",
+      "firstName": "NySpiller_14_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_14_7312_1",
+      "anonymousToken": "tok_f7f1fe3378534b04",
+      "createdAt": "2026-09-07T21:08:37.362Z",
+      "updatedAt": "2026-09-07T21:08:37.362Z",
+      "isSimulated": false
+    },
+    {
+      "id": "7314adde-cd76-42b3-8ed6-4fef8c209649",
+      "firstName": "NySpiller_15_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_15_7312_1",
+      "anonymousToken": "tok_3eeb5dbec6f14c7c",
+      "createdAt": "2026-09-07T21:08:37.366Z",
+      "updatedAt": "2026-09-07T21:08:37.366Z",
+      "isSimulated": false
+    },
+    {
+      "id": "a1ddb68f-ad0a-492f-971c-9867dae83b97",
+      "firstName": "NySpiller_16_7312",
+      "nameNumber": 1,
+      "displayId": "NySpiller_16_7312_1",
+      "anonymousToken": "tok_19562440d3504eaa",
+      "createdAt": "2026-09-07T21:08:37.369Z",
+      "updatedAt": "2026-09-07T21:08:37.369Z",
+      "isSimulated": false
+    }
+  ],
   "popcorn": {
     "totalCapacity": 100,
     "bongs": [
@@ -719,135 +2362,5 @@
       }
     ]
   },
-  "activities": [
-    {
-      "id": "act-tabletennis",
-      "name": "Bordtenniscup",
-      "shortDesc": "Digital påmelding ved ankomst! Single elimination cup på 2 bord. Premieutdeling kl. 22:30!",
-      "fullDesc": "Klassisk bordtennisturnering med digital påmelding ved ankomst og digital turneringsflyt! Kampene starter kl. 18:45, og spilles først til 21 poeng med 5 server hver (2 poengs ledelse ved 20–20). Semifinaler og finale spilles fra kl. 22:00, og høytidelig premieutdeling skjer kl. 22:30!",
-      "iconName": "Trophy",
-      "time": "Digital påmelding fra 17:00 • Kampstart 18:45",
-      "location": "Bordtennis-sonen (2 bord)",
-      "enabled": true,
-      "badge": "Digital påmelding",
-      "highlight": true
-    },
-    {
-      "id": "act-football",
-      "name": "Lillesand United Fotball",
-      "shortDesc": "5-er turnering i hallen. Fysisk organisering og lagpåmelding ved ankomst fra kl. 17:00!",
-      "fullDesc": "Rå 5-er innendørs fotballturnering! Turneringen organiseres fysisk i hallen (har foreløpig ikke digital turneringsmotor). Sett sammen et lag med venner eller meld deg på et lag ved ankomst. Kampene starter kl. 18:45, semifinaler/finaler kl. 22:00 og premieutdeling kl. 22:30.",
-      "iconName": "CircleDot",
-      "time": "Fysisk lagpåmelding fra 17:00 • Kampstart 18:45",
-      "location": "Hovedbanen, Møglestuhallen",
-      "enabled": true,
-      "badge": "Fysisk organisering"
-    },
-    {
-      "id": "act-gaming",
-      "name": "Mario Kart & Gaming Lounge",
-      "shortDesc": "Påmelding enkeltvis ved ankomst! Konkurranser, Mario Kart på storskjerm og lounge.",
-      "fullDesc": "Gaming på storskjerm og dedikerte spillstasjoner! Påmelding skjer enkeltvis ved ankomst i gaming-sonen (har foreløpig ikke digital turneringsmotor). Gaming og turnering starter kl. 18:45, finaler kl. 22:00 og premieutdeling kl. 22:30.",
-      "iconName": "Gamepad2",
-      "time": "Påmelding fra 17:00 • Gaming starter 18:45",
-      "location": "Gaming-hjørnet",
-      "enabled": true,
-      "badge": "Påmelding ved ankomst"
-    },
-    {
-      "id": "act-gathering",
-      "name": "Kveldens fellesmøte",
-      "shortDesc": "Lovsang, lek, Moshpit-sanger og tale ved Eivind Galdal (SALT Bergen)!",
-      "fullDesc": "Kveldens store felles samlingsstund for hele hallen! Fellesmøte med lovsang, morsomme leker, energiske Moshpit-sanger og inspirerende tale ved Eivind Galdal fra SALT Bergen. Starter kl. 21:00 og varer til ca. 21:45.",
-      "iconName": "Music",
-      "time": "Kl. 21:00 – ca. 21:45",
-      "location": "Hovedscenen / Tribunen",
-      "enabled": true,
-      "badge": "Kveldens fellesmøte"
-    },
-    {
-      "id": "act-kiosk",
-      "name": "Kiosk & Varmmat",
-      "shortDesc": "Gratis popcorn til de første 100! Salg av pølser, brus og kioskvarer hele kvelden.",
-      "fullDesc": "De første 100 som kommer inn døra fra kl. 17:00 får gratis nypoppet popcorn! I kiosken kan du kjøpe varme pølser, iskald brus, sjokolade og snacks til ungdomsvennlige priser gjennom hele kvelden helt til avslutning kl. 22:45.",
-      "iconName": "Utensils",
-      "time": "Kl. 17:00 – 22:45",
-      "location": "Kioskområdet ved inngangen",
-      "enabled": true,
-      "badge": "Gratis popcorn!"
-    },
-    {
-      "id": "act-alpha",
-      "name": "UngdomsAlpha",
-      "shortDesc": "Starter fredag 25. september kl. 19:00. Uformelt og gøy med god mat!",
-      "fullDesc": "Hva er egentlig meningen med livet? UngdomsAlpha er for deg mellom 13 og 19 år som vil henge, spise digg mat, se morsomme filmer og prate om de store spørsmålene uten fasitsvar og press. Oppstart 25. september kl 19:00!",
-      "iconName": "Sparkles",
-      "time": "Oppstart: Fredag 25. sept kl. 19:00",
-      "location": "Lillesand",
-      "enabled": true,
-      "badge": "Oppstart 25. sept"
-    }
-  ],
-  "tournament": {
-    "id": "tour-lillesand-2026",
-    "status": "registration",
-    "startedAt": null,
-    "completedAt": null,
-    "participants": [
-      {
-        "id": "p_1788727104020_8ujj",
-        "personId": "75d2c399-d596-48a8-b78e-daa6a817a83d",
-        "displayId": "Sander_1",
-        "firstName": "Sander",
-        "registeredAt": "2026-09-06T20:38:24.020Z"
-      }
-    ],
-    "matches": [],
-    "winner": null,
-    "estimatedMinutesPerMatch": 10,
-    "bracketCapacity": 16
-  },
-  "alphaInterests": [],
-  "persons": [
-    {
-      "id": "9051652a-47a5-48bf-92eb-12d06715eb89",
-      "firstName": "Oliver",
-      "nameNumber": 1,
-      "displayId": "Oliver_1",
-      "anonymousToken": "tok_0770ac32cbe64276",
-      "createdAt": "2026-09-06T20:29:22.805Z",
-      "updatedAt": "2026-09-06T20:29:22.805Z",
-      "isSimulated": false
-    },
-    {
-      "id": "d4bd21d0-c202-4ac0-9529-0dfcc95f1cea",
-      "firstName": "Oliver",
-      "nameNumber": 2,
-      "displayId": "Oliver_2",
-      "anonymousToken": "tok_ac84af2a9cd74d77",
-      "createdAt": "2026-09-06T20:29:22.807Z",
-      "updatedAt": "2026-09-06T20:29:22.807Z",
-      "isSimulated": false
-    },
-    {
-      "id": "75ec2cb5-64d6-41e5-9e55-0f7fca58afe2",
-      "firstName": "Oliver",
-      "nameNumber": 3,
-      "displayId": "Oliver_3",
-      "anonymousToken": "tok_3816dd584c124b07",
-      "createdAt": "2026-09-06T20:29:22.809Z",
-      "updatedAt": "2026-09-06T20:29:22.809Z",
-      "isSimulated": false
-    },
-    {
-      "id": "75d2c399-d596-48a8-b78e-daa6a817a83d",
-      "firstName": "Sander",
-      "nameNumber": 1,
-      "displayId": "Sander_1",
-      "anonymousToken": "tok_24c6a2687bfc4231",
-      "createdAt": "2026-09-06T20:38:16.792Z",
-      "updatedAt": "2026-09-06T20:38:16.792Z",
-      "isSimulated": false
-    }
-  ]
+  "alphaInterests": []
 }

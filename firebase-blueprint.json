@@ -1,0 +1,348 @@
+{
+  "entities": {
+    "person": {
+      "title": "Person",
+      "description": "A person profile participating in the event",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Unique identifier"
+        },
+        "firstName": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "First name of person"
+        },
+        "nameNumber": {
+          "type": "number",
+          "description": "Sequential identifier number"
+        },
+        "displayId": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Combined display ID"
+        },
+        "anonymousToken": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Token for anonymous identification"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Update timestamp"
+        },
+        "isSimulated": {
+          "type": "boolean",
+          "description": "Whether person is simulated"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "nameNumber",
+        "displayId",
+        "createdAt"
+      ]
+    },
+    "participant": {
+      "title": "Participant",
+      "description": "A participant registered for table tennis tournament",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Participant registration ID"
+        },
+        "personId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Referenced Person ID"
+        },
+        "displayId": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Display identifier"
+        },
+        "firstName": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "First name"
+        },
+        "registeredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Registration timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "registeredAt"
+      ]
+    },
+    "match": {
+      "title": "Match",
+      "description": "A table tennis tournament match",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Match ID"
+        },
+        "round": {
+          "type": "number",
+          "description": "Round number"
+        },
+        "roundName": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Round display title"
+        },
+        "position": {
+          "type": "number",
+          "description": "Position in bracket"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_ready",
+            "ready",
+            "in_progress",
+            "completed",
+            "walkover"
+          ],
+          "description": "Status of match"
+        },
+        "winnerId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Winner participant ID"
+        },
+        "isWalkover": {
+          "type": "boolean",
+          "description": "Whether match was resolved via walkover"
+        }
+      },
+      "required": [
+        "id",
+        "round",
+        "roundName",
+        "position",
+        "status"
+      ]
+    },
+    "popcornBong": {
+      "title": "PopcornBong",
+      "description": "Digital popcorn coupon record",
+      "type": "object",
+      "properties": {
+        "number": {
+          "type": "number",
+          "description": "Bong number 1-100"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blank",
+            "activated",
+            "used"
+          ],
+          "description": "Coupon status"
+        },
+        "personId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Claiming person ID"
+        },
+        "activatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Activation timestamp"
+        },
+        "usedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Usage timestamp"
+        }
+      },
+      "required": [
+        "number",
+        "status"
+      ]
+    },
+    "alphaInterest": {
+      "title": "AlphaInterest",
+      "description": "Interest registration for Alpha course",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Alpha interest entry ID"
+        },
+        "firstName": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Contact first name"
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Contact phone number"
+        },
+        "registeredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of interest registration"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Optional notes or questions"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "registeredAt"
+      ]
+    },
+    "activity": {
+      "title": "Activity",
+      "description": "An activity available at Lillesand United",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Activity key"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Name of activity"
+        },
+        "shortDesc": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Short description"
+        },
+        "fullDesc": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Full description"
+        },
+        "iconName": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Lucide icon identifier"
+        },
+        "time": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Schedule time string"
+        },
+        "location": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Location in hall"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Activity enabled flag"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "shortDesc",
+        "enabled"
+      ]
+    },
+    "appState": {
+      "title": "AppState",
+      "description": "Full application aggregated state",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "State document ID"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last updated timestamp"
+        }
+      },
+      "required": [
+        "id",
+        "updatedAt"
+      ]
+    },
+    "testConnection": {
+      "title": "TestConnection",
+      "description": "Document for testing database connection",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Connection test ID"
+        },
+        "connectedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  "firestore": {
+    "/persons/{personId}": {
+      "schema": "person",
+      "description": "Collection of person profiles"
+    },
+    "/tournaments/{tournamentId}/participants/{participantId}": {
+      "schema": "participant",
+      "description": "Participants in a tournament"
+    },
+    "/tournaments/{tournamentId}/matches/{matchId}": {
+      "schema": "match",
+      "description": "Matches in a tournament"
+    },
+    "/popcornBongs/{bongId}": {
+      "schema": "popcornBong",
+      "description": "Popcorn coupons collection"
+    },
+    "/alphaInterests/{interestId}": {
+      "schema": "alphaInterest",
+      "description": "Alpha course signups"
+    },
+    "/activities/{activityId}": {
+      "schema": "activity",
+      "description": "Event activities"
+    },
+    "/appState/{stateId}": {
+      "schema": "appState",
+      "description": "Consolidated state snapshots for rapid sync"
+    },
+    "/test/{testId}": {
+      "schema": "testConnection",
+      "description": "Connection test documents"
+    }
+  }
+}

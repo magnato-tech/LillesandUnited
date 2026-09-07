@@ -22,6 +22,9 @@ import {
   Popcorn,
   Check,
   AlertCircle,
+  Database,
+  RefreshCw,
+  X,
 } from 'lucide-react';
 import { AppState, Match, PopcornBong } from '../types';
 import {
@@ -46,10 +49,32 @@ import {
   resetAlpha,
   resetTestData,
   expandTournamentCapacity,
+  getFirestoreStatus,
+  syncFirestore,
 } from '../services/api';
 import { calculateTournamentStats, resolveBracketCapacity, hasPlayedDependencies } from '../lib/tournament';
 import { TableTennisAdminPanel, ScoreEntryModal, ResetMatchConfirmModal } from './TableTennisAdminPanel';
 import { BracketView } from './BracketView';
+
+interface ConfirmDialogState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  variant?: 'danger' | 'warning' | 'primary' | 'success';
+  secondaryAction?: {
+    label: string;
+    onClick: () => Promise<void> | void;
+  };
+  onConfirm: () => Promise<void> | void;
+}
+
+interface ToastMessage {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
 
 interface AdminDashboardProps {
   state: AppState;
@@ -67,6 +92,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState(false);
+
+  // In-app confirm dialog & toast state (replacing window.confirm and window.alert for reliable iframe behavior)
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ id: Date.now(), message, type });
+  };
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => {
+      setToast(null);
+    }, 4500);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   // Match score entry form state
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
@@ -118,6 +160,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     return saved && valid.includes(saved) ? (saved as typeof initialTab) : initialTab;
   });
 
+  // Firestore status state
+  const [firestoreStatus, setFirestoreStatus] = useState<{
+    connected: boolean;
+    projectId: string | null;
+    firestoreDatabaseId: string | null;
+    lastSyncTime: string | null;
+    error: string | null;
+    mode: string;
+  } | null>(null);
+  const [isSyncingFirestore, setIsSyncingFirestore] = useState(false);
+  const [firestoreSyncMessage, setFirestoreSyncMessage] = useState<string | null>(null);
+
   const setAdminTab = (tab: typeof initialTab) => {
     sessionStorage.setItem('lillesand_admin_section', tab);
     setAdminTabState(tab);
@@ -155,6 +209,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     });
   }, [state.event]);
 
+  // Fetch Firestore Info
+  const fetchFirestoreInfo = async () => {
+    try {
+      const info = await getFirestoreStatus();
+      setFirestoreStatus(info);
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchFirestoreInfo();
+    }
+  }, [isAuthenticated, adminTab]);
+
+  const handleSyncFirestore = async () => {
+    setIsSyncingFirestore(true);
+    setFirestoreSyncMessage(null);
+    try {
+      const res = await syncFirestore();
+      setFirestoreSyncMessage(
+        `Synkronisert: ${res.itemCounts.persons} personer, ${res.itemCounts.participants} deltakere, ${res.itemCounts.activities} aktiviteter.`
+      );
+      await fetchFirestoreInfo();
+      onRefresh();
+      showToast('Databasen er synkronisert til Google Firestore!', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Feil under synkronisering til Firestore', 'error');
+    } finally {
+      setIsSyncingFirestore(false);
+    }
+  };
+
   // Admin unlock
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,6 +271,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       await redeemPopcornBong(bongNumber);
       setSelectedBong(null);
       onRefresh();
+      showToast(`Popcorn-bong #${bongNumber} markert som utlevert!`, 'success');
     } catch (err: any) {
       setBongActionError(err.message || 'Kunne ikke levere ut popcorn');
     } finally {
@@ -192,117 +279,181 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleAddCapacity = async () => {
+  const handleAddCapacity = () => {
     const current = popcorn?.totalCapacity || 100;
     const nextTotal = current + 10;
-    if (
-      !confirm(
-        `Vil du åpne 10 nye popcorn-bonger (#${current + 1}–#${nextTotal})?\n\nTotalt åpnet blir da ${nextTotal} bonger.`
-      )
-    ) {
-      return;
-    }
-    try {
-      await addPopcornCapacity(10);
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Åpne flere popcorn-bonger',
+      message: `Vil du åpne 10 nye popcorn-bonger (#${current + 1}–#${nextTotal})? Totalt åpnet blir da ${nextTotal} bonger.`,
+      confirmLabel: 'Åpne 10 nye',
+      variant: 'primary',
+      onConfirm: async () => {
+        try {
+          await addPopcornCapacity(10);
+          onRefresh();
+          showToast(`Åpnet 10 nye bonger (#${current + 1}–#${nextTotal})`, 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Kunne ikke åpne nye bonger', 'error');
+        }
+      },
+    });
   };
 
-  const handleResetPopcorn = async () => {
-    if (!confirm('Dette sletter all testdata for popcorn. Er du sikker?')) return;
-    try {
-      await resetPopcorn();
-      setSelectedBong(null);
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleResetPopcorn = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Reset Popcorn-bonger',
+      message: 'Setter alle bonger tilbake til blank/nøytral, og nullstiller aktiveringer og hentet-statuser. Neste nummer blir igjen #1.',
+      confirmLabel: 'Reset Popcorn',
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          await resetPopcorn();
+          setSelectedBong(null);
+          onRefresh();
+          showToast('Popcorn-bonger er nullstilt. Neste nummer er nå #1.', 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Feil ved nullstilling av popcorn', 'error');
+        }
+      },
+    });
   };
 
-  const handleResetTournamentData = async () => {
-    if (
-      !confirm(
-        'Dette sletter alle testspillere, kamper og cup-tre for bordtennis. Er du sikker?'
-      )
-    ) {
-      return;
-    }
-    try {
-      await resetTournament(false);
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleResetTournamentData = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Reset Bordtennisturnering',
+      message: 'Fjerner alle eksisterende kamper, resultater og cup-tre, og setter turneringen tilbake til påmeldingsfasen. Du kan velge om du også vil fjerne påmeldte spillere eller beholde dem.',
+      confirmLabel: 'Nullstill alt (tøm deltakere)',
+      variant: 'danger',
+      secondaryAction: {
+        label: 'Nullstill cup (behold påmeldte spillere)',
+        onClick: async () => {
+          try {
+            await resetTournament(true);
+            onRefresh();
+            showToast('Turneringen er nullstilt. Påmeldte spillere er beholdt.', 'success');
+          } catch (err: any) {
+            showToast(err.message || 'Feil ved nullstilling', 'error');
+          }
+        },
+      },
+      onConfirm: async () => {
+        try {
+          await resetTournament(false);
+          onRefresh();
+          showToast('Turneringen er nullstilt og deltakerlisten er tømt.', 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Feil ved nullstilling', 'error');
+        }
+      },
+    });
   };
 
-  const handleReDraw = async () => {
+  const handleReDraw = () => {
     if (tournament.participants.length < 2) {
-      alert('Minst 2 deltakere kreves for å generere ny trekning.');
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Minst 2 deltakere kreves',
+        message: `Det er for øyeblikket kun ${tournament.participants.length} påmeldt(e) deltaker(e). Minst 2 deltakere kreves for å generere en trekning. Vil du opprette en 16-spillers test-cup for å starte turneringen?`,
+        confirmLabel: 'Simuler 16 spillere & start cup',
+        variant: 'primary',
+        onConfirm: async () => {
+          try {
+            await simulateTournament(16);
+            onRefresh();
+            showToast('16 spillere registrert og turnering startet!', 'success');
+          } catch (err: any) {
+            showToast(err.message || 'Kunne ikke generere test-turnering', 'error');
+          }
+        },
+      });
       return;
     }
-    if (
-      !confirm(
-        `Vil du generere en ny tilfeldig trekning for de ${tournament.participants.length} påmeldte spillerne?`
-      )
-    ) {
-      return;
-    }
-    try {
-      await reDrawTournament();
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Generer ny trekning',
+      message: `Vil du generere en ny tilfeldig trekning for de ${tournament.participants.length} påmeldte spillerne? Alle eksisterende resultater og kamper nullstilles, og turneringen starter på nytt med de samme spillerne.`,
+      confirmLabel: 'Generer ny trekning',
+      variant: 'primary',
+      onConfirm: async () => {
+        try {
+          await reDrawTournament();
+          onRefresh();
+          showToast(
+            `Ny trekning generert for ${tournament.participants.length} spillere! Turneringen har startet på nytt.`,
+            'success'
+          );
+        } catch (err: any) {
+          showToast(err.message || 'Feil ved ny trekning', 'error');
+        }
+      },
+    });
   };
 
-  const handleResetAlphaData = async () => {
-    if (!confirm('Dette sletter all testregistrering for UngdomsAlpha. Er du sikker?')) return;
-    try {
-      await resetAlpha();
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleResetAlphaData = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Reset UngdomsAlpha',
+      message: 'Fjerner alle testregistreringer og tømmer interesselisten for UngdomsAlpha.',
+      confirmLabel: 'Reset Alpha',
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          await resetAlpha();
+          onRefresh();
+          showToast('Interesselisten for UngdomsAlpha er tømt.', 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Feil ved nullstilling av Alpha', 'error');
+        }
+      },
+    });
   };
 
-  const handleResetTestDataFull = async () => {
-    if (
-      !confirm(
-        'Vil du nullstille all testdata for Popcorn, Bordtennis og Alpha i én operasjon? (Arrangementets faste info berøres ikke).'
-      )
-    ) {
-      return;
-    }
-    try {
-      await resetTestData();
-      setSelectedBong(null);
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleResetTestDataFull = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Reset Alt Testdata',
+      message: 'Nullstiller Popcorn, Bordtennis og Alpha i én operasjon. Rører aldri tidspunkter eller arrangementets faste program. Simulerte testpersoner fjernes automatisk.',
+      confirmLabel: 'Reset Alt Testdata',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await resetTestData();
+          setSelectedBong(null);
+          onRefresh();
+          showToast('All testdata er nullstilt. Arrangementets program er bevart.', 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Feil ved nullstilling av testdata', 'error');
+        }
+      },
+    });
   };
 
   // Start tournament
-  const handleStartTournament = async () => {
+  const handleStartTournament = () => {
     if (tournament.participants.length < 2) {
-      alert('Minst 2 deltakere kreves for å starte.');
+      showToast('Minst 2 deltakere kreves for å starte turneringen.', 'error');
       return;
     }
-    if (
-      !confirm(
-        `Er du sikker på at du vil stenge påmeldingen og generere cup-tre for ${tournament.participants.length} spillere?`
-      )
-    ) {
-      return;
-    }
-    try {
-      await startTournament();
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Steng påmelding og start cup',
+      message: `Er du sikker på at du vil stenge påmeldingen og generere cup-tre for ${tournament.participants.length} spillere?`,
+      confirmLabel: 'Start cup',
+      variant: 'primary',
+      onConfirm: async () => {
+        try {
+          await startTournament();
+          onRefresh();
+          showToast(`Turneringen er startet med ${tournament.participants.length} deltakere!`, 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Feil ved start av turnering', 'error');
+        }
+      },
+    });
   };
 
   // Submit match score
@@ -315,6 +466,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       await submitMatchScore(selectedMatchId, scoreA, scoreB, isWalkover, woSlot);
       setSelectedMatchId(null);
       onRefresh();
+      showToast('Resultat lagret!', 'success');
     } catch (err: any) {
       setActionError(err.message || 'Kunne ikke lagre resultat.');
     }
@@ -334,6 +486,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setSelectedMatchId(null);
       setCorrectionWarning(null);
       onRefresh();
+      showToast('Resultat korrigert!', 'success');
     } catch (err: any) {
       setActionError(err.message || 'Kunne ikke korrigere.');
     }
@@ -344,49 +497,69 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     try {
       await assignMatchTable(matchId, tableNumber, status);
       onRefresh();
+      showToast(tableNumber ? `Bord ${tableNumber} tildelt kampen` : 'Bordtildeling fjernet', 'info');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Kunne ikke tildele bord', 'error');
     }
   };
 
   // Reset tournament to registration (keep players)
-  const handleReopenRegistration = async () => {
-    if (!confirm('Tilbakestille turneringen til påmeldingsfasen (beholde deltakerne)?')) {
-      return;
-    }
-    try {
-      await resetTournament(true);
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleReopenRegistration = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Gjenåpne påmelding',
+      message: 'Tilbakestille turneringen til påmeldingsfasen? Eksisterende påmeldte deltakere beholdes, men pågående kamper og resultater nullstilles.',
+      confirmLabel: 'Gjenåpne påmelding',
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          await resetTournament(true);
+          onRefresh();
+          showToast('Turneringen er satt tilbake til påmelding. Deltakerne er beholdt.', 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Kunne ikke gjenåpne påmelding', 'error');
+        }
+      },
+    });
   };
 
   // Run test simulation
-  const handleExpandCapacity = async (capacity: 32 | 64) => {
-    if (
-      !confirm(
-        `Utvide cupen til ${capacity} spillere (${capacity / 2} kamper i runde 1)? Dette kan ikke angres.`
-      )
-    ) {
-      return;
-    }
-    try {
-      await expandTournamentCapacity(capacity);
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleExpandCapacity = (capacity: 32 | 64) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: `Utvid cup-oppsett til ${capacity} plasser`,
+      message: `Utvide cupen til ${capacity} spillere (${capacity / 2} kamper i runde 1)?`,
+      confirmLabel: `Utvid til ${capacity}`,
+      variant: 'primary',
+      onConfirm: async () => {
+        try {
+          await expandTournamentCapacity(capacity);
+          onRefresh();
+          showToast(`Cup-kapasiteten er utvidet til ${capacity} plasser!`, 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Kunne ikke utvide cup-størrelse', 'error');
+        }
+      },
+    });
   };
 
-  const handleSimulate = async (count: number) => {
-    if (!confirm(`Generere en test-turnering med ${count} fiktive spillere?`)) return;
-    try {
-      await simulateTournament(count);
-      onRefresh();
-    } catch (err: any) {
-      alert(err.message);
-    }
+  const handleSimulate = (count: number) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: `Simuler ${count} spillere`,
+      message: `Generere en test-turnering med ${count} fiktive spillere og starte cupen direkte?`,
+      confirmLabel: `Start ${count} spillere`,
+      variant: 'primary',
+      onConfirm: async () => {
+        try {
+          await simulateTournament(count);
+          onRefresh();
+          showToast(`Test-turnering med ${count} spillere generert og startet!`, 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Kunne ikke generere test-turnering', 'error');
+        }
+      },
+    });
   };
 
   // Add participant (creates person profile first, then registers for cup)
@@ -398,8 +571,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       await registerParticipant(person.firstName, undefined, person.id);
       setNewPlayerName('');
       onRefresh();
+      showToast(`Spiller ${person.firstName} meldt på!`, 'success');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Kunne ikke melde på deltaker', 'error');
     }
   };
 
@@ -447,6 +621,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setResetWarning(null);
       setResetError(null);
       onRefresh();
+      showToast('Kampresultat nullstilt', 'info');
     } catch (err: any) {
       setResetError(err.message || 'Kunne ikke nullstille resultat.');
     } finally {
@@ -459,8 +634,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     try {
       await removeParticipant(id);
       onRefresh();
+      showToast('Deltaker fjernet', 'info');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Kunne ikke fjerne deltaker', 'error');
     }
   };
 
@@ -469,8 +645,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     try {
       await toggleActivity(id, !currentEnabled);
       onRefresh();
+      showToast(currentEnabled ? 'Aktivitet deaktivert' : 'Aktivitet aktivert', 'info');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Kunne ikke oppdatere aktivitet', 'error');
     }
   };
 
@@ -486,8 +663,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         organizers: eventForm.organizers,
       });
       onRefresh();
+      showToast('Arrangementsdetaljer lagret!', 'success');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Kunne ikke lagre arrangement', 'error');
     } finally {
       setProgramSaving(false);
     }
@@ -513,8 +691,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       await updateActivity(editingActivityId, activityForm);
       setEditingActivityId(null);
       onRefresh();
+      showToast('Aktivitet lagret!', 'success');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Kunne ikke oppdatere aktivitet', 'error');
     } finally {
       setActivitySaving(false);
     }
@@ -531,7 +710,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )
       .join('\n');
     navigator.clipboard.writeText(text);
-    alert('Alpha-interesselisten er kopiert til utklippstavlen!');
+    showToast('Alpha-interesselisten er kopiert til utklippstavlen!', 'success');
   };
 
   // ----------------------------------------------------
@@ -1299,8 +1478,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <button
                 id="admin-redraw-btn"
                 onClick={handleReDraw}
-                disabled={tournament.participants.length < 2}
-                className="w-full py-3 rounded-2xl bg-zinc-900 border-2 border-lime-400/50 hover:border-lime-400 disabled:opacity-40 text-lime-300 text-xs font-black uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                className="w-full py-3 rounded-2xl bg-zinc-900 border-2 border-lime-400/50 hover:border-lime-400 text-lime-300 text-xs font-black uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 Generer ny trekning
               </button>
@@ -1344,6 +1522,73 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 Reset Alt Testdata
               </button>
+            </div>
+          </div>
+
+          {/* Firestore Cloud Database Status & Sync */}
+          <div className="pt-4 border-t-2 border-zinc-800">
+            <div className="p-5 rounded-2xl bg-zinc-950 border-2 border-emerald-500/40 shadow-artistic-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    <Database className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-black text-white text-base">Firestore Database</h4>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                        Aktiv
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-400 font-medium mt-0.5">
+                      Alle endringer i turnering, popcorn, profiler og aktiviteter synkroniseres til Google Cloud Firestore.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  id="admin-sync-firestore-btn"
+                  onClick={handleSyncFirestore}
+                  disabled={isSyncingFirestore}
+                  className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm flex items-center justify-center gap-2 transition-all shrink-0"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncingFirestore ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingFirestore ? 'Synkroniserer...' : 'Synkroniser nå'}</span>
+                </button>
+              </div>
+
+              {firestoreSyncMessage && (
+                <div className="mb-3 p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-xs text-emerald-300 font-medium">
+                  {firestoreSyncMessage}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                <div className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase block">Prosjekt</span>
+                  <span className="font-mono text-zinc-300 truncate block">
+                    {firestoreStatus?.projectId || 'gen-lang-client-0041387233'}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase block">Database-ID</span>
+                  <span className="font-mono text-zinc-300 truncate block">
+                    {firestoreStatus?.firestoreDatabaseId || 'ai-studio-lillesandunited-...'}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase block">Sist synkronisert</span>
+                  <span className="text-zinc-300 font-medium block">
+                    {firestoreStatus?.lastSyncTime
+                      ? new Date(firestoreStatus.lastSyncTime).toLocaleTimeString('nb-NO', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })
+                      : 'Oppstart'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1634,6 +1879,125 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           onCancel={closeResetMatchModal}
           onConfirm={() => handleResetMatch(Boolean(resetWarning))}
         />
+      )}
+
+      {/* ---------------- CUSTOM IN-APP CONFIRM DIALOG ---------------- */}
+      {confirmDialog && confirmDialog.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-700 shadow-2xl space-y-4">
+            <div className="flex items-start gap-3">
+              <div
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                  confirmDialog.variant === 'danger'
+                    ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                    : confirmDialog.variant === 'warning'
+                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                    : 'bg-lime-500/20 text-lime-400 border border-lime-500/30'
+                }`}
+              >
+                {confirmDialog.variant === 'danger' ? (
+                  <AlertTriangle className="w-5 h-5" />
+                ) : confirmDialog.variant === 'warning' ? (
+                  <AlertCircle className="w-5 h-5" />
+                ) : (
+                  <CheckCircle className="w-5 h-5" />
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-black text-white">{confirmDialog.title}</h3>
+                <p className="text-xs text-zinc-300 mt-1 leading-relaxed whitespace-pre-line">
+                  {confirmDialog.message}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 space-y-2">
+              {confirmDialog.secondaryAction && (
+                <button
+                  type="button"
+                  disabled={confirmLoading}
+                  onClick={async () => {
+                    setConfirmLoading(true);
+                    try {
+                      await confirmDialog.secondaryAction?.onClick();
+                      setConfirmDialog(null);
+                    } finally {
+                      setConfirmLoading(false);
+                    }
+                  }}
+                  className="w-full py-3 px-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-black uppercase tracking-wider transition-all border border-zinc-700"
+                >
+                  {confirmDialog.secondaryAction.label}
+                </button>
+              )}
+
+              <button
+                type="button"
+                disabled={confirmLoading}
+                onClick={async () => {
+                  setConfirmLoading(true);
+                  try {
+                    await confirmDialog.onConfirm();
+                    setConfirmDialog(null);
+                  } finally {
+                    setConfirmLoading(false);
+                  }
+                }}
+                className={`w-full py-3 px-4 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-artistic-sm flex items-center justify-center gap-2 ${
+                  confirmDialog.variant === 'danger'
+                    ? 'bg-rose-500 hover:bg-rose-400 text-zinc-950'
+                    : confirmDialog.variant === 'warning'
+                    ? 'bg-amber-400 hover:bg-amber-300 text-zinc-950'
+                    : 'bg-lime-400 hover:bg-lime-300 text-zinc-950'
+                }`}
+              >
+                {confirmLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                {confirmDialog.confirmLabel || 'Bekreft'}
+              </button>
+
+              <button
+                type="button"
+                disabled={confirmLoading}
+                onClick={() => setConfirmDialog(null)}
+                className="w-full py-2.5 px-4 rounded-2xl bg-transparent hover:bg-zinc-800/60 text-zinc-400 text-xs font-bold transition-all"
+              >
+                {confirmDialog.cancelLabel || 'Avbryt'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- TOAST NOTIFICATION ---------------- */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full animate-in slide-in-from-bottom-5 fade-in duration-200">
+          <div
+            className={`p-4 rounded-2xl border shadow-xl flex items-start gap-3 backdrop-blur-md ${
+              toast.type === 'error'
+                ? 'bg-rose-950/90 border-rose-700 text-rose-100'
+                : toast.type === 'success'
+                ? 'bg-zinc-900/95 border-lime-500/50 text-white'
+                : 'bg-zinc-900/95 border-zinc-700 text-white'
+            }`}
+          >
+            <div className="shrink-0 mt-0.5">
+              {toast.type === 'error' ? (
+                <AlertCircle className="w-4 h-4 text-rose-400" />
+              ) : toast.type === 'success' ? (
+                <CheckCircle className="w-4 h-4 text-lime-400" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-sky-400" />
+              )}
+            </div>
+            <p className="text-xs font-semibold flex-1 leading-snug">{toast.message}</p>
+            <button
+              onClick={() => setToast(null)}
+              className="text-zinc-400 hover:text-white shrink-0 p-0.5 rounded-lg"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

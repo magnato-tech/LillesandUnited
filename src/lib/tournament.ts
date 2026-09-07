@@ -4,9 +4,15 @@ import { TOURNAMENT_DEFAULT_CAPACITY } from './initial-data';
 
 export function resolveBracketCapacity(
   participantCount: number,
-  configured?: BracketCapacity | null
-): BracketCapacity {
+  configured?: number | null
+): number {
+  if (participantCount <= 4) return 4;
+  if (participantCount <= 8) return 8;
   if (configured === 16 || configured === 32 || configured === 64) {
+    if (participantCount > configured) {
+      if (participantCount <= 32) return 32;
+      return 64;
+    }
     return configured;
   }
   if (participantCount <= 16) return 16;
@@ -14,7 +20,7 @@ export function resolveBracketCapacity(
   return 64;
 }
 
-export function getCapacityInfo(capacity: BracketCapacity) {
+export function getCapacityInfo(capacity: number) {
   return {
     capacity,
     round1Matches: capacity / 2,
@@ -22,10 +28,60 @@ export function getCapacityInfo(capacity: BracketCapacity) {
   };
 }
 
-export function getNextCapacityTier(current: BracketCapacity): BracketCapacity | null {
-  if (current === 16) return 32;
+export function getNextCapacityTier(current: number): BracketCapacity | null {
+  if (current <= 16) return 32;
   if (current === 32) return 64;
   return null;
+}
+
+export interface ServeState {
+  currentServer: 'A' | 'B';
+  servesLeftInTurn: number;
+  isDeuce: boolean;
+  totalPoints: number;
+}
+
+/**
+ * Calculates current server in a 21-point table tennis game:
+ * - Each player serves 5 consecutive serves.
+ * - At 20-20 (deuce, both >= 20), players alternate serve after every single point.
+ */
+export function calculateServer(
+  scoreA: number,
+  scoreB: number,
+  firstServer: 'A' | 'B' = 'A'
+): ServeState {
+  const safeA = Math.max(0, scoreA || 0);
+  const safeB = Math.max(0, scoreB || 0);
+  const totalPoints = safeA + safeB;
+  const otherServer = firstServer === 'A' ? 'B' : 'A';
+  const isDeuce = safeA >= 20 && safeB >= 20;
+
+  if (isDeuce) {
+    // At deuce (both >= 20):
+    // Players alternate after every single point (1 serve each).
+    const deucePoints = totalPoints - 40;
+    const currentServer = deucePoints % 2 === 0 ? firstServer : otherServer;
+    return {
+      currentServer,
+      servesLeftInTurn: 1,
+      isDeuce: true,
+      totalPoints,
+    };
+  }
+
+  // Normal phase: 5 serves each
+  const turnIndex = Math.floor(totalPoints / 5);
+  const currentServer = turnIndex % 2 === 0 ? firstServer : otherServer;
+  const servesDoneInCurrentTurn = totalPoints % 5;
+  const servesLeftInTurn = 5 - servesDoneInCurrentTurn;
+
+  return {
+    currentServer,
+    servesLeftInTurn,
+    isDeuce: false,
+    totalPoints,
+  };
 }
 
 /**
@@ -79,7 +135,7 @@ export function generateBracket(
 
   const totalRounds = Math.log2(bracketSize);
   const numR1Matches = bracketSize / 2;
-  const minPlayers = bracketSize / 2;
+  const minPlayers = Math.max(2, Math.floor(bracketSize / 2));
   if (n < minPlayers) {
     throw new Error(
       `Minst ${minPlayers} spillere kreves for en ${bracketSize}-spiller cup (${numR1Matches} kamper i runde 1).`

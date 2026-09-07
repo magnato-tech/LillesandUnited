@@ -17,12 +17,32 @@ import {
   resolveBracketCapacity,
 } from './src/lib/tournament';
 import { INITIAL_STATE, INITIAL_ACTIVITIES, INITIAL_POPCORN, SIMULATION_NAMES_16, SIMULATION_NAMES_31, generateSimulationNames, TOURNAMENT_MAX_PARTICIPANTS, TOURNAMENT_DEFAULT_CAPACITY } from './src/lib/initial-data';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 const app = express();
 const PORT = 3000;
 const ADMIN_PIN = process.env.ADMIN_PIN || 'united2026';
 
 app.use(express.json());
+
+// Firebase Firestore setup
+let firestoreDb: any = null;
+let firebaseConfig: any = null;
+let lastFirestoreSyncTime: string | null = null;
+let firestoreSyncError: string | null = null;
+
+try {
+  const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
+  if (fs.existsSync(configPath)) {
+    firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    const fbApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    firestoreDb = getFirestore(fbApp, firebaseConfig.firestoreDatabaseId);
+    console.log('[Firestore] Initialized Firestore client for DB:', firebaseConfig.firestoreDatabaseId);
+  }
+} catch (err) {
+  console.error('[Firestore] Initialization error:', err);
+}
 
 function isValidAdminPin(pin: unknown): boolean {
   if (typeof pin !== 'string' || !pin) return false;
@@ -158,7 +178,7 @@ function loadState(): AppState {
 
 let state: AppState = loadState();
 
-function saveState() {
+function saveLocalStateOnly() {
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -166,6 +186,120 @@ function saveState() {
     fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf-8');
   } catch (err) {
     console.error('Failed to save state to db.json:', err);
+  }
+}
+
+async function syncToFirestoreCollections(targetState: AppState) {
+  if (!firestoreDb) return;
+  try {
+    // 1. App state snapshot document
+    const cleanState = cleanForFirestore({
+      ...targetState,
+      updatedAt: new Date().toISOString(),
+    });
+    await setDoc(doc(firestoreDb, 'appState', 'current'), cleanState);
+
+    // 2. Connection test doc
+    await setDoc(doc(firestoreDb, 'test', 'connection'), {
+      id: 'connection',
+      connectedAt: new Date().toISOString(),
+    });
+
+    // 3. Persons collection
+    if (Array.isArray(targetState.persons)) {
+      for (const p of targetState.persons) {
+        if (p && p.id) {
+          await setDoc(doc(firestoreDb, 'persons', p.id), cleanForFirestore(p));
+        }
+      }
+    }
+
+    // 4. Activities collection
+    if (Array.isArray(targetState.activities)) {
+      for (const a of targetState.activities) {
+        if (a && a.id) {
+          await setDoc(doc(firestoreDb, 'activities', a.id), cleanForFirestore(a));
+        }
+      }
+    }
+
+    // 5. Alpha interests collection
+    if (Array.isArray(targetState.alphaInterests)) {
+      for (const alpha of targetState.alphaInterests) {
+        if (alpha && alpha.id) {
+          await setDoc(doc(firestoreDb, 'alphaInterests', alpha.id), cleanForFirestore(alpha));
+        }
+      }
+    }
+
+    lastFirestoreSyncTime = new Date().toISOString();
+    firestoreSyncError = null;
+    console.log('[Firestore] Successfully synchronized state to Firestore at', lastFirestoreSyncTime);
+  } catch (err: any) {
+    firestoreSyncError = err?.message || String(err);
+    console.error('[Firestore] Error syncing state to Firestore:', err);
+    throw err;
+  }
+}
+
+async function initFirestoreAndMigrate() {
+  if (!firestoreDb) {
+    console.warn('[Firestore] No firestoreDb initialized, running in local mode.');
+    return;
+  }
+  try {
+    console.log('[Firestore] Checking for existing state in Firestore...');
+    const stateDocRef = doc(firestoreDb, 'appState', 'current');
+    const snap = await getDoc(stateDocRef);
+    if (snap.exists()) {
+      const remoteState = snap.data() as AppState;
+      if (remoteState && remoteState.event && remoteState.tournament) {
+        console.log('[Firestore] Loaded existing state from Firestore! Persons:', remoteState.persons?.length || 0);
+        state = remoteState;
+        saveLocalStateOnly();
+        lastFirestoreSyncTime = new Date().toISOString();
+        return;
+      }
+    }
+
+    console.log('[Firestore] No remote state found in Firestore. Migrating current local data (db.json) to Firestore...');
+    await syncToFirestoreCollections(state);
+    console.log('[Firestore] Migration to Firestore finished successfully!');
+  } catch (err: any) {
+    firestoreSyncError = err?.message || String(err);
+    console.error('[Firestore] Initial Firestore sync/migration failed:', err);
+  }
+}
+
+function cleanForFirestore(obj: any): any {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+let firestoreSaveTimeout: NodeJS.Timeout | null = null;
+async function saveToFirestoreNow(): Promise<void> {
+  if (!firestoreDb) return;
+  try {
+    const payload = cleanForFirestore({
+      ...state,
+      updatedAt: new Date().toISOString(),
+    });
+    await setDoc(doc(firestoreDb, 'appState', 'current'), payload);
+    lastFirestoreSyncTime = new Date().toISOString();
+    firestoreSyncError = null;
+  } catch (err: any) {
+    firestoreSyncError = err?.message || String(err);
+    console.error('[Firestore] Save error:', err);
+  }
+}
+
+function saveState() {
+  saveLocalStateOnly();
+
+  if (firestoreDb) {
+    if (firestoreSaveTimeout) clearTimeout(firestoreSaveTimeout);
+    firestoreSaveTimeout = setTimeout(() => {
+      saveToFirestoreNow();
+    }, 50);
   }
 }
 
@@ -179,6 +313,50 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/state', (req, res) => {
   res.json(state);
+});
+
+// Firestore status & sync endpoints
+app.get('/api/firestore/status', (req, res) => {
+  res.json({
+    connected: Boolean(firestoreDb),
+    projectId: firebaseConfig?.projectId || null,
+    firestoreDatabaseId: firebaseConfig?.firestoreDatabaseId || null,
+    lastSyncTime: lastFirestoreSyncTime,
+    error: firestoreSyncError,
+    mode: 'Firestore Database',
+  });
+});
+
+app.post('/api/firestore/flush', async (req, res) => {
+  if (firestoreSaveTimeout) {
+    clearTimeout(firestoreSaveTimeout);
+    firestoreSaveTimeout = null;
+  }
+  await saveToFirestoreNow();
+  res.json({ success: true, lastSyncTime: lastFirestoreSyncTime, error: firestoreSyncError });
+});
+
+app.post('/api/admin/firestore/sync', requireAdmin, async (req, res) => {
+  if (!firestoreDb) {
+    return res.status(500).json({ error: 'Firestore er ikke konfigurert på serveren.' });
+  }
+  try {
+    await syncToFirestoreCollections(state);
+    res.json({
+      success: true,
+      message: 'Databasen er synkronisert til Firestore.',
+      lastSyncTime: lastFirestoreSyncTime,
+      itemCounts: {
+        persons: state.persons?.length || 0,
+        participants: state.tournament?.participants?.length || 0,
+        matches: state.tournament?.matches?.length || 0,
+        activities: state.activities?.length || 0,
+        alphaInterests: state.alphaInterests?.length || 0,
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Kunne ikke synkronisere til Firestore' });
+  }
 });
 
 // ----------------------------------------------------
@@ -326,16 +504,13 @@ app.post('/api/register', (req, res) => {
     return res.json({ success: true, participant: existing, state, alreadyRegistered: true });
   }
 
-  const capacity = resolveBracketCapacity(
-    state.tournament.participants.length,
-    state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
-  );
+  const registrationCapacity = state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY;
   if (
     state.tournament.status === 'registration' &&
-    state.tournament.participants.length >= capacity
+    state.tournament.participants.length >= registrationCapacity
   ) {
     return res.status(400).json({
-      error: `Cupen er full (${capacity} spillere). Be admin utvide cup-størrelsen.`,
+      error: `Cupen er full (${registrationCapacity} spillere). Be admin utvide cup-størrelsen.`,
     });
   }
 
@@ -373,14 +548,15 @@ app.post('/api/tournament/start', requireAdmin, (req, res) => {
       state.tournament.participants.length,
       state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
     );
-    const minPlayers = capacity / 2;
+    const minPlayers = Math.max(2, Math.floor(capacity / 2));
     if (state.tournament.participants.length < minPlayers) {
       return res.status(400).json({
         error: `Minst ${minPlayers} spillere kreves for å starte ${capacity}-spiller cupen (${capacity / 2} kamper i runde 1).`,
       });
     }
 
-    const matches = generateBracket(state.tournament.participants, capacity);
+    const matches = generateBracket(state.tournament.participants, capacity as any);
+    state.tournament.bracketCapacity = capacity as any;
     state.tournament.matches = matches;
     state.tournament.status = 'active';
     state.tournament.startedAt = new Date().toISOString();
@@ -405,14 +581,13 @@ app.post('/api/tournament/re-draw', requireAdmin, (req, res) => {
       state.tournament.participants.length,
       state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
     );
-    const matches = generateBracket(state.tournament.participants, capacity);
+    const matches = generateBracket(state.tournament.participants, capacity as any);
+    state.tournament.bracketCapacity = capacity as any;
     state.tournament.matches = matches;
     state.tournament.status = 'active';
     state.tournament.winner = null;
     state.tournament.completedAt = null;
-    if (!state.tournament.startedAt) {
-      state.tournament.startedAt = new Date().toISOString();
-    }
+    state.tournament.startedAt = new Date().toISOString();
 
     saveState();
     res.json({ success: true, state });
@@ -427,6 +602,20 @@ app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
     const { matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot } = req.body;
     if (!matchId) {
       return res.status(400).json({ error: 'Match ID mangler.' });
+    }
+
+    const match = state.tournament.matches.find((m) => m.id === matchId);
+    if (!match) {
+      return res.status(404).json({ error: 'Kamp ikke funnet.' });
+    }
+
+    // Controlled conflict handling: prevent silent overwriting of already completed matches
+    if (match.status === 'completed' || match.status === 'walkover') {
+      return res.status(409).json({
+        error: 'Kampen er allerede registrert som fullført. Bruk korrigeringsfunksjonen for å endre resultat.',
+        conflict: true,
+        currentStatus: match.status,
+      });
     }
 
     const { updatedMatches, tournamentWinner } = recordMatchResult(
@@ -669,19 +858,36 @@ app.post('/api/tournament/simulate', requireAdmin, (req, res) => {
 
 // Register interest for Alpha (Public)
 app.post('/api/alpha/interest', (req, res) => {
-  const { firstName, phone, notes, userId } = req.body;
-  if (!firstName || typeof firstName !== 'string' || !firstName.trim()) {
+  const { firstName, phone, notes, userId, personId } = req.body;
+  const cleanPersonId = typeof personId === 'string' && personId.trim() ? personId.trim() : null;
+
+  let resolvedPerson: Person | null = null;
+  if (cleanPersonId) {
+    resolvedPerson = (state.persons || []).find((p) => p.id === cleanPersonId) || null;
+    if (!resolvedPerson) {
+      return res.status(404).json({ error: 'Personen ble ikke funnet.' });
+    }
+  }
+
+  const effectiveName = resolvedPerson ? resolvedPerson.firstName : firstName;
+  if (!effectiveName || typeof effectiveName !== 'string' || !effectiveName.trim()) {
     return res.status(400).json({ error: 'Fornavn er påkrevd.' });
   }
 
-  const cleanName = firstName.trim();
+  const cleanName = effectiveName.trim();
   const cleanUserId = typeof userId === 'string' && userId.trim() ? userId.trim() : undefined;
 
-  // Check if already registered by userId or name
+  // Check if already registered by personId, userId, or name
   const existing = state.alphaInterests.find(
-    (a) => (cleanUserId && a.userId === cleanUserId) || a.firstName.toLowerCase() === cleanName.toLowerCase()
+    (a) =>
+      (cleanPersonId && a.personId === cleanPersonId) ||
+      (cleanUserId && a.userId === cleanUserId) ||
+      a.firstName.toLowerCase() === cleanName.toLowerCase()
   );
   if (existing) {
+    if (cleanPersonId && !existing.personId) {
+      existing.personId = cleanPersonId;
+    }
     if (cleanUserId && !existing.userId) {
       existing.userId = cleanUserId;
     }
@@ -699,6 +905,7 @@ app.post('/api/alpha/interest', (req, res) => {
     registeredAt: new Date().toISOString(),
     notes: notes ? notes.trim() : undefined,
     userId: cleanUserId,
+    personId: cleanPersonId || undefined,
   };
 
   state.alphaInterests.push(interest);
@@ -1211,6 +1418,9 @@ app.get('/sitemap.xml', (req, res) => {
 // ----------------------------------------------------
 
 async function start() {
+  // Initialize Firestore connection and migrate/sync data
+  await initFirestoreAndMigrate();
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },

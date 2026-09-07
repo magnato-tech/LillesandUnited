@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'magnar.totland@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Connection test document
+    match /test/{testId} {
+      allow read: if isValidId(testId);
+      allow create, update: if isValidId(testId) &&
+        incoming().size() <= 4 &&
+        (!('connectedAt' in incoming()) || (incoming().connectedAt is string && incoming().connectedAt.size() <= 64));
+    }
+
+    // App state snapshot
+    match /appState/{stateId} {
+      allow read: if isValidId(stateId);
+      allow write: if isValidId(stateId) && (isAdmin() || request.auth == null);
+    }
+
+    // Persons collection
+    match /persons/{personId} {
+      allow read: if isValidId(personId);
+      allow create: if isValidId(personId) &&
+        incoming().id == personId &&
+        incoming().firstName is string && incoming().firstName.size() > 0 && incoming().firstName.size() <= 64 &&
+        incoming().nameNumber is number &&
+        incoming().displayId is string && incoming().displayId.size() > 0 && incoming().displayId.size() <= 80 &&
+        incoming().createdAt is string && incoming().createdAt.size() <= 64;
+      allow update: if isValidId(personId) &&
+        incoming().id == existing().id &&
+        incoming().firstName is string && incoming().firstName.size() <= 64 &&
+        incoming().nameNumber is number &&
+        incoming().displayId is string && incoming().displayId.size() <= 80;
+    }
+
+    // Tournaments and subcollections
+    match /tournaments/{tournamentId} {
+      allow read: if isValidId(tournamentId);
+      allow write: if isValidId(tournamentId);
+
+      match /participants/{participantId} {
+        allow read: if isValidId(participantId);
+        allow write: if isValidId(participantId);
+      }
+
+      match /matches/{matchId} {
+        allow read: if isValidId(matchId);
+        allow write: if isValidId(matchId);
+      }
+    }
+
+    // Popcorn bongs collection
+    match /popcornBongs/{bongId} {
+      allow read: if isValidId(bongId);
+      allow write: if isValidId(bongId);
+    }
+
+    // Alpha interests collection
+    match /alphaInterests/{interestId} {
+      allow read: if isValidId(interestId);
+      allow create: if isValidId(interestId) &&
+        incoming().id == interestId &&
+        incoming().firstName is string && incoming().firstName.size() > 0 && incoming().firstName.size() <= 64 &&
+        incoming().registeredAt is string && incoming().registeredAt.size() <= 64;
+      allow update, delete: if isValidId(interestId) && (isAdmin() || request.auth == null);
+    }
+
+    // Activities collection
+    match /activities/{activityId} {
+      allow read: if isValidId(activityId);
+      allow write: if isValidId(activityId);
+    }
+  }
+}

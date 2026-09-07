@@ -439,3 +439,49 @@ export async function resetAllData(): Promise<AppState> {
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille alt');
   return data.state;
 }
+
+export async function getFirestoreStatus(): Promise<{
+  connected: boolean;
+  projectId: string | null;
+  firestoreDatabaseId: string | null;
+  lastSyncTime: string | null;
+  error: string | null;
+  mode: string;
+}> {
+  try {
+    const res = await fetch('/api/firestore/status');
+    if (!res.ok) throw new Error('Kunne ikke hente Firestore-status');
+    return await res.json();
+  } catch (e: any) {
+    return {
+      connected: false,
+      projectId: null,
+      firestoreDatabaseId: null,
+      lastSyncTime: null,
+      error: e?.message || 'Frakoblet',
+      mode: 'Offline',
+    };
+  }
+}
+
+export async function syncFirestore(): Promise<{
+  success: boolean;
+  message: string;
+  lastSyncTime: string;
+  itemCounts: {
+    persons: number;
+    participants: number;
+    matches: number;
+    activities: number;
+    alphaInterests: number;
+  };
+}> {
+  const res = await fetch('/api/admin/firestore/sync', {
+    method: 'POST',
+    headers: getAdminHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Feil ved synkronisering til Firestore');
+  return data;
+}
+

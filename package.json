@@ -13,8 +13,12 @@
     "test:walkovers": "tsx scripts/test-walkovers.ts",
     "test:duplicate-names": "tsx scripts/test-duplicate-names.ts",
     "test:consistency": "tsx scripts/test-db-consistency.ts",
+    "test:firestore": "tsx scripts/test-firestore-integration.ts",
+    "test:cup-16": "tsx scripts/test-complete-16-cup.ts",
+    "test:cup-63": "tsx scripts/test-cup-63-players.ts",
+    "test:resets": "tsx scripts/test-tournament-resets.ts",
     "validate:db": "tsx scripts/validate-db.ts",
-    "test:all": "tsx scripts/test-walkovers.ts && tsx scripts/test-duplicate-names.ts && tsx scripts/test-db-consistency.ts"
+    "test:all": "tsx scripts/test-walkovers.ts && tsx scripts/test-duplicate-names.ts && tsx scripts/test-db-consistency.ts && tsx scripts/test-firestore-integration.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -23,6 +27,7 @@
     "canvas-confetti": "^1.9.4",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "firebase": "^12.18.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",
