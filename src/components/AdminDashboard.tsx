@@ -25,6 +25,7 @@ import {
   Database,
   RefreshCw,
   X,
+  User,
 } from 'lucide-react';
 import { AppState, Match, PopcornBong } from '../types';
 import {
@@ -43,6 +44,7 @@ import {
   updateActivity,
   setAdminPin,
   verifyAdminPin,
+  verifyResetPin,
   redeemPopcornBong,
   addPopcornCapacity,
   resetPopcorn,
@@ -82,7 +84,16 @@ interface AdminDashboardProps {
   state: AppState;
   onRefresh: () => void;
   onOpenDisplay: () => void;
-  initialTab?: 'kiosk_popcorn' | 'matches' | 'participants' | 'activities' | 'alpha' | 'test';
+  initialTab?:
+    | 'kiosk_popcorn'
+    | 'matches'
+    | 'event_participants'
+    | 'tabletennis_participants'
+    | 'activities'
+    | 'alpha'
+    | 'test';
+  testPersonOverrideId?: string | null;
+  onSetTestPersonOverride: (personId: string | null) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -90,10 +101,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onRefresh,
   onOpenDisplay,
   initialTab = 'kiosk_popcorn',
+  testPersonOverrideId = null,
+  onSetTestPersonOverride,
 }) => {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState(false);
+  const [testTabUnlocked, setTestTabUnlocked] = useState(false);
+  const [testTabUnlockPin, setTestTabUnlockPin] = useState('');
+  const [testTabUnlockError, setTestTabUnlockError] = useState(false);
 
   // In-app confirm dialog & toast state (replacing window.confirm and window.alert for reliable iframe behavior)
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
@@ -132,6 +148,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Manual participant add state
   const [newPlayerName, setNewPlayerName] = useState('');
   const [participantSearch, setParticipantSearch] = useState('');
+  const [eventParticipantSearch, setEventParticipantSearch] = useState('');
 
   // Program & activity editing
   const [eventForm, setEventForm] = useState({
@@ -154,13 +171,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [activitySaving, setActivitySaving] = useState(false);
 
   // Active section tab: Kiosk & Popcorn is prominent
-  const [adminTab, setAdminTabState] = useState<
-    'kiosk_popcorn' | 'matches' | 'participants' | 'activities' | 'alpha' | 'test'
-  >(() => {
+  type AdminSectionTab = NonNullable<AdminDashboardProps['initialTab']>;
+
+  const [adminTab, setAdminTabState] = useState<AdminSectionTab>(() => {
     if (typeof window === 'undefined') return initialTab;
     const saved = sessionStorage.getItem('lillesand_admin_section');
-    const valid = ['kiosk_popcorn', 'matches', 'participants', 'activities', 'alpha', 'test'];
-    return saved && valid.includes(saved) ? (saved as typeof initialTab) : initialTab;
+    const valid: AdminSectionTab[] = [
+      'kiosk_popcorn',
+      'matches',
+      'event_participants',
+      'tabletennis_participants',
+      'activities',
+      'alpha',
+      'test',
+    ];
+    if (saved === 'participants') return 'tabletennis_participants';
+    return saved && valid.includes(saved as AdminSectionTab)
+      ? (saved as AdminSectionTab)
+      : initialTab;
   });
 
   // Firestore status state
@@ -180,7 +208,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setAdminTabState(tab);
   };
 
+  const handleAdminTabSelect = (tab: typeof initialTab) => {
+    if (tab === 'test' && !testTabUnlocked) {
+      setTestTabUnlockPin('');
+      setTestTabUnlockError(false);
+      setAdminTab('test');
+      return;
+    }
+    setAdminTab(tab);
+  };
+
+  const handleUnlockTestTab = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const cleanPin = testTabUnlockPin.trim();
+    if (!cleanPin) {
+      setTestTabUnlockError(true);
+      return;
+    }
+
+    try {
+      const ok = await verifyResetPin(cleanPin);
+      if (ok) {
+        setTestTabUnlocked(true);
+        setTestTabUnlockError(false);
+        setTestTabUnlockPin('');
+      } else {
+        setTestTabUnlockError(true);
+      }
+    } catch {
+      setTestTabUnlockError(true);
+    }
+  };
+
   const { tournament, activities, alphaInterests, popcorn } = state;
+  const eventPersons = state.persons || [];
+  const tableTennisCapacity = resolveBracketCapacity(
+    tournament.participants.length,
+    tournament.bracketCapacity ?? 16
+  );
   const stats = calculateTournamentStats(tournament.matches, tournament.estimatedMinutesPerMatch);
 
   const prevInitialTab = useRef(initialTab);
@@ -269,6 +334,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleLock = () => {
     setIsAuthenticated(false);
+    setTestTabUnlocked(false);
+    setTestTabUnlockPin('');
     setPin('');
     setAdminPin('');
     sessionStorage.removeItem('lillesand_admin_pin');
@@ -312,21 +379,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleResetPopcorn = () => {
+    setDialogResetPin('');
     setConfirmDialog({
       isOpen: true,
       title: 'Reset Popcorn-bonger',
       message: 'Setter alle bonger tilbake til blank/nøytral, og nullstiller aktiveringer og hentet-statuser. Neste nummer blir igjen #1.',
       confirmLabel: 'Reset Popcorn',
       variant: 'warning',
-      onConfirm: async () => {
-        try {
-          await resetPopcorn();
-          setSelectedBong(null);
-          onRefresh();
-          showToast('Popcorn-bonger er nullstilt. Neste nummer er nå #1.', 'success');
-        } catch (err: any) {
-          showToast(err.message || 'Feil ved nullstilling av popcorn', 'error');
+      requiresResetPin: true,
+      onConfirm: async (resetPin) => {
+        if (!resetPin.trim()) {
+          showToast('Nullstillings-PIN er påkrevd.', 'error');
+          throw new Error('reset pin required');
         }
+        await resetPopcorn(resetPin.trim());
+        setSelectedBong(null);
+        onRefresh();
+        showToast('Popcorn-bonger er nullstilt. Neste nummer er nå #1.', 'success');
       },
     });
   };
@@ -386,62 +455,68 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return;
     }
 
+    setDialogResetPin('');
     setConfirmDialog({
       isOpen: true,
       title: 'Generer ny trekning',
       message: `Vil du generere en ny tilfeldig trekning for de ${tournament.participants.length} påmeldte spillerne? Alle eksisterende resultater og kamper nullstilles, og turneringen starter på nytt med de samme spillerne.`,
       confirmLabel: 'Generer ny trekning',
       variant: 'primary',
-      onConfirm: async () => {
-        try {
-          await reDrawTournament();
-          onRefresh();
-          showToast(
-            `Ny trekning generert for ${tournament.participants.length} spillere! Turneringen har startet på nytt.`,
-            'success'
-          );
-        } catch (err: any) {
-          showToast(err.message || 'Feil ved ny trekning', 'error');
+      requiresResetPin: true,
+      onConfirm: async (resetPin) => {
+        if (!resetPin.trim()) {
+          showToast('Nullstillings-PIN er påkrevd.', 'error');
+          throw new Error('reset pin required');
         }
+        await reDrawTournament(resetPin.trim());
+        onRefresh();
+        showToast(
+          `Ny trekning generert for ${tournament.participants.length} spillere! Turneringen har startet på nytt.`,
+          'success'
+        );
       },
     });
   };
 
   const handleResetAlphaData = () => {
+    setDialogResetPin('');
     setConfirmDialog({
       isOpen: true,
       title: 'Reset UngdomsAlpha',
       message: 'Fjerner alle testregistreringer og tømmer interesselisten for UngdomsAlpha.',
       confirmLabel: 'Reset Alpha',
       variant: 'warning',
-      onConfirm: async () => {
-        try {
-          await resetAlpha();
-          onRefresh();
-          showToast('Interesselisten for UngdomsAlpha er tømt.', 'success');
-        } catch (err: any) {
-          showToast(err.message || 'Feil ved nullstilling av Alpha', 'error');
+      requiresResetPin: true,
+      onConfirm: async (resetPin) => {
+        if (!resetPin.trim()) {
+          showToast('Nullstillings-PIN er påkrevd.', 'error');
+          throw new Error('reset pin required');
         }
+        await resetAlpha(resetPin.trim());
+        onRefresh();
+        showToast('Interesselisten for UngdomsAlpha er tømt.', 'success');
       },
     });
   };
 
   const handleResetTestDataFull = () => {
+    setDialogResetPin('');
     setConfirmDialog({
       isOpen: true,
       title: 'Reset Alt Testdata',
       message: 'Nullstiller Popcorn, Bordtennis og Alpha i én operasjon. Rører aldri tidspunkter eller arrangementets faste program. Simulerte testpersoner fjernes automatisk.',
       confirmLabel: 'Reset Alt Testdata',
       variant: 'danger',
-      onConfirm: async () => {
-        try {
-          await resetTestData();
-          setSelectedBong(null);
-          onRefresh();
-          showToast('All testdata er nullstilt. Arrangementets program er bevart.', 'success');
-        } catch (err: any) {
-          showToast(err.message || 'Feil ved nullstilling av testdata', 'error');
+      requiresResetPin: true,
+      onConfirm: async (resetPin) => {
+        if (!resetPin.trim()) {
+          showToast('Nullstillings-PIN er påkrevd.', 'error');
+          throw new Error('reset pin required');
         }
+        await resetTestData(resetPin.trim());
+        setSelectedBong(null);
+        onRefresh();
+        showToast('All testdata er nullstilt. Arrangementets program er bevart.', 'success');
       },
     });
   };
@@ -519,21 +594,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Reset tournament to registration (keep players)
   const handleReopenRegistration = () => {
-    setDialogResetPin('');
     setConfirmDialog({
       isOpen: true,
       title: 'Gjenåpne påmelding',
       message:
-        'Tilbakestille turneringen til påmeldingsfasen? Eksisterende påmeldte deltakere beholdes, men pågående kamper og resultater nullstilles.\n\nSkriv inn nullstillings-PIN for å bekrefte.',
+        'Tilbakestille turneringen til påmeldingsfasen? Eksisterende påmeldte deltakere beholdes, men pågående kamper og resultater nullstilles.',
       confirmLabel: 'Gjenåpne påmelding',
       variant: 'warning',
-      requiresResetPin: true,
-      onConfirm: async (resetPin) => {
-        if (!resetPin.trim()) {
-          showToast('Nullstillings-PIN er påkrevd.', 'error');
-          throw new Error('reset pin required');
-        }
-        await resetTournament(true, resetPin.trim());
+      onConfirm: async () => {
+        await resetTournament(true);
         onRefresh();
         showToast('Turneringen er satt tilbake til påmelding. Deltakerne er beholdt.', 'success');
       },
@@ -842,7 +911,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 border-b-2 border-zinc-800 pb-3 mb-6 overflow-x-auto">
         <button
-          onClick={() => setAdminTab('kiosk_popcorn')}
+          onClick={() => handleAdminTabSelect('kiosk_popcorn')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
             adminTab === 'kiosk_popcorn'
               ? 'bg-amber-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
@@ -854,7 +923,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </button>
 
         <button
-          onClick={() => setAdminTab('matches')}
+          onClick={() => handleAdminTabSelect('matches')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
             adminTab === 'matches'
               ? 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
@@ -866,19 +935,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </button>
 
         <button
-          onClick={() => setAdminTab('participants')}
+          onClick={() => handleAdminTabSelect('event_participants')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'participants'
+            adminTab === 'event_participants'
+              ? 'bg-sky-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
+              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
+          }`}
+        >
+          <User className="w-4 h-4" />
+          Deltakere Arrangement ({eventPersons.length})
+        </button>
+
+        <button
+          onClick={() => handleAdminTabSelect('tabletennis_participants')}
+          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
+            adminTab === 'tabletennis_participants'
               ? 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
               : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
           }`}
         >
           <Users className="w-4 h-4" />
-          Deltakere ({tournament.participants.length})
+          Deltakere Bordtennis ({tournament.participants.length}/{tableTennisCapacity})
         </button>
 
         <button
-          onClick={() => setAdminTab('activities')}
+          onClick={() => handleAdminTabSelect('activities')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
             adminTab === 'activities'
               ? 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
@@ -890,7 +971,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </button>
 
         <button
-          onClick={() => setAdminTab('alpha')}
+          onClick={() => handleAdminTabSelect('alpha')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
             adminTab === 'alpha'
               ? 'bg-sky-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
@@ -902,7 +983,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </button>
 
         <button
-          onClick={() => setAdminTab('test')}
+          onClick={() => handleAdminTabSelect('test')}
           className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
             adminTab === 'test'
               ? 'bg-rose-500 text-zinc-950 border-zinc-950 shadow-artistic-sm'
@@ -1101,21 +1182,76 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       )}
 
-      {/* ---------------- TAB: PARTICIPANTS ---------------- */}
-      {adminTab === 'participants' && (
+      {/* ---------------- TAB: DELTAKERE ARRANGEMENT ---------------- */}
+      {adminTab === 'event_participants' && (
+        <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm space-y-6">
+          <div>
+            <h3 className="text-base font-black text-white uppercase">
+              Registrerte personer ({eventPersons.length})
+            </h3>
+            <p className="text-xs text-zinc-400 font-medium">
+              Alle som har registrert navnet sitt i appen, uavhengig av bordtennisturneringen
+            </p>
+          </div>
+
+          <input
+            type="search"
+            placeholder="Søk person (displayId eller navn)..."
+            value={eventParticipantSearch}
+            onChange={(e) => setEventParticipantSearch(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white text-xs font-bold focus:outline-none focus:border-sky-400 shadow-artistic-sm"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 max-h-[480px] overflow-y-auto pr-1">
+            {eventPersons
+              .filter((p) => {
+                const q = eventParticipantSearch.trim().toLowerCase();
+                if (!q) return true;
+                const label = (p.displayId || p.firstName).toLowerCase();
+                return label.includes(q) || p.firstName.toLowerCase().includes(q);
+              })
+              .map((p, idx) => (
+                <div
+                  key={p.id}
+                  className="p-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 shadow-artistic-sm"
+                >
+                  <span className="text-[10px] font-black text-zinc-500 block uppercase">#{idx + 1}</span>
+                  <strong className="text-sm font-black text-white block">
+                    {p.displayId || p.firstName}
+                  </strong>
+                  {p.displayId && p.displayId !== p.firstName && (
+                    <span className="text-[11px] text-zinc-400 font-medium">{p.firstName}</span>
+                  )}
+                  <span className="text-[10px] text-zinc-500 font-mono mt-1 block">
+                    {new Date(p.createdAt).toLocaleString('no-NO', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+              ))}
+          </div>
+
+          {eventPersons.length === 0 && (
+            <div className="p-8 text-center text-xs font-bold text-zinc-500">
+              Ingen har registrert seg i appen ennå.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ---------------- TAB: DELTAKERE BORDTENNIS ---------------- */}
+      {adminTab === 'tabletennis_participants' && (
         <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-base font-black text-white uppercase">
-                Påmeldte deltakere ({tournament.participants.length} /{' '}
-                {resolveBracketCapacity(
-                  tournament.participants.length,
-                  tournament.bracketCapacity ?? 16
-                )}
-                )
+                Påmeldte bordtennisspillere ({tournament.participants.length} / {tableTennisCapacity})
               </h3>
               <p className="text-xs text-zinc-400 font-medium">
-                Legg til eller fjern deltakere manuelt før trekning
+                Legg til eller fjern spillere i bordtennisturneringen før trekning
               </p>
             </div>
 
@@ -1139,7 +1275,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           <input
             type="search"
-            placeholder="Søk deltaker (displayId eller navn)..."
+            placeholder="Søk bordtennisspiller (displayId eller navn)..."
             value={participantSearch}
             onChange={(e) => setParticipantSearch(e.target.value)}
             className="w-full px-4 py-2.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white text-xs font-bold focus:outline-none focus:border-lime-400 shadow-artistic-sm"
@@ -1176,7 +1312,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           {tournament.participants.length === 0 && (
             <div className="p-8 text-center text-xs font-bold text-zinc-500">
-              Ingen deltakere er registrert.
+              Ingen er påmeldt bordtennisturneringen.
             </div>
           )}
         </div>
@@ -1423,7 +1559,50 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* ---------------- TAB: TEST & RESET (Section 11–15) ---------------- */}
-      {adminTab === 'test' && (
+      {adminTab === 'test' && !testTabUnlocked && (
+        <div className="max-w-md mx-auto p-6 sm:p-8 rounded-3xl bg-zinc-900 border-2 border-rose-500 shadow-artistic-md">
+          <div className="w-14 h-14 rounded-2xl bg-rose-500 text-zinc-950 flex items-center justify-center mx-auto mb-4 shadow-artistic-sm -rotate-2">
+            <Lock className="w-7 h-7" />
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black text-white text-center uppercase tracking-tight mb-2">
+            Test & Reset
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-400 text-center mb-6 font-medium">
+            Denne fanen krever nullstillings-PIN for å åpnes.
+          </p>
+
+          <form onSubmit={handleUnlockTestTab} className="space-y-4">
+            <div>
+              <label className="block text-xs font-black text-zinc-300 uppercase tracking-wider mb-1.5">
+                Nullstillings-PIN
+              </label>
+              <input
+                type="password"
+                placeholder="PIN-kode"
+                value={testTabUnlockPin}
+                onChange={(e) => setTestTabUnlockPin(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500 text-center text-lg tracking-widest font-mono font-black shadow-artistic-sm"
+                autoFocus
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-zinc-950 font-black text-sm uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
+            >
+              Lås opp Test & Reset
+            </button>
+
+            {testTabUnlockError && (
+              <p className="text-xs text-rose-400 text-center font-bold">
+                Feil nullstillings-PIN. Prøv igjen.
+              </p>
+            )}
+          </form>
+        </div>
+      )}
+
+      {adminTab === 'test' && testTabUnlocked && (
         <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm space-y-6">
           <div>
             <h3 className="text-base font-black text-white uppercase flex items-center gap-2">
@@ -1433,6 +1612,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <p className="text-xs text-zinc-400 font-medium mt-1">
               Test appen grundig mange ganger før arrangementet 18. september. Ingen reset-knapper rører arrangementets faste informasjon.
             </p>
+          </div>
+
+          {/* Testidentitet (kun denne nettleseren) */}
+          <div className="p-5 rounded-2xl bg-zinc-950 border-2 border-purple-500/40 shadow-artistic-sm">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-black text-white text-base">Testidentitet</h4>
+                <p className="text-xs text-zinc-400 font-medium mt-0.5">
+                  Simuler en registrert person i denne nettleseren. Gjelder kun testsesjonen og endrer ikke andre brukeres identitet.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select
+                id="admin-test-person-select"
+                value={testPersonOverrideId || ''}
+                onChange={(e) => onSetTestPersonOverride(e.target.value || null)}
+                className="flex-1 px-4 py-3 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-white text-sm font-bold focus:outline-none focus:border-purple-400"
+              >
+                <option value="">Ingen testidentitet (bruk vanlig profil)</option>
+                {(state.persons || []).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.displayId || `${p.firstName}_${p.nameNumber || 1}`}
+                  </option>
+                ))}
+              </select>
+              {testPersonOverrideId && (
+                <button
+                  type="button"
+                  onClick={() => onSetTestPersonOverride(null)}
+                  className="px-4 py-3 rounded-2xl bg-zinc-900 border-2 border-zinc-700 hover:border-zinc-500 text-zinc-300 text-xs font-black uppercase tracking-wider"
+                >
+                  Nullstill testidentitet
+                </button>
+              )}
+            </div>
+            {testPersonOverrideId && (
+              <p className="text-xs text-purple-300 font-bold mt-3">
+                Aktiv testidentitet:{' '}
+                {(state.persons || []).find((p) => p.id === testPersonOverrideId)?.displayId || testPersonOverrideId}
+              </p>
+            )}
           </div>
 
           {/* Reset Buttons Grid */}
@@ -1656,27 +1880,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           </div>
 
-          {/* Registered Central Persons overview (displayId) */}
-          <div className="pt-4 border-t-2 border-zinc-800">
-            <h4 className="font-black text-white text-sm uppercase mb-3">
-              Registrerte personer (displayId):
-            </h4>
-            {(!state.persons || state.persons.length === 0) ? (
-              <p className="text-xs text-zinc-500 font-medium">Ingen sentrale personer registrert enda.</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {state.persons.map((p) => (
-                  <div
-                    key={p.id}
-                    className="px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono font-bold text-lime-400 flex items-center gap-1.5 shadow-artistic-sm"
-                  >
-                    <span>👤</span>
-                    <span>{p.displayId || `${p.firstName}_${p.nameNumber || 1}`}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       )}
 

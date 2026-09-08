@@ -120,7 +120,7 @@ export async function runResetTests() {
   // Nullstill først turneringen for å starte rent
   await adminApi('/api/tournament/reset', {
     method: 'POST',
-    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN, securedReset: true }),
   });
 
   for (const p of selected16Persons) {
@@ -153,7 +153,7 @@ export async function runResetTests() {
   console.log('[Del A - 6] Kaller adminfunksjonen Reset Turnering (keepParticipants=false)...');
   const resetTourRes = await adminApi('/api/tournament/reset', {
     method: 'POST',
-    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN, securedReset: true }),
   });
   assert(resetTourRes.ok, `Reset turnering feilet: ${JSON.stringify(resetTourRes.data)}`);
 
@@ -223,7 +223,10 @@ export async function runResetTests() {
 
   // 1. Bruk funksjonen som fjerner turnerings-/testdata og spillere: /api/admin/reset-testdata
   console.log('[Del B - 1] Kaller /api/admin/reset-testdata...');
-  const resetTestDataRes = await adminApi('/api/admin/reset-testdata', { method: 'POST' });
+  const resetTestDataRes = await adminApi('/api/admin/reset-testdata', {
+    method: 'POST',
+    body: JSON.stringify({ resetPin: RESET_PIN }),
+  });
   assert(resetTestDataRes.ok, `Reset testdata feilet: ${JSON.stringify(resetTestDataRes.data)}`);
 
   // 2. Kontroller databasen og tilstand

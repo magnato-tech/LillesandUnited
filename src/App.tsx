@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import { Header } from './components/Header';
 import { EventHero } from './components/EventHero';
@@ -13,16 +13,31 @@ import { WelcomeBanner } from './components/WelcomeBanner';
 import { AppState, Person } from './types';
 import { INITIAL_STATE } from './lib/initial-data';
 import { fetchState, registerParticipant, createPerson } from './services/api';
-import { getActivePersonId, setActivePersonId, setActivePersonToken } from './lib/userProfile';
+import { getActivePersonId, setActivePersonId, setActivePersonToken, getTestPersonOverrideId, setTestPersonOverrideId, setTestPersonOverrideToken, clearTestPersonOverride } from './lib/userProfile';
 
 type AppTab = 'home' | 'profile' | 'tabletennis' | 'alpha' | 'kiosk' | 'display' | 'admin';
-type AdminTab = 'kiosk_popcorn' | 'matches' | 'participants' | 'activities' | 'alpha' | 'test';
+type AdminTab =
+  | 'kiosk_popcorn'
+  | 'matches'
+  | 'event_participants'
+  | 'tabletennis_participants'
+  | 'activities'
+  | 'alpha'
+  | 'test';
 
 const APP_TAB_KEY = 'lillesand_current_tab';
 const ADMIN_TAB_KEY = 'lillesand_admin_section';
 
 const VALID_APP_TABS: AppTab[] = ['home', 'profile', 'tabletennis', 'alpha', 'kiosk', 'display', 'admin'];
-const VALID_ADMIN_TABS: AdminTab[] = ['kiosk_popcorn', 'matches', 'participants', 'activities', 'alpha', 'test'];
+const VALID_ADMIN_TABS: AdminTab[] = [
+  'kiosk_popcorn',
+  'matches',
+  'event_participants',
+  'tabletennis_participants',
+  'activities',
+  'alpha',
+  'test',
+];
 
 function readStoredAppTab(): AppTab {
   if (typeof window === 'undefined') return 'home';
@@ -33,6 +48,7 @@ function readStoredAppTab(): AppTab {
 function readStoredAdminTab(fallback: AdminTab): AdminTab {
   if (typeof window === 'undefined') return fallback;
   const saved = sessionStorage.getItem(ADMIN_TAB_KEY);
+  if (saved === 'participants') return 'tabletennis_participants';
   return VALID_ADMIN_TABS.includes(saved as AdminTab) ? (saved as AdminTab) : fallback;
 }
 
@@ -45,9 +61,18 @@ export default function App() {
   const [activePersonId, setActivePersonIdState] = useState<string | null>(() => {
     return getActivePersonId();
   });
+  const [testPersonOverrideId, setTestPersonOverrideIdState] = useState<string | null>(() => {
+    return getTestPersonOverrideId();
+  });
   const [myPlayerName, setMyPlayerName] = useState<string | null>(() => {
     return localStorage.getItem('lillesand_my_player_name');
   });
+
+  const effectiveActivePersonId = testPersonOverrideId ?? activePersonId;
+  const effectiveActivePerson = useMemo(() => {
+    if (!effectiveActivePersonId) return null;
+    return (state.persons || []).find((p) => p.id === effectiveActivePersonId) || null;
+  }, [effectiveActivePersonId, state.persons]);
 
   const previousWinnerRef = useRef<string | null>(null);
 
@@ -57,11 +82,12 @@ export default function App() {
       const data = await fetchState();
       setState(data);
 
-      // Sync active person name if activePersonId is set
-      const currentId = getActivePersonId();
+      // Sync active person name if activePersonId is set (not test override)
+      const overrideId = getTestPersonOverrideId();
+      const currentId = overrideId ?? getActivePersonId();
       if (currentId && data.persons && Array.isArray(data.persons)) {
         const matchingPerson = data.persons.find((p) => p.id === currentId);
-        if (matchingPerson) {
+        if (matchingPerson && !overrideId) {
           setMyPlayerName(matchingPerson.firstName);
           localStorage.setItem('lillesand_my_player_name', matchingPerson.firstName);
           localStorage.setItem('lillesand_my_player_display_id', matchingPerson.displayId);
@@ -137,10 +163,24 @@ export default function App() {
     await handleCreatePerson(clean);
   };
 
+  const handleSetTestPersonOverride = (personId: string | null) => {
+    setTestPersonOverrideIdState(personId);
+    if (personId) {
+      const person = (state.persons || []).find((p) => p.id === personId);
+      setTestPersonOverrideId(personId);
+      setTestPersonOverrideToken(person?.anonymousToken || null);
+    } else {
+      clearTestPersonOverride();
+    }
+  };
+
   const handleRegisterPlayer = async (name: string, personId: string) => {
-    const person = (state.persons || []).find((p) => p.id === personId);
+    const person =
+      effectiveActivePerson?.id === personId
+        ? effectiveActivePerson
+        : (state.persons || []).find((p) => p.id === personId);
     if (!person) {
-      throw new Error('Profil ikke funnet. Velg eller opprett profil i menyen øverst.');
+      throw new Error('Profil ikke funnet. Opprett eller velg profil på Min side.');
     }
     const updatedState = await registerParticipant(
       person.firstName,
@@ -193,35 +233,27 @@ export default function App() {
           currentTab={currentTab}
           setCurrentTab={handleNavigate}
           tournamentActive={state.tournament.status === 'active'}
-          myPlayerName={myPlayerName}
-          onSetMyPlayer={handleSetMyPlayer}
-          participants={state.tournament.participants}
-          persons={state.persons || []}
-          activePersonId={activePersonId}
-          onSelectPerson={handleSelectPerson}
-          onCreatePerson={handleCreatePerson}
+          myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
+          activePerson={effectiveActivePerson}
         />
 
         {/* Main Content Area */}
         <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
           {currentTab === 'home' && (
             <>
-              <WelcomeBanner
-                myPlayerName={myPlayerName}
-                onSetMyPlayer={handleSetMyPlayer}
-                onGoToProfile={() => setCurrentTab('profile')}
-              />
+              {!effectiveActivePerson && (
+                <WelcomeBanner onSetMyPlayer={(name) => handleSetMyPlayer(name)} />
+              )}
               <EventHero
                 state={state}
                 onGoToTableTennis={() => setCurrentTab('tabletennis')}
                 onGoToAlpha={() => setCurrentTab('alpha')}
-                myPlayerName={myPlayerName}
-                onSetMyPlayer={handleSetMyPlayer}
+                myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
                 onBongClaimed={loadLatestState}
-                activePersonId={activePersonId}
-                persons={state.persons || []}
-                onSelectPerson={handleSelectPerson}
+                activePersonId={effectiveActivePersonId}
+                activePerson={effectiveActivePerson}
                 onCreatePerson={handleCreatePerson}
+                onGoToProfile={() => setCurrentTab('profile')}
               />
               <ActivityGrid
                 activities={state.activities}
@@ -237,23 +269,23 @@ export default function App() {
               onSetMyPlayer={handleSetMyPlayer}
               onGoToTab={setCurrentTab}
               onRefreshState={loadLatestState}
-              activePersonId={activePersonId}
-              persons={state.persons || []}
+              activePersonId={effectiveActivePersonId}
+              activePerson={effectiveActivePerson}
             />
           )}
 
           {currentTab === 'tabletennis' && (
             <TableTennisView
               state={state}
-              myPlayerName={myPlayerName}
+              myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
               onSetMyPlayer={handleSetMyPlayer}
               onRegister={handleRegisterPlayer}
               onGoToAdmin={() => {
                 setAdminInitialTab('matches');
                 setCurrentTab('admin');
               }}
-              activePersonId={activePersonId}
-              persons={state.persons || []}
+              activePersonId={effectiveActivePersonId}
+              activePerson={effectiveActivePerson}
             />
           )}
 
@@ -269,13 +301,12 @@ export default function App() {
           {currentTab === 'kiosk' && (
             <KioskSection
               state={state}
-              myPlayerName={myPlayerName}
-              onSetMyPlayer={handleSetMyPlayer}
+              myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
               onBongClaimed={loadLatestState}
-              activePersonId={activePersonId}
-              persons={state.persons || []}
-              onSelectPerson={handleSelectPerson}
+              activePersonId={effectiveActivePersonId}
+              activePerson={effectiveActivePerson}
               onCreatePerson={handleCreatePerson}
+              onGoToProfile={() => setCurrentTab('profile')}
             />
           )}
 
@@ -285,6 +316,8 @@ export default function App() {
               onRefresh={loadLatestState}
               onOpenDisplay={() => setCurrentTab('display')}
               initialTab={adminInitialTab}
+              testPersonOverrideId={testPersonOverrideId}
+              onSetTestPersonOverride={handleSetTestPersonOverride}
             />
           )}
         </main>

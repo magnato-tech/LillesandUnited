@@ -3,6 +3,8 @@
 
 export const ACTIVE_PERSON_ID_KEY = 'lillesand_active_person_id';
 export const ACTIVE_PERSON_TOKEN_KEY = 'lillesand_active_person_token';
+export const TEST_PERSON_OVERRIDE_ID_KEY = 'lillesand_test_person_override_id';
+export const TEST_PERSON_OVERRIDE_TOKEN_KEY = 'lillesand_test_person_override_token';
 
 export function getActivePersonId(): string | null {
   if (typeof window === 'undefined') return null;
@@ -30,6 +32,39 @@ export function setActivePersonToken(token: string | null): void {
   } else {
     localStorage.removeItem(ACTIVE_PERSON_TOKEN_KEY);
   }
+}
+
+export function getTestPersonOverrideId(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem(TEST_PERSON_OVERRIDE_ID_KEY);
+}
+
+export function setTestPersonOverrideId(id: string | null): void {
+  if (typeof window === 'undefined') return;
+  if (id) {
+    sessionStorage.setItem(TEST_PERSON_OVERRIDE_ID_KEY, id);
+  } else {
+    sessionStorage.removeItem(TEST_PERSON_OVERRIDE_ID_KEY);
+  }
+}
+
+export function getTestPersonOverrideToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem(TEST_PERSON_OVERRIDE_TOKEN_KEY);
+}
+
+export function setTestPersonOverrideToken(token: string | null): void {
+  if (typeof window === 'undefined') return;
+  if (token) {
+    sessionStorage.setItem(TEST_PERSON_OVERRIDE_TOKEN_KEY, token);
+  } else {
+    sessionStorage.removeItem(TEST_PERSON_OVERRIDE_TOKEN_KEY);
+  }
+}
+
+export function clearTestPersonOverride(): void {
+  setTestPersonOverrideId(null);
+  setTestPersonOverrideToken(null);
 }
 
 export function getUserToken(userName?: string | null, guestIdOverride?: string): string {

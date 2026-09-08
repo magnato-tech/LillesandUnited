@@ -6,6 +6,7 @@
 
 const BASE = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const ADMIN_PIN = process.env.ADMIN_PIN || 'United2026';
+const RESET_PIN = process.env.RESET_PIN || 'ResetUnited2026';
 
 async function api(path: string, options: RequestInit = {}) {
   const res = await fetch(`${BASE}${path}`, options);
@@ -49,6 +50,7 @@ async function main() {
   const { res: resetRes } = await api('/api/admin/reset-all', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-admin-pin': ADMIN_PIN },
+    body: JSON.stringify({ resetPin: RESET_PIN }),
   });
   if (!resetRes.ok) {
     throw new Error('Kunne ikke resette testdata. Er serveren oppe på ' + BASE + '?');

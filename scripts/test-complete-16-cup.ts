@@ -40,7 +40,7 @@ async function runTest1() {
   console.log('[Steg 0] Nullstiller turnering...');
   const resetRes = await adminApi('/api/tournament/reset', {
     method: 'POST',
-    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN, securedReset: true }),
   });
   assert(resetRes.ok, `Reset tournament feilet: ${JSON.stringify(resetRes.data)}`);
 

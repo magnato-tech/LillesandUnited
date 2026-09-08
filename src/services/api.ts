@@ -29,6 +29,15 @@ export async function verifyAdminPin(pin: string): Promise<boolean> {
   return res.ok;
 }
 
+export async function verifyResetPin(pin: string): Promise<boolean> {
+  const res = await fetch('/api/admin/verify-reset-pin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin }),
+  });
+  return res.ok;
+}
+
 function getAdminHeaders(): HeadersInit {
   return {
     'Content-Type': 'application/json',
@@ -162,10 +171,11 @@ export async function addPopcornCapacity(count = 10): Promise<{ totalCapacity: n
   return data;
 }
 
-export async function resetPopcorn(): Promise<AppState> {
+export async function resetPopcorn(resetPin: string): Promise<AppState> {
   const res = await fetch('/api/popcorn/reset', {
     method: 'POST',
     headers: getAdminHeaders(),
+    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille popcorn');
@@ -243,10 +253,11 @@ export async function startTournament(): Promise<AppState> {
   return data.state;
 }
 
-export async function reDrawTournament(): Promise<AppState> {
+export async function reDrawTournament(resetPin: string): Promise<AppState> {
   const res = await fetch('/api/tournament/re-draw', {
     method: 'POST',
     headers: getAdminHeaders(),
+    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke generere ny trekning');
@@ -334,12 +345,19 @@ export async function assignMatchTable(
 
 export async function resetTournament(
   keepParticipants = true,
-  resetPin: string
+  resetPin?: string
 ): Promise<AppState> {
+  const body: { keepParticipants: boolean; resetPin?: string; securedReset?: boolean } = {
+    keepParticipants,
+  };
+  if (resetPin) {
+    body.resetPin = resetPin;
+    body.securedReset = true;
+  }
   const res = await fetch('/api/tournament/reset', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ keepParticipants, resetPin }),
+    body: JSON.stringify(body),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille');
@@ -377,10 +395,11 @@ export async function registerAlphaInterest(
   return data.state;
 }
 
-export async function resetAlpha(): Promise<AppState> {
+export async function resetAlpha(resetPin: string): Promise<AppState> {
   const res = await fetch('/api/alpha/reset', {
     method: 'POST',
     headers: getAdminHeaders(),
+    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille Alpha');
@@ -437,20 +456,22 @@ export async function updateActivity(
   return data.state;
 }
 
-export async function resetTestData(): Promise<AppState> {
+export async function resetTestData(resetPin: string): Promise<AppState> {
   const res = await fetch('/api/admin/reset-testdata', {
     method: 'POST',
     headers: getAdminHeaders(),
+    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille testdata');
   return data.state;
 }
 
-export async function resetAllData(): Promise<AppState> {
+export async function resetAllData(resetPin: string): Promise<AppState> {
   const res = await fetch('/api/admin/reset-all', {
     method: 'POST',
     headers: getAdminHeaders(),
+    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille alt');

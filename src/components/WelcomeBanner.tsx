@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, UserPlus, Users } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 interface WelcomeBannerProps {
   onSetMyPlayer: (name: string) => void;
-  onContinueAsGuest?: () => void;
 }
 
 export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
   onSetMyPlayer,
-  onContinueAsGuest,
 }) => {
   const [nameInput, setNameInput] = useState('');
 
@@ -58,30 +56,8 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
           </button>
         </form>
 
-        <div className="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-          <span className="font-bold flex items-center gap-1">
-            <Users className="w-3.5 h-3.5 text-zinc-500" />
-            Eller velg en testprofil:
-          </span>
-          {['Oliver', 'Emma', 'Sander', 'Thea'].map((sample) => (
-            <button
-              key={sample}
-              type="button"
-              onClick={() => onSetMyPlayer(sample)}
-              className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-lime-400 text-zinc-300 hover:text-white font-bold transition-all text-xs"
-            >
-              {sample}
-            </button>
-          ))}
-          {onContinueAsGuest && (
-            <button
-              type="button"
-              onClick={onContinueAsGuest}
-              className="ml-auto text-zinc-500 hover:text-zinc-300 text-xs underline"
-            >
-              Hopp over (fortsett som anonym gjest)
-            </button>
-          )}
+        <div className="pt-2 border-t border-zinc-800/80 text-xs text-zinc-500 font-medium">
+          Opprett eller endre profilen din under Min side.
         </div>
       </div>
     </div>

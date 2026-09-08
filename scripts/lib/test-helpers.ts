@@ -23,7 +23,11 @@ export async function adminApi(path: string, body?: unknown, method = 'POST') {
 }
 
 export async function resetTournamentApi(keepParticipants = false) {
-  return adminApi('/api/tournament/reset', { keepParticipants, resetPin: RESET_PIN });
+  return adminApi('/api/tournament/reset', {
+    keepParticipants,
+    resetPin: RESET_PIN,
+    securedReset: true,
+  });
 }
 
 export async function fetchState(): Promise<AppState> {
@@ -33,7 +37,7 @@ export async function fetchState(): Promise<AppState> {
 }
 
 export async function resetAll(): Promise<AppState> {
-  const { res, data } = await adminApi('/api/admin/reset-all');
+  const { res, data } = await adminApi('/api/admin/reset-all', { resetPin: RESET_PIN });
   if (!res.ok) throw new Error(`reset-all feilet: ${data.error || res.status}`);
   return data.state as AppState;
 }

@@ -7,23 +7,21 @@ interface KioskSectionProps {
   state: AppState;
   onClaimPopcorn?: () => void;
   myPlayerName?: string | null;
-  onSetMyPlayer?: (name: string | null) => void;
   onBongClaimed?: () => void;
   activePersonId?: string | null;
-  persons?: Person[];
-  onSelectPerson?: (person: Person | null) => void;
+  activePerson?: Person | null;
   onCreatePerson?: (firstName: string) => Promise<Person | null>;
+  onGoToProfile?: () => void;
 }
 
 export const KioskSection: React.FC<KioskSectionProps> = ({
   state,
   myPlayerName,
-  onSetMyPlayer,
   onBongClaimed,
   activePersonId = null,
-  persons = [],
-  onSelectPerson,
+  activePerson = null,
   onCreatePerson,
+  onGoToProfile,
 }) => {
   const kioskItems = [
     { name: 'Nypoppet Popcorn', desc: 'Første 100 beger gratis med digital bong!', price: 'Gratis bong / 20 kr', icon: '🍿', free: true },
@@ -42,13 +40,11 @@ export const KioskSection: React.FC<KioskSectionProps> = ({
         className="mb-8"
         variant="kiosk"
         userName={myPlayerName}
-        onSelectUser={onSetMyPlayer}
-        onSelectPerson={onSelectPerson}
         onCreatePerson={onCreatePerson}
-        participants={state.tournament.participants}
         onBongClaimed={onBongClaimed}
         activePersonId={activePersonId}
-        persons={persons}
+        activePerson={activePerson}
+        onGoToProfile={onGoToProfile}
       />
 
       {/* Kiosk Menu List */}

@@ -15,6 +15,7 @@ import {
   registerParticipant,
   adminApi,
   api,
+  RESET_PIN,
 } from './lib/test-helpers';
 
 async function main() {
@@ -156,7 +157,7 @@ async function main() {
 
   await runScenario('S11: Reset testdata (behold persons)', async () => {
     const realPersonIdsBefore = state.persons.filter((p) => !p.isSimulated).map((p) => p.id);
-    const { res, data } = await adminApi('/api/admin/reset-testdata');
+    const { res, data } = await adminApi('/api/admin/reset-testdata', { resetPin: RESET_PIN });
     if (!res.ok) throw new Error(`reset-testdata feilet: ${data.error}`);
     state = data.state as AppState;
 

@@ -57,6 +57,13 @@ function getResetPinFromRequest(req: express.Request): unknown {
   return req.body?.resetPin ?? req.headers['x-reset-pin'];
 }
 
+function requireResetPin(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (!isValidResetPin(getResetPinFromRequest(req))) {
+    return res.status(403).json({ error: 'Ugyldig eller manglende nullstillings-PIN.' });
+  }
+  next();
+}
+
 // Admin authentication middleware
 function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
   const pin = req.headers['x-admin-pin'] || req.query.adminPin || (req.body && req.body.adminPin);
@@ -324,6 +331,14 @@ app.post('/api/admin/verify-pin', (req, res) => {
   return res.status(401).json({ error: 'Ugyldig admin-PIN' });
 });
 
+app.post('/api/admin/verify-reset-pin', (req, res) => {
+  const { pin } = req.body || {};
+  if (isValidResetPin(pin)) {
+    return res.json({ success: true });
+  }
+  return res.status(403).json({ error: 'Ugyldig nullstillings-PIN' });
+});
+
 app.get('/api/state', (req, res) => {
   res.json(state);
 });
@@ -583,8 +598,8 @@ app.post('/api/tournament/start', requireAdmin, (req, res) => {
   }
 });
 
-// Generate new bracket draw with existing participants (Admin)
-app.post('/api/tournament/re-draw', requireAdmin, (req, res) => {
+// Generate new bracket draw with existing participants (Admin + reset PIN)
+app.post('/api/tournament/re-draw', requireAdmin, requireResetPin, (req, res) => {
   try {
     if (state.tournament.participants.length < 2) {
       return res.status(400).json({ error: 'Minst 2 deltakere kreves for å generere ny trekning.' });
@@ -755,9 +770,9 @@ app.post('/api/tournament/match/assign-table', requireAdmin, (req, res) => {
   res.json({ success: true, state });
 });
 
-// Reset tournament (Admin + reset PIN)
+// Reset tournament (Admin; secured reset from TEST & RESET requires RESET_PIN)
 app.post('/api/tournament/reset', requireAdmin, (req, res) => {
-  if (!isValidResetPin(getResetPinFromRequest(req))) {
+  if (req.body?.securedReset === true && !isValidResetPin(getResetPinFromRequest(req))) {
     return res.status(403).json({ error: 'Ugyldig eller manglende nullstillings-PIN.' });
   }
 
@@ -1038,8 +1053,8 @@ app.get('/api/user/status', (req, res) => {
   });
 });
 
-// Reset Alpha interests (Admin)
-app.post('/api/alpha/reset', requireAdmin, (req, res) => {
+// Reset Alpha interests (Admin + reset PIN)
+app.post('/api/alpha/reset', requireAdmin, requireResetPin, (req, res) => {
   state.alphaInterests = [];
   saveState();
   res.json({ success: true, state });
@@ -1274,8 +1289,8 @@ app.post('/api/popcorn/add-capacity', requireAdmin, (req, res) => {
   });
 });
 
-// Reset Popcorn (Admin)
-app.post('/api/popcorn/reset', requireAdmin, (req, res) => {
+// Reset Popcorn (Admin + reset PIN)
+app.post('/api/popcorn/reset', requireAdmin, requireResetPin, (req, res) => {
   state.popcorn = {
     totalCapacity: 100,
     bongs: Array.from({ length: 100 }, (_, i) => ({
@@ -1347,8 +1362,8 @@ app.patch('/api/activities/:id', requireAdmin, (req, res) => {
   res.json({ success: true, activity: act, state });
 });
 
-// Reset test data (Popcorn, Tournament, Alpha, and Simulated Persons) while preserving event info and real persons (Admin)
-app.post('/api/admin/reset-testdata', requireAdmin, (req, res) => {
+// Reset test data (Popcorn, Tournament, Alpha, and Simulated Persons) while preserving event info and real persons (Admin + reset PIN)
+app.post('/api/admin/reset-testdata', requireAdmin, requireResetPin, (req, res) => {
   // 1. Reset popcorn
   state.popcorn = {
     totalCapacity: 100,
@@ -1388,8 +1403,8 @@ app.post('/api/admin/reset-testdata', requireAdmin, (req, res) => {
   res.json({ success: true, state });
 });
 
-// Reset entire database to initial state (Admin)
-app.post('/api/admin/reset-all', requireAdmin, (req, res) => {
+// Reset entire database to initial state (Admin + reset PIN)
+app.post('/api/admin/reset-all', requireAdmin, requireResetPin, (req, res) => {
   state = JSON.parse(JSON.stringify(INITIAL_STATE));
   saveState();
   res.json({ success: true, state });

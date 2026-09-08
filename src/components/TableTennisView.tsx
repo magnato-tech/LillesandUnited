@@ -11,7 +11,7 @@ interface TableTennisViewProps {
   onRegister: (firstName: string, personId: string) => Promise<void>;
   onGoToAdmin: () => void;
   activePersonId?: string | null;
-  persons?: Person[];
+  activePerson?: Person | null;
 }
 
 export const TableTennisView: React.FC<TableTennisViewProps> = ({
@@ -21,9 +21,9 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
   onRegister,
   onGoToAdmin,
   activePersonId,
-  persons = [],
+  activePerson: activePersonProp = null,
 }) => {
-  const activePerson = persons.find((p) => p.id === activePersonId);
+  const activePerson = activePersonProp;
   const effectiveName = activePerson?.firstName || myPlayerName || '';
   const [nameInput, setNameInput] = useState(effectiveName);
   const [isSubmitting, setIsSubmitting] = useState(false);

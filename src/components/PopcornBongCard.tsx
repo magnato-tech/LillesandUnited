@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Popcorn, CheckCircle, Sparkles, AlertCircle, Loader2, User, UserPlus, ArrowRightLeft } from 'lucide-react';
-import { PopcornData, PopcornBong, Participant, Person } from '../types';
+import React, { useState, useMemo } from 'react';
+import { Popcorn, CheckCircle, Sparkles, AlertCircle, Loader2, User } from 'lucide-react';
+import { PopcornData, PopcornBong, Person } from '../types';
 import { activatePopcornBong } from '../services/api';
 
 interface PopcornBongCardProps {
@@ -9,12 +9,10 @@ interface PopcornBongCardProps {
   className?: string;
   variant?: 'hero' | 'kiosk';
   userName?: string | null;
-  onSelectUser?: (name: string | null) => void;
-  onSelectPerson?: (person: Person | null) => void;
   onCreatePerson?: (firstName: string) => Promise<Person | null>;
-  participants?: Participant[];
   activePersonId?: string | null;
-  persons?: Person[];
+  activePerson?: Person | null;
+  onGoToProfile?: () => void;
 }
 
 export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
@@ -23,26 +21,18 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
   className = '',
   variant = 'kiosk',
   userName = null,
-  onSelectUser,
-  onSelectPerson,
   onCreatePerson,
-  participants = [],
   activePersonId = null,
-  persons = [],
+  activePerson: activePersonProp = null,
+  onGoToProfile,
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [guestId, setGuestId] = useState<string>(() => {
+  const [guestId] = useState<string>(() => {
     return localStorage.getItem('lillesand_popcorn_guest_id') || 'guest_1';
   });
-  const [customNameInput, setCustomNameInput] = useState('');
-  const [showNameModal, setShowNameModal] = useState(false);
 
-  // Active Person resolution
-  const activePerson = useMemo(() => {
-    if (!activePersonId || !Array.isArray(persons)) return null;
-    return persons.find((p) => p.id === activePersonId) || null;
-  }, [activePersonId, persons]);
+  const activePerson = activePersonProp;
 
   // Active user name normalized
   const currentUserName = activePerson?.firstName || ((userName && userName.trim()) ? userName.trim() : null);
@@ -123,44 +113,7 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
     }
   };
 
-  const handleNewGuestSession = () => {
-    const nextId = 'guest_' + (Date.now() % 100000);
-    localStorage.setItem('lillesand_popcorn_guest_id', nextId);
-    setGuestId(nextId);
-    if (onSelectUser) {
-      onSelectUser(null);
-    }
-  };
-
-  const handleAddCustomUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customNameInput.trim()) return;
-    const name = customNameInput.trim();
-    if (onCreatePerson) {
-      await onCreatePerson(name);
-    } else if (onSelectUser) {
-      onSelectUser(name);
-    }
-    setCustomNameInput('');
-    setShowNameModal(false);
-  };
-
-  const selectablePersons = persons.length > 0
-    ? persons
-    : participants
-        .filter((p) => p.personId)
-        .map((p) => ({
-          id: p.personId!,
-          firstName: p.firstName,
-          displayId: p.displayId || p.firstName,
-          nameNumber: 1,
-          anonymousToken: p.userId || '',
-          createdAt: p.registeredAt,
-          updatedAt: p.registeredAt,
-        }));
-
-  // User Profile switcher component
-  const renderUserSwitcher = () => {
+  const renderActiveUserBadge = () => {
     return (
       <div className="mb-4 pb-4 border-b border-zinc-800 flex flex-wrap items-center justify-between gap-2.5 text-xs">
         <div className="flex items-center gap-2">
@@ -169,92 +122,17 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
           </div>
           <span className="text-zinc-400 font-medium">Aktiv bruker:</span>
           <strong className="text-white font-black bg-zinc-950 px-2.5 py-1 rounded-lg border border-zinc-800">
-            {displayLabel || 'Gjest / Ikke valgt'}
+            {displayLabel || 'Ikke registrert'}
           </strong>
         </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {(onSelectPerson || onSelectUser) && selectablePersons.length > 0 && (
-            <div className="flex items-center gap-1.5">
-              <ArrowRightLeft className="w-3.5 h-3.5 text-zinc-500" />
-              <select
-                id={`popcorn-user-select-${variant}`}
-                value={activePersonId || ''}
-                onChange={(e) => {
-                  const id = e.target.value;
-                  if (!id) {
-                    if (onSelectPerson) onSelectPerson(null);
-                    else if (onSelectUser) onSelectUser(null);
-                    return;
-                  }
-                  const person = selectablePersons.find((p) => p.id === id);
-                  if (person && onSelectPerson) {
-                    onSelectPerson(person as Person);
-                  } else if (person && onSelectUser) {
-                    onSelectUser(person.firstName);
-                  }
-                }}
-                className="bg-zinc-950 border border-zinc-700 text-zinc-200 rounded-lg px-2.5 py-1 text-xs font-bold focus:outline-none focus:border-amber-400 cursor-pointer"
-                title="Bytt profil for å se eller hente unik popcorn-bong"
-              >
-                <option value="">Gjest (ikke valgt)</option>
-                {selectablePersons.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.displayId || p.firstName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
+        {!displayLabel && onGoToProfile && (
           <button
             type="button"
-            onClick={() => setShowNameModal(true)}
-            className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 font-bold text-xs flex items-center gap-1 transition-all"
-            title="Test med et nytt navn"
+            onClick={onGoToProfile}
+            className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-amber-300 hover:text-amber-200 font-bold text-xs transition-all"
           >
-            <UserPlus className="w-3 h-3 text-amber-400" />
-            <span>Ny testbruker</span>
+            Opprett profil på Min side
           </button>
-
-          <button
-            type="button"
-            onClick={handleNewGuestSession}
-            className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs font-medium transition-all"
-            title="Simuler ny mobil/enhet som gjest"
-          >
-            Ny gjesteøkt
-          </button>
-        </div>
-
-        {/* Modal for adding custom test user */}
-        {showNameModal && (
-          <form
-            onSubmit={handleAddCustomUser}
-            className="w-full mt-2 p-3 bg-zinc-950 rounded-xl border border-zinc-700 flex items-center gap-2"
-          >
-            <input
-              type="text"
-              placeholder="Skriv inn fornavn (f.eks. Mia, Tobias)..."
-              value={customNameInput}
-              onChange={(e) => setCustomNameInput(e.target.value)}
-              className="flex-1 bg-zinc-900 border border-zinc-700 px-3 py-1.5 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
-              autoFocus
-            />
-            <button
-              type="submit"
-              className="px-3 py-1.5 bg-amber-400 text-zinc-950 rounded-lg font-black text-xs uppercase"
-            >
-              Velg
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowNameModal(false)}
-              className="px-2 py-1.5 text-zinc-400 hover:text-white text-xs"
-            >
-              Avbryt
-            </button>
-          </form>
         )}
       </div>
     );
@@ -267,7 +145,7 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
         id={`popcorn-card-used-${variant}`}
         className={`bg-zinc-900 border-2 border-zinc-800 rounded-2xl p-6 relative overflow-hidden shadow-artistic-md ${className}`}
       >
-        {renderUserSwitcher()}
+        {renderActiveUserBadge()}
 
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-800 text-zinc-300 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
@@ -306,7 +184,7 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
         id={`popcorn-card-active-${variant}`}
         className={`bg-gradient-to-b from-amber-950/40 via-zinc-900 to-zinc-950 border-2 border-amber-500/80 rounded-2xl p-6 relative overflow-hidden shadow-artistic-lg ${className}`}
       >
-        {renderUserSwitcher()}
+        {renderActiveUserBadge()}
 
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-full text-xs font-bold uppercase tracking-wider mb-3 animate-pulse">
@@ -354,7 +232,7 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
         id={`popcorn-card-soldout-${variant}`}
         className={`bg-zinc-900 border-2 border-zinc-800 rounded-2xl p-6 relative shadow-artistic-md ${className}`}
       >
-        {renderUserSwitcher()}
+        {renderActiveUserBadge()}
 
         <div className="text-center">
           <div className="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-3 text-zinc-500">
@@ -380,7 +258,7 @@ export const PopcornBongCard: React.FC<PopcornBongCardProps> = ({
       id={`popcorn-card-claim-${variant}`}
       className={`bg-zinc-900 border-2 border-amber-500/50 rounded-2xl p-6 sm:p-7 relative overflow-hidden shadow-artistic-md ${className}`}
     >
-      {renderUserSwitcher()}
+      {renderActiveUserBadge()}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
         <div>

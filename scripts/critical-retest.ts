@@ -47,7 +47,10 @@ async function runRetest() {
   console.log('====================================================\n');
 
   // Reset before starting
-  await adminApi('/api/admin/reset-all', { method: 'POST' });
+  await adminApi('/api/admin/reset-all', {
+    method: 'POST',
+    body: JSON.stringify({ resetPin: RESET_PIN }),
+  });
 
   // ----------------------------------------------------
   // TEST 1: Samtidige popcorn-bonger (12 pers, samtidige requester)
@@ -307,7 +310,7 @@ async function runRetest() {
   // Nullstill turnering og opprett en 4-spillers cup
   await adminApi('/api/tournament/reset', {
     method: 'POST',
-    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN, securedReset: true }),
   });
 
   const fourPlayers: Person[] = [];
@@ -481,7 +484,7 @@ async function runRetest() {
   // Kjør tournament reset
   const tResetRes = await adminApi('/api/tournament/reset', {
     method: 'POST',
-    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN, securedReset: true }),
   });
   assert(tResetRes.ok, 'Tournament reset feilet');
 
@@ -515,7 +518,10 @@ async function runRetest() {
   );
 
   // Kjør reset testdata
-  const resetTestDataRes = await adminApi('/api/admin/reset-testdata', { method: 'POST' });
+  const resetTestDataRes = await adminApi('/api/admin/reset-testdata', {
+    method: 'POST',
+    body: JSON.stringify({ resetPin: RESET_PIN }),
+  });
   assert(resetTestDataRes.ok, 'Reset testdata feilet');
 
   const afterTestResetState: AppState = (await api('/api/state')).data;

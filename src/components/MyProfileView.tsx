@@ -26,7 +26,7 @@ interface MyProfileViewProps {
   onRefreshState: () => void;
   onGoToTab: (tab: 'home' | 'tabletennis' | 'alpha' | 'kiosk') => void;
   activePersonId?: string | null;
-  persons?: Person[];
+  activePerson?: Person | null;
 }
 
 export const MyProfileView: React.FC<MyProfileViewProps> = ({
@@ -36,7 +36,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
   onRefreshState,
   onGoToTab,
   activePersonId = null,
-  persons = [],
+  activePerson: activePersonProp = null,
 }) => {
   const [editingName, setEditingName] = useState(false);
   const [newNameInput, setNewNameInput] = useState('');
@@ -45,10 +45,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const activePerson = useMemo(() => {
-    if (!activePersonId || !Array.isArray(persons)) return null;
-    return persons.find((p) => p.id === activePersonId) || null;
-  }, [activePersonId, persons]);
+  const activePerson = activePersonProp;
 
   const currentUserName = activePerson?.firstName || ((myPlayerName && myPlayerName.trim()) ? myPlayerName.trim() : null);
   const userToken = useMemo(() => {

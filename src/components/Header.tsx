@@ -1,18 +1,13 @@
 import React from 'react';
-import { Trophy, Sparkles, Tv, ShieldCheck, Home, Popcorn, UserCheck, User } from 'lucide-react';
-import { Participant, Person } from '../types';
+import { Trophy, Sparkles, Tv, ShieldCheck, Home, Popcorn, User } from 'lucide-react';
+import { Person } from '../types';
 
 interface HeaderProps {
   currentTab: 'home' | 'profile' | 'tabletennis' | 'alpha' | 'kiosk' | 'display' | 'admin';
   setCurrentTab: (tab: 'home' | 'profile' | 'tabletennis' | 'alpha' | 'kiosk' | 'display' | 'admin') => void;
   tournamentActive: boolean;
   myPlayerName: string | null;
-  onSetMyPlayer: (name: string | null) => void;
-  participants: Participant[];
-  persons?: Person[];
-  activePersonId?: string | null;
-  onSelectPerson?: (person: Person | null) => void;
-  onCreatePerson?: (firstName: string) => Promise<Person | null>;
+  activePerson?: Person | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -20,14 +15,8 @@ export const Header: React.FC<HeaderProps> = ({
   setCurrentTab,
   tournamentActive,
   myPlayerName,
-  onSetMyPlayer,
-  participants,
-  persons = [],
-  activePersonId,
-  onSelectPerson,
-  onCreatePerson,
+  activePerson = null,
 }) => {
-  const activePerson = persons.find((p) => p.id === activePersonId);
   const profileLabel = activePerson?.displayId || myPlayerName;
 
   return (
@@ -164,83 +153,15 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Right side: Player selection dropdown & mobile triggers */}
           <div className="flex items-center gap-2">
-            {/* Person selector dropdown in top right */}
-            <div className="flex items-center gap-1.5 bg-zinc-900 border-2 border-zinc-800 rounded-2xl px-2.5 py-1.5 shadow-artistic-sm hover:border-lime-400/60 transition-all">
-              <UserCheck className="w-4 h-4 text-lime-400 shrink-0" />
-              <select
-                id="header-user-select"
-                value={activePersonId ? `person_${activePersonId}` : myPlayerName ? `legacy_${myPlayerName}` : ''}
-                onChange={async (e) => {
-                  const val = e.target.value;
-                  if (val === '__guest__') {
-                    if (onSelectPerson) onSelectPerson(null);
-                    else onSetMyPlayer(null);
-                  } else if (val === '__new__') {
-                    const input = window.prompt('Skriv inn fornavn for ny person:');
-                    if (input && input.trim()) {
-                      if (onCreatePerson) {
-                        await onCreatePerson(input.trim());
-                      } else {
-                        onSetMyPlayer(input.trim());
-                      }
-                    }
-                  } else if (val.startsWith('person_')) {
-                    const pId = val.replace('person_', '');
-                    const found = persons.find((p) => p.id === pId);
-                    if (found) {
-                      if (onSelectPerson) onSelectPerson(found);
-                      else onSetMyPlayer(found.firstName);
-                    }
-                  } else if (val.startsWith('legacy_')) {
-                    const name = val.replace('legacy_', '');
-                    if (onCreatePerson) {
-                      await onCreatePerson(name);
-                    } else {
-                      onSetMyPlayer(name);
-                    }
-                  }
-                }}
-                className="bg-transparent text-xs font-black uppercase tracking-wider text-white focus:outline-none cursor-pointer pr-1 max-w-[140px] truncate"
-              >
-                <option value="" disabled className="bg-zinc-950 text-zinc-400">
-                  Velg person...
-                </option>
-
-                {/* Registered central Persons (distinct IDs even with identical names) */}
-                {persons.length > 0 &&
-                  persons.map((p) => (
-                    <option key={p.id} value={`person_${p.id}`} className="bg-zinc-950 text-white font-bold">
-                      👤 {p.displayId || p.firstName} {activePersonId === p.id ? '✓' : ''}
-                    </option>
-                  ))}
-
-                {/* Legacy test names shown if no persons registered yet */}
-                {persons.length === 0 &&
-                  Array.from(
-                    new Set([
-                      ...(myPlayerName ? [myPlayerName] : []),
-                      'Oliver',
-                      'Emma',
-                      'Sander',
-                      'Thea',
-                      ...participants.map((p) => p.firstName),
-                    ])
-                  ).map((name) => (
-                    <option key={name} value={`legacy_${name}`} className="bg-zinc-950 text-white font-bold">
-                      👤 {name} {myPlayerName && myPlayerName.toLowerCase() === name.toLowerCase() ? '✓' : ''}
-                    </option>
-                  ))}
-
-                <option value="__guest__" className="bg-zinc-950 text-zinc-400">
-                  — Ingen / Anonym —
-                </option>
-                <option value="__new__" className="bg-zinc-950 text-lime-400 font-bold">
-                  + Ny person / testbruker...
-                </option>
-              </select>
-            </div>
+            {profileLabel && (
+              <div className="hidden sm:flex items-center gap-1.5 bg-zinc-900 border-2 border-zinc-800 rounded-2xl px-3 py-1.5 shadow-artistic-sm">
+                <User className="w-4 h-4 text-lime-400 shrink-0" />
+                <span className="text-xs font-black uppercase tracking-wider text-white max-w-[140px] truncate">
+                  {profileLabel}
+                </span>
+              </div>
+            )}
 
             {/* Mobile Admin Icon */}
             <button

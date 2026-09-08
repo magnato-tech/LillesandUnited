@@ -9,12 +9,11 @@ interface EventHeroProps {
   onGoToAlpha: () => void;
   onClaimPopcorn?: () => void;
   myPlayerName?: string | null;
-  onSetMyPlayer?: (name: string | null) => void;
   onBongClaimed?: () => void;
   activePersonId?: string | null;
-  persons?: Person[];
-  onSelectPerson?: (person: Person | null) => void;
+  activePerson?: Person | null;
   onCreatePerson?: (firstName: string) => Promise<Person | null>;
+  onGoToProfile?: () => void;
 }
 
 export const EventHero: React.FC<EventHeroProps> = ({
@@ -23,12 +22,11 @@ export const EventHero: React.FC<EventHeroProps> = ({
   onGoToAlpha,
   onClaimPopcorn,
   myPlayerName,
-  onSetMyPlayer,
   onBongClaimed,
   activePersonId = null,
-  persons = [],
-  onSelectPerson,
+  activePerson = null,
   onCreatePerson,
+  onGoToProfile,
 }) => {
   const popcornPercent = Math.min(
     100,
@@ -201,13 +199,11 @@ export const EventHero: React.FC<EventHeroProps> = ({
         variant="hero"
         className="mb-8"
         userName={myPlayerName}
-        onSelectUser={onSetMyPlayer}
-        onSelectPerson={onSelectPerson}
         onCreatePerson={onCreatePerson}
-        participants={state.tournament.participants}
         onBongClaimed={onBongClaimed}
         activePersonId={activePersonId}
-        persons={persons}
+        activePerson={activePerson}
+        onGoToProfile={onGoToProfile}
       />
 
       {/* Action CTA Buttons */}
