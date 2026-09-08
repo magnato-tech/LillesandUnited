@@ -10,6 +10,7 @@ import type { Participant, Match, Person, AppState } from '../src/types';
 
 const BASE_URL = 'http://localhost:3000';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const RESET_PIN = process.env.RESET_PIN || 'ResetUnited2026';
 
 async function api(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
@@ -28,7 +29,7 @@ async function adminApi(path: string, options: RequestInit = {}) {
   return api(path, {
     ...options,
     headers: {
-      'x-admin-pin': 'united2026',
+      'x-admin-pin': process.env.ADMIN_PIN || 'United2026',
       ...(options.headers as Record<string, string>),
     },
   });
@@ -304,7 +305,10 @@ async function runRetest() {
   // ----------------------------------------------------
   console.log('Test 8: Resultatkorrigering (A vinner kamp 1, så B vinner ved korrigering)...');
   // Nullstill turnering og opprett en 4-spillers cup
-  await adminApi('/api/tournament/reset', { method: 'POST' });
+  await adminApi('/api/tournament/reset', {
+    method: 'POST',
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+  });
 
   const fourPlayers: Person[] = [];
   for (const name of ['Kandidat_A', 'Kandidat_B', 'Kandidat_C', 'Kandidat_D']) {
@@ -475,7 +479,10 @@ async function runRetest() {
   const realPerson: Person = realPersonRes.data.person;
 
   // Kjør tournament reset
-  const tResetRes = await adminApi('/api/tournament/reset', { method: 'POST' });
+  const tResetRes = await adminApi('/api/tournament/reset', {
+    method: 'POST',
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+  });
   assert(tResetRes.ok, 'Tournament reset feilet');
 
   const postResetState = (await api('/api/state')).data;

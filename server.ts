@@ -22,7 +22,8 @@ import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 const app = express();
 const PORT = 3000;
-const ADMIN_PIN = process.env.ADMIN_PIN || 'united2026';
+const ADMIN_PIN = process.env.ADMIN_PIN || 'United2026';
+const RESET_PIN = process.env.RESET_PIN || 'ResetUnited2026';
 
 app.use(express.json());
 
@@ -45,11 +46,15 @@ try {
 }
 
 function isValidAdminPin(pin: unknown): boolean {
-  if (typeof pin !== 'string' || !pin) return false;
-  if (process.env.NODE_ENV === 'production') {
-    return pin === ADMIN_PIN;
-  }
-  return pin === ADMIN_PIN || pin === 'united2026' || pin === 'admin';
+  return typeof pin === 'string' && pin.length > 0 && pin === ADMIN_PIN;
+}
+
+function isValidResetPin(pin: unknown): boolean {
+  return typeof pin === 'string' && pin.length > 0 && pin === RESET_PIN;
+}
+
+function getResetPinFromRequest(req: express.Request): unknown {
+  return req.body?.resetPin ?? req.headers['x-reset-pin'];
 }
 
 // Admin authentication middleware
@@ -309,6 +314,14 @@ function saveState() {
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+app.post('/api/admin/verify-pin', (req, res) => {
+  const { pin } = req.body || {};
+  if (isValidAdminPin(pin)) {
+    return res.json({ success: true });
+  }
+  return res.status(401).json({ error: 'Ugyldig admin-PIN' });
 });
 
 app.get('/api/state', (req, res) => {
@@ -742,8 +755,12 @@ app.post('/api/tournament/match/assign-table', requireAdmin, (req, res) => {
   res.json({ success: true, state });
 });
 
-// Reset tournament (Admin)
+// Reset tournament (Admin + reset PIN)
 app.post('/api/tournament/reset', requireAdmin, (req, res) => {
+  if (!isValidResetPin(getResetPinFromRequest(req))) {
+    return res.status(403).json({ error: 'Ugyldig eller manglende nullstillings-PIN.' });
+  }
+
   const { keepParticipants } = req.body;
   state.tournament.status = 'registration';
   state.tournament.startedAt = null;

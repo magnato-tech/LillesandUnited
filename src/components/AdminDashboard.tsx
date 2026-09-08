@@ -42,6 +42,7 @@ import {
   updateEvent,
   updateActivity,
   setAdminPin,
+  verifyAdminPin,
   redeemPopcornBong,
   addPopcornCapacity,
   resetPopcorn,
@@ -63,11 +64,12 @@ interface ConfirmDialogState {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'danger' | 'warning' | 'primary' | 'success';
+  requiresResetPin?: boolean;
   secondaryAction?: {
     label: string;
-    onClick: () => Promise<void> | void;
+    onClick: (resetPin: string) => Promise<void> | void;
   };
-  onConfirm: () => Promise<void> | void;
+  onConfirm: (resetPin: string) => Promise<void> | void;
 }
 
 interface ToastMessage {
@@ -96,6 +98,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // In-app confirm dialog & toast state (replacing window.confirm and window.alert for reliable iframe behavior)
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [dialogResetPin, setDialogResetPin] = useState('');
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -241,17 +244,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  // Admin unlock
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Admin unlock (validated server-side)
+  const handleUnlock = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     const cleanPin = pin.trim();
-    if (cleanPin === 'united2026' || cleanPin === 'admin' || cleanPin === '1234') {
-      const activePin = cleanPin === '1234' ? 'united2026' : cleanPin;
-      setAdminPin(activePin);
-      sessionStorage.setItem('lillesand_admin_pin', activePin);
-      setIsAuthenticated(true);
-      setAuthError(false);
-    } else {
+    if (!cleanPin) {
+      setAuthError(true);
+      return;
+    }
+
+    try {
+      const ok = await verifyAdminPin(cleanPin);
+      if (ok) {
+        setAdminPin(cleanPin);
+        setIsAuthenticated(true);
+        setAuthError(false);
+      } else {
+        setAuthError(true);
+      }
+    } catch {
       setAuthError(true);
     }
   };
@@ -321,32 +332,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleResetTournamentData = () => {
+    setDialogResetPin('');
     setConfirmDialog({
       isOpen: true,
       title: 'Reset Bordtennisturnering',
-      message: 'Fjerner alle eksisterende kamper, resultater og cup-tre, og setter turneringen tilbake til påmeldingsfasen. Du kan velge om du også vil fjerne påmeldte spillere eller beholde dem.',
+      message:
+        'Fjerner alle eksisterende kamper, resultater og cup-tre, og setter turneringen tilbake til påmeldingsfasen. Du kan velge om du også vil fjerne påmeldte spillere eller beholde dem.\n\nSkriv inn nullstillings-PIN for å bekrefte.',
       confirmLabel: 'Nullstill alt (tøm deltakere)',
       variant: 'danger',
+      requiresResetPin: true,
       secondaryAction: {
         label: 'Nullstill cup (behold påmeldte spillere)',
-        onClick: async () => {
-          try {
-            await resetTournament(true);
-            onRefresh();
-            showToast('Turneringen er nullstilt. Påmeldte spillere er beholdt.', 'success');
-          } catch (err: any) {
-            showToast(err.message || 'Feil ved nullstilling', 'error');
+        onClick: async (resetPin) => {
+          if (!resetPin.trim()) {
+            showToast('Nullstillings-PIN er påkrevd.', 'error');
+            throw new Error('reset pin required');
           }
+          await resetTournament(true, resetPin.trim());
+          onRefresh();
+          showToast('Turneringen er nullstilt. Påmeldte spillere er beholdt.', 'success');
         },
       },
-      onConfirm: async () => {
-        try {
-          await resetTournament(false);
-          onRefresh();
-          showToast('Turneringen er nullstilt og deltakerlisten er tømt.', 'success');
-        } catch (err: any) {
-          showToast(err.message || 'Feil ved nullstilling', 'error');
+      onConfirm: async (resetPin) => {
+        if (!resetPin.trim()) {
+          showToast('Nullstillings-PIN er påkrevd.', 'error');
+          throw new Error('reset pin required');
         }
+        await resetTournament(false, resetPin.trim());
+        onRefresh();
+        showToast('Turneringen er nullstilt og deltakerlisten er tømt.', 'success');
       },
     });
   };
@@ -505,20 +519,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Reset tournament to registration (keep players)
   const handleReopenRegistration = () => {
+    setDialogResetPin('');
     setConfirmDialog({
       isOpen: true,
       title: 'Gjenåpne påmelding',
-      message: 'Tilbakestille turneringen til påmeldingsfasen? Eksisterende påmeldte deltakere beholdes, men pågående kamper og resultater nullstilles.',
+      message:
+        'Tilbakestille turneringen til påmeldingsfasen? Eksisterende påmeldte deltakere beholdes, men pågående kamper og resultater nullstilles.\n\nSkriv inn nullstillings-PIN for å bekrefte.',
       confirmLabel: 'Gjenåpne påmelding',
       variant: 'warning',
-      onConfirm: async () => {
-        try {
-          await resetTournament(true);
-          onRefresh();
-          showToast('Turneringen er satt tilbake til påmelding. Deltakerne er beholdt.', 'success');
-        } catch (err: any) {
-          showToast(err.message || 'Kunne ikke gjenåpne påmelding', 'error');
+      requiresResetPin: true,
+      onConfirm: async (resetPin) => {
+        if (!resetPin.trim()) {
+          showToast('Nullstillings-PIN er påkrevd.', 'error');
+          throw new Error('reset pin required');
         }
+        await resetTournament(true, resetPin.trim());
+        onRefresh();
+        showToast('Turneringen er satt tilbake til påmelding. Deltakerne er beholdt.', 'success');
       },
     });
   };
@@ -753,21 +770,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           {authError && (
             <p className="text-xs text-rose-400 text-center font-bold">
-              Feil kode. Standard arrangør-PIN er "united2026".
+              Feil kode. Prøv igjen eller kontakt arrangør.
             </p>
           )}
 
           <div className="pt-2 text-center">
             <button
               type="button"
-              onClick={() => {
-                setPin('united2026');
-                setAdminPin('united2026');
-                setIsAuthenticated(true);
-              }}
+              onClick={() => handleUnlock()}
               className="text-xs font-bold text-zinc-500 hover:text-zinc-300 underline uppercase tracking-wider"
             >
-              Hurtiginnlogging som arrangør (united2026)
+              Hurtiginnlogging som arrangør
             </button>
           </div>
         </form>
@@ -1908,6 +1921,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <p className="text-xs text-zinc-300 mt-1 leading-relaxed whitespace-pre-line">
                   {confirmDialog.message}
                 </p>
+                {confirmDialog.requiresResetPin && (
+                  <div className="mt-3">
+                    <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-1">
+                      Nullstillings-PIN
+                    </label>
+                    <input
+                      type="password"
+                      value={dialogResetPin}
+                      onChange={(e) => setDialogResetPin(e.target.value)}
+                      placeholder="Skriv nullstillings-PIN"
+                      className="w-full px-3 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500 text-sm font-mono"
+                      autoComplete="off"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1919,8 +1947,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={async () => {
                     setConfirmLoading(true);
                     try {
-                      await confirmDialog.secondaryAction?.onClick();
+                      await confirmDialog.secondaryAction?.onClick(dialogResetPin);
                       setConfirmDialog(null);
+                      setDialogResetPin('');
+                    } catch (err: any) {
+                      if (err?.message !== 'reset pin required') {
+                        showToast(err?.message || 'Handlingen feilet', 'error');
+                      }
                     } finally {
                       setConfirmLoading(false);
                     }
@@ -1937,8 +1970,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 onClick={async () => {
                   setConfirmLoading(true);
                   try {
-                    await confirmDialog.onConfirm();
+                    await confirmDialog.onConfirm(dialogResetPin);
                     setConfirmDialog(null);
+                    setDialogResetPin('');
+                  } catch (err: any) {
+                    if (err?.message !== 'reset pin required') {
+                      showToast(err?.message || 'Handlingen feilet', 'error');
+                    }
                   } finally {
                     setConfirmLoading(false);
                   }
@@ -1958,7 +1996,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <button
                 type="button"
                 disabled={confirmLoading}
-                onClick={() => setConfirmDialog(null)}
+                onClick={() => {
+                  setConfirmDialog(null);
+                  setDialogResetPin('');
+                }}
                 className="w-full py-2.5 px-4 rounded-2xl bg-transparent hover:bg-zinc-800/60 text-zinc-400 text-xs font-bold transition-all"
               >
                 {confirmDialog.cancelLabel || 'Avbryt'}

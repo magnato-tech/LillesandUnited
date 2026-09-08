@@ -2,7 +2,8 @@ import type { AppState } from '../../src/types';
 import { validateAppState } from '../../src/lib/state-consistency';
 
 export const BASE = process.env.TEST_BASE_URL || 'http://localhost:3000';
-export const ADMIN_PIN = process.env.ADMIN_PIN || 'united2026';
+export const ADMIN_PIN = process.env.ADMIN_PIN || 'United2026';
+export const RESET_PIN = process.env.RESET_PIN || 'ResetUnited2026';
 
 export async function api(path: string, options: RequestInit = {}) {
   const res = await fetch(`${BASE}${path}`, options);
@@ -19,6 +20,10 @@ export async function adminApi(path: string, body?: unknown, method = 'POST') {
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+}
+
+export async function resetTournamentApi(keepParticipants = false) {
+  return adminApi('/api/tournament/reset', { keepParticipants, resetPin: RESET_PIN });
 }
 
 export async function fetchState(): Promise<AppState> {

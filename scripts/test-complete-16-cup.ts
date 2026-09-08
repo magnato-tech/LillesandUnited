@@ -1,7 +1,8 @@
 import type { AppState, Match, Participant, Person } from '../src/types';
 
 const BASE_URL = 'http://localhost:3000';
-const ADMIN_PIN = 'united2026';
+const ADMIN_PIN = process.env.ADMIN_PIN || 'United2026';
+const RESET_PIN = process.env.RESET_PIN || 'ResetUnited2026';
 
 async function api(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
@@ -37,7 +38,10 @@ async function runTest1() {
 
   // 0. Nullstill turnering for en ren start
   console.log('[Steg 0] Nullstiller turnering...');
-  const resetRes = await adminApi('/api/tournament/reset', { method: 'POST' });
+  const resetRes = await adminApi('/api/tournament/reset', {
+    method: 'POST',
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
+  });
   assert(resetRes.ok, `Reset tournament feilet: ${JSON.stringify(resetRes.data)}`);
 
   // 1. Opprett 16 distinkte testspillere og meld dem på

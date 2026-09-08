@@ -2,17 +2,31 @@ import { AppState, Participant, Match, AlphaInterest, PopcornBong, Person } from
 
 const STATE_CACHE_KEY = 'lillesand_state_cache';
 
-let currentAdminPin = typeof window !== 'undefined' ? (sessionStorage.getItem('lillesand_admin_pin') || 'united2026') : 'united2026';
+let currentAdminPin =
+  typeof window !== 'undefined' ? sessionStorage.getItem('lillesand_admin_pin') || '' : '';
 
 export function setAdminPin(pin: string) {
   currentAdminPin = pin;
   if (typeof window !== 'undefined') {
-    sessionStorage.setItem('lillesand_admin_pin', pin);
+    if (pin) {
+      sessionStorage.setItem('lillesand_admin_pin', pin);
+    } else {
+      sessionStorage.removeItem('lillesand_admin_pin');
+    }
   }
 }
 
 export function getAdminPin(): string {
   return currentAdminPin;
+}
+
+export async function verifyAdminPin(pin: string): Promise<boolean> {
+  const res = await fetch('/api/admin/verify-pin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pin }),
+  });
+  return res.ok;
 }
 
 function getAdminHeaders(): HeadersInit {
@@ -318,11 +332,14 @@ export async function assignMatchTable(
   return data.state;
 }
 
-export async function resetTournament(keepParticipants = true): Promise<AppState> {
+export async function resetTournament(
+  keepParticipants = true,
+  resetPin: string
+): Promise<AppState> {
   const res = await fetch('/api/tournament/reset', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ keepParticipants }),
+    body: JSON.stringify({ keepParticipants, resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille');

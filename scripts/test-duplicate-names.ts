@@ -5,7 +5,7 @@
  */
 
 const BASE = process.env.TEST_BASE_URL || 'http://localhost:3000';
-const ADMIN_PIN = process.env.ADMIN_PIN || 'united2026';
+const ADMIN_PIN = process.env.ADMIN_PIN || 'United2026';
 
 async function api(path: string, options: RequestInit = {}) {
   const res = await fetch(`${BASE}${path}`, options);

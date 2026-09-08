@@ -1,7 +1,8 @@
 import type { AppState, Match, Participant, Person } from '../src/types';
 
 const BASE_URL = 'http://localhost:3000';
-const ADMIN_PIN = 'united2026';
+const ADMIN_PIN = process.env.ADMIN_PIN || 'United2026';
+const RESET_PIN = process.env.RESET_PIN || 'ResetUnited2026';
 
 async function api(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
@@ -119,7 +120,7 @@ export async function runResetTests() {
   // Nullstill først turneringen for å starte rent
   await adminApi('/api/tournament/reset', {
     method: 'POST',
-    body: JSON.stringify({ keepParticipants: false }),
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
   });
 
   for (const p of selected16Persons) {
@@ -152,7 +153,7 @@ export async function runResetTests() {
   console.log('[Del A - 6] Kaller adminfunksjonen Reset Turnering (keepParticipants=false)...');
   const resetTourRes = await adminApi('/api/tournament/reset', {
     method: 'POST',
-    body: JSON.stringify({ keepParticipants: false }),
+    body: JSON.stringify({ keepParticipants: false, resetPin: RESET_PIN }),
   });
   assert(resetTourRes.ok, `Reset turnering feilet: ${JSON.stringify(resetTourRes.data)}`);
 

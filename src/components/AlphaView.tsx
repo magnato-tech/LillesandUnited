@@ -85,6 +85,18 @@ export const AlphaView: React.FC<AlphaViewProps> = ({ myPlayerName, onSuccessReg
         </div>
       </div>
 
+      <div className="mb-8 rounded-3xl overflow-hidden bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm">
+        <div className="relative w-full aspect-video">
+          <iframe
+            className="absolute inset-0 w-full h-full"
+            src="https://www.youtube.com/embed/aPPOuEXwZAc"
+            title="Alpha Youth trailer"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
+      </div>
+
       {/* 3 Pillars of Alpha Youth */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
         <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm hover:border-zinc-700 transition-colors">
