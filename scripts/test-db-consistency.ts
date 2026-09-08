@@ -25,6 +25,17 @@ async function main() {
 
   await runScenario('S1: Tom database (reset-all)', async () => {
     state = await resetAll();
+    if (state.persons.length !== 0) {
+      throw new Error(`Forventet 0 personer etter reset-all, fikk ${state.persons.length}`);
+    }
+    if (state.tournament.participants.length !== 0) {
+      throw new Error(
+        `Forventet 0 bordtennisdeltakere etter reset-all, fikk ${state.tournament.participants.length}`
+      );
+    }
+    if (state.alphaInterests.length !== 0) {
+      throw new Error(`Forventet 0 Alpha-interesser etter reset-all, fikk ${state.alphaInterests.length}`);
+    }
     assertConsistent(state, 'S1 reset-all');
   });
 

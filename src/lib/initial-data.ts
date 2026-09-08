@@ -120,6 +120,32 @@ export const INITIAL_STATE: AppState = {
   persons: [],
 };
 
+/** Tom runtime-tilstand for full database-nullstilling (beholder fast program/aktiviteter). */
+export function createEmptyAppState(): AppState {
+  return {
+    event: {
+      ...INITIAL_STATE.event,
+      freePopcornLimit: INITIAL_POPCORN.totalCapacity,
+      popcornClaimedCount: 0,
+    },
+    popcorn: JSON.parse(JSON.stringify(INITIAL_POPCORN)),
+    activities: JSON.parse(JSON.stringify(INITIAL_ACTIVITIES)),
+    tournament: {
+      id: 'tour-lillesand-2026',
+      status: 'registration',
+      startedAt: null,
+      completedAt: null,
+      participants: [],
+      matches: [],
+      winner: null,
+      estimatedMinutesPerMatch: 10,
+      bracketCapacity: TOURNAMENT_DEFAULT_CAPACITY,
+    },
+    alphaInterests: [],
+    persons: [],
+  };
+}
+
 export const SIMULATION_NAMES_16 = [
   'Oliver', 'Emma', 'Sander', 'Thea', 'Lukas', 'Mathias', 'Nora', 'Jakob',
   'Leah', 'William', 'Sara', 'Filip', 'Emilie', 'Henrik', 'Maja', 'Aksel'

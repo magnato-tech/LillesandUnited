@@ -16,9 +16,9 @@ import {
   getCapacityInfo,
   resolveBracketCapacity,
 } from './src/lib/tournament';
-import { INITIAL_STATE, INITIAL_ACTIVITIES, INITIAL_POPCORN, SIMULATION_NAMES_16, SIMULATION_NAMES_31, generateSimulationNames, TOURNAMENT_MAX_PARTICIPANTS, TOURNAMENT_DEFAULT_CAPACITY } from './src/lib/initial-data';
+import { INITIAL_STATE, INITIAL_ACTIVITIES, INITIAL_POPCORN, createEmptyAppState, SIMULATION_NAMES_16, SIMULATION_NAMES_31, generateSimulationNames, TOURNAMENT_MAX_PARTICIPANTS, TOURNAMENT_DEFAULT_CAPACITY } from './src/lib/initial-data';
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 
 const app = express();
 const PORT = 3000;
@@ -198,6 +198,14 @@ function saveLocalStateOnly() {
     fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf-8');
   } catch (err) {
     console.error('Failed to save state to db.json:', err);
+  }
+}
+
+async function deleteFirestoreCollection(collectionName: string): Promise<void> {
+  if (!firestoreDb) return;
+  const snap = await getDocs(collection(firestoreDb, collectionName));
+  for (const docSnap of snap.docs) {
+    await deleteDoc(docSnap.ref);
   }
 }
 
@@ -1404,10 +1412,38 @@ app.post('/api/admin/reset-testdata', requireAdmin, requireResetPin, (req, res) 
 });
 
 // Reset entire database to initial state (Admin + reset PIN)
-app.post('/api/admin/reset-all', requireAdmin, requireResetPin, (req, res) => {
-  state = JSON.parse(JSON.stringify(INITIAL_STATE));
-  saveState();
-  res.json({ success: true, state });
+app.post('/api/admin/reset-all', requireAdmin, requireResetPin, async (req, res) => {
+  try {
+    if (firestoreSaveTimeout) {
+      clearTimeout(firestoreSaveTimeout);
+      firestoreSaveTimeout = null;
+    }
+
+    if (firestoreDb) {
+      try {
+        await deleteFirestoreCollection('persons');
+        await deleteFirestoreCollection('alphaInterests');
+      } catch (deleteErr: any) {
+        console.warn(
+          '[reset-all] Kunne ikke slette Firestore-underkolleksjoner:',
+          deleteErr?.message || deleteErr
+        );
+      }
+    }
+
+    state = JSON.parse(JSON.stringify(createEmptyAppState()));
+    saveLocalStateOnly();
+
+    if (firestoreDb) {
+      await syncToFirestoreCollections(state);
+    }
+
+    res.json({ success: true, state });
+  } catch (err: any) {
+    firestoreSyncError = err?.message || String(err);
+    console.error('[reset-all] Failed to reset database:', err);
+    res.status(500).json({ error: err?.message || 'Kunne ikke nullstille databasen.' });
+  }
 });
 
 // ----------------------------------------------------

@@ -14,7 +14,9 @@ import {
   Trash2,
   Edit3,
   ToggleLeft,
-  ToggleRight,
+  Target,
+  Settings,
+  UserCheck,
   Tv,
   Sparkles,
   Copy,
@@ -51,6 +53,7 @@ import {
   reDrawTournament,
   resetAlpha,
   resetTestData,
+  resetAllData,
   expandTournamentCapacity,
   getFirestoreStatus,
   syncFirestore,
@@ -521,6 +524,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     });
   };
 
+  const handleResetDatabase = () => {
+    setDialogResetPin('');
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Nullstill database',
+      message:
+        'Sletter ALT runtime-data og setter applikasjonen tilbake til tom tilstand: alle personer, bordtennisdeltakere, kamper, popcorn, Alpha og annen testdata. Arrangementets faste program og aktivitetsoppsett beholdes.\n\nDenne handlingen kan ikke angres.',
+      confirmLabel: 'Nullstill database',
+      variant: 'danger',
+      requiresResetPin: true,
+      onConfirm: async (resetPin) => {
+        if (!resetPin.trim()) {
+          showToast('Nullstillings-PIN er påkrevd.', 'error');
+          throw new Error('reset pin required');
+        }
+        await resetAllData(resetPin.trim());
+        setSelectedBong(null);
+        onSetTestPersonOverride(null);
+        onRefresh();
+        showToast('Databasen er nullstilt. Alle personer og testdata er slettet.', 'success');
+      },
+    });
+  };
+
   // Start tournament
   const handleStartTournament = () => {
     if (tournament.participants.length < 2) {
@@ -876,6 +903,72 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     .filter((b) => b.status === 'blank' && b.number <= totalCapacity)
     .sort((a, b) => a.number - b.number)[0];
 
+  type AdminNavItem = {
+    id: AdminSectionTab;
+    shortLabel: string;
+    countLabel?: string;
+    tooltip: string;
+    icon: React.ComponentType<{ className?: string }>;
+    activeClass: string;
+  };
+
+  const adminNavItems: AdminNavItem[] = [
+    {
+      id: 'event_participants',
+      shortLabel: 'ARR',
+      countLabel: String(eventPersons.length),
+      tooltip: 'Deltakere arrangement — alle som har registrert navnet sitt i appen',
+      icon: Users,
+      activeClass: 'bg-sky-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+    {
+      id: 'tabletennis_participants',
+      shortLabel: 'BT',
+      countLabel: `${tournament.participants.length}/${tableTennisCapacity}`,
+      tooltip: 'Deltakere bordtennis — påmeldte spillere i turneringen',
+      icon: UserCheck,
+      activeClass: 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+    {
+      id: 'matches',
+      shortLabel: 'KAMP',
+      countLabel: String(tournament.matches.length),
+      tooltip: 'Bordtenniskamper — cup-tre, resultater og bordtildeling',
+      icon: Trophy,
+      activeClass: 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+    {
+      id: 'activities',
+      shortLabel: 'AKT',
+      tooltip: 'Aktiviteter — program, aktiviteter og arrangementsdetaljer',
+      icon: Target,
+      activeClass: 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+    {
+      id: 'kiosk_popcorn',
+      shortLabel: 'KIOSK',
+      countLabel: `${usedBongs.length}/${totalCapacity}`,
+      tooltip: 'Kiosk & popcorn — bongkart, utlevering og kapasitet',
+      icon: Popcorn,
+      activeClass: 'bg-amber-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+    {
+      id: 'alpha',
+      shortLabel: 'ALPHA',
+      countLabel: String(alphaInterests.length),
+      tooltip: 'Alpha-interesser — registrerte interesser for UngdomsAlpha',
+      icon: Sparkles,
+      activeClass: 'bg-sky-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+    {
+      id: 'test',
+      shortLabel: 'TEST',
+      tooltip: 'Test & Reset — testidentitet, nullstilling og simulering (krever nullstillings-PIN)',
+      icon: Settings,
+      activeClass: 'bg-rose-500 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
       {/* Top Admin Header */}
@@ -909,90 +1002,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b-2 border-zinc-800 pb-3 mb-6 overflow-x-auto">
-        <button
-          onClick={() => handleAdminTabSelect('kiosk_popcorn')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'kiosk_popcorn'
-              ? 'bg-amber-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
-              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
-          }`}
-        >
-          <Popcorn className="w-4 h-4" />
-          Kiosk & Popcorn ({usedBongs.length}/{totalCapacity})
-        </button>
-
-        <button
-          onClick={() => handleAdminTabSelect('matches')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'matches'
-              ? 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
-              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
-          }`}
-        >
-          <Trophy className="w-4 h-4" />
-          Bordtennis Kamper ({tournament.matches.length})
-        </button>
-
-        <button
-          onClick={() => handleAdminTabSelect('event_participants')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'event_participants'
-              ? 'bg-sky-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
-              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
-          }`}
-        >
-          <User className="w-4 h-4" />
-          Deltakere Arrangement ({eventPersons.length})
-        </button>
-
-        <button
-          onClick={() => handleAdminTabSelect('tabletennis_participants')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'tabletennis_participants'
-              ? 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
-              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          Deltakere Bordtennis ({tournament.participants.length}/{tableTennisCapacity})
-        </button>
-
-        <button
-          onClick={() => handleAdminTabSelect('activities')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'activities'
-              ? 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
-              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
-          }`}
-        >
-          <ToggleRight className="w-4 h-4" />
-          Aktiviteter
-        </button>
-
-        <button
-          onClick={() => handleAdminTabSelect('alpha')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'alpha'
-              ? 'bg-sky-400 text-zinc-950 border-zinc-950 shadow-artistic-sm'
-              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          Alpha-interesser ({alphaInterests.length})
-        </button>
-
-        <button
-          onClick={() => handleAdminTabSelect('test')}
-          className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 border-2 transition-all ${
-            adminTab === 'test'
-              ? 'bg-rose-500 text-zinc-950 border-zinc-950 shadow-artistic-sm'
-              : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
-          }`}
-        >
-          <Zap className="w-4 h-4" />
-          Test & Reset
-        </button>
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-2 border-b-2 border-zinc-800 pb-3 mb-6">
+        {adminNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = adminTab === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleAdminTabSelect(item.id)}
+              title={item.tooltip}
+              aria-label={item.tooltip}
+              className={`px-2 sm:px-2.5 py-2.5 rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-wide flex items-center justify-center gap-1.5 border-2 transition-all min-w-0 ${
+                isActive
+                  ? item.activeClass
+                  : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="truncate">
+                {item.shortLabel}
+                {item.countLabel ? (
+                  <span className="font-mono tabular-nums"> {item.countLabel}</span>
+                ) : null}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ==================================================== */}
@@ -1783,15 +1819,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                 </div>
 
-                <button
-                  id="admin-sync-firestore-btn"
-                  onClick={handleSyncFirestore}
-                  disabled={isSyncingFirestore}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm flex items-center justify-center gap-2 transition-all shrink-0"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncingFirestore ? 'animate-spin' : ''}`} />
-                  <span>{isSyncingFirestore ? 'Synkroniserer...' : 'Synkroniser nå'}</span>
-                </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
+                  <button
+                    id="admin-reset-database-btn"
+                    type="button"
+                    onClick={handleResetDatabase}
+                    className="px-4 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Database className="w-3.5 h-3.5" />
+                    Nullstill database
+                  </button>
+
+                  <button
+                    id="admin-sync-firestore-btn"
+                    onClick={handleSyncFirestore}
+                    disabled={isSyncingFirestore}
+                    className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm flex items-center justify-center gap-2 transition-all"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncingFirestore ? 'animate-spin' : ''}`} />
+                    <span>{isSyncingFirestore ? 'Synkroniserer...' : 'Synkroniser nå'}</span>
+                  </button>
+                </div>
               </div>
 
               {firestoreSyncMessage && (

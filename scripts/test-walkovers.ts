@@ -26,7 +26,7 @@ function validateBracket(n: number, capacity: number, runs = 20) {
 
   for (let run = 0; run < runs; run++) {
     const participants = makeParticipants(n);
-    const matches = generateBracket(participants, capacity as 16 | 32 | 64);
+    const matches = generateBracket(participants, capacity as any);
 
     const r1 = matches.filter((m) => m.round === 1);
     const walkoverMatches = r1.filter((m) => m.isWalkover || m.status === 'walkover');
@@ -129,7 +129,7 @@ function validateBracket(n: number, capacity: number, runs = 20) {
 
 function printTreeSample(n: number, capacity: number): void {
   const participants = makeParticipants(n);
-  const matches = generateBracket(participants, capacity as 16 | 32 | 64);
+  const matches = generateBracket(participants, capacity as any);
   const totalRounds = Math.max(...matches.map((m) => m.round));
 
   console.log(`\nEksempel-tre for ${n} spillere (cup ${capacity}, ${capacity / 2} kamper r1):`);
@@ -161,7 +161,9 @@ function printTreeSample(n: number, capacity: number): void {
 }
 
 const testCases = [
-  { players: 8, capacity: 16 },
+  // N er 2-potens → perfekt bracket, 0 walkovers
+  { players: 8, capacity: 8 },
+  // N mellom 2-potenser → walkovers
   { players: 17, capacity: 32 },
   { players: 35, capacity: 64 },
   { players: 63, capacity: 64 },
