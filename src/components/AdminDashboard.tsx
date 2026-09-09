@@ -28,8 +28,11 @@ import {
   RefreshCw,
   X,
   User,
+  UserPlus,
+  UserMinus,
+  ExternalLink,
 } from 'lucide-react';
-import { AppState, Match, PopcornBong } from '../types';
+import { AppState, Match, PopcornBong, Person } from '../types';
 import {
   startTournament,
   submitMatchScore,
@@ -40,6 +43,7 @@ import {
   simulateTournament,
   registerParticipant,
   createPerson,
+  deletePerson,
   removeParticipant,
   toggleActivity,
   updateEvent,
@@ -48,8 +52,10 @@ import {
   verifyAdminPin,
   verifyResetPin,
   redeemPopcornBong,
+  activatePopcornBong,
   addPopcornCapacity,
   resetPopcorn,
+  updatePerson,
   reDrawTournament,
   resetAlpha,
   resetTestData,
@@ -87,6 +93,8 @@ interface AdminDashboardProps {
   state: AppState;
   onRefresh: () => void;
   onOpenDisplay: () => void;
+  onGoToProfile?: () => void;
+  onOpenPersonProfile?: (person: Person) => void;
   initialTab?:
     | 'kiosk_popcorn'
     | 'matches'
@@ -95,17 +103,15 @@ interface AdminDashboardProps {
     | 'activities'
     | 'alpha'
     | 'test';
-  testPersonOverrideId?: string | null;
-  onSetTestPersonOverride: (personId: string | null) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   state,
   onRefresh,
   onOpenDisplay,
+  onGoToProfile,
+  onOpenPersonProfile,
   initialTab = 'kiosk_popcorn',
-  testPersonOverrideId = null,
-  onSetTestPersonOverride,
 }) => {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -150,8 +156,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Manual participant add state
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [newEventPersonName, setNewEventPersonName] = useState('');
   const [participantSearch, setParticipantSearch] = useState('');
   const [eventParticipantSearch, setEventParticipantSearch] = useState('');
+
+  // Selected participant for direct viewing and editing
+  const [selectedPersonForEdit, setSelectedPersonForEdit] = useState<Person | null>(null);
+  const [editingPersonName, setEditingPersonName] = useState('');
+  const [personEditLoading, setPersonEditLoading] = useState(false);
 
   // Program & activity editing
   const [eventForm, setEventForm] = useState({
@@ -541,7 +553,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         }
         await resetAllData(resetPin.trim());
         setSelectedBong(null);
-        onSetTestPersonOverride(null);
         onRefresh();
         showToast('Databasen er nullstilt. Alle personer og testdata er slettet.', 'success');
       },
@@ -573,13 +584,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // Submit match score
-  const handleSubmitScore = async (isWalkover = false, woSlot?: 'A' | 'B') => {
+  const handleSubmitScore = async (
+    isWalkover = false,
+    woSlot?: 'A' | 'B',
+    sets?: { scoreA: number; scoreB: number }[]
+  ) => {
     if (!selectedMatchId) return;
     setActionError(null);
     setCorrectionWarning(null);
 
     try {
-      await submitMatchScore(selectedMatchId, scoreA, scoreB, isWalkover, woSlot);
+      await submitMatchScore(selectedMatchId, scoreA, scoreB, isWalkover, woSlot, sets);
       setSelectedMatchId(null);
       onRefresh();
       showToast('Resultat lagret!', 'success');
@@ -589,12 +604,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // Correct match score
-  const handleCorrectScore = async (forceConfirm = false) => {
+  const handleCorrectScore = async (
+    forceConfirm = false,
+    sets?: { scoreA: number; scoreB: number }[]
+  ) => {
     if (!selectedMatchId) return;
     setActionError(null);
 
     try {
-      const res = await correctMatchScore(selectedMatchId, scoreA, scoreB, forceConfirm);
+      const res = await correctMatchScore(selectedMatchId, scoreA, scoreB, forceConfirm, sets);
       if (res.requiresConfirmation && !forceConfirm) {
         setCorrectionWarning(res.warning || 'Advarsel om avhengigheter');
         return;
@@ -690,10 +708,133 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
+  // Add participant to EVENT ONLY (does not register for table tennis tournament)
+  const handleAddEventPerson = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEventPersonName.trim()) return;
+    try {
+      const { person } = await createPerson(newEventPersonName.trim());
+      setNewEventPersonName('');
+      onRefresh();
+      showToast(`${person.displayId || person.firstName} er lagt til som deltaker på arrangementet!`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Kunne ikke opprette deltaker', 'error');
+    }
+  };
+
+  // Open modal to view and edit participant directly
+  const handleOpenPersonModal = (person: Person) => {
+    setSelectedPersonForEdit(person);
+    setEditingPersonName(person.firstName);
+  };
+
+  // Save participant name updates
+  const handleSavePersonName = async () => {
+    if (!selectedPersonForEdit || !editingPersonName.trim()) return;
+    setPersonEditLoading(true);
+    try {
+      const res = await updatePerson(selectedPersonForEdit.id, { firstName: editingPersonName.trim() });
+      onRefresh();
+      setSelectedPersonForEdit(res.person);
+      showToast(`Deltakernavn oppdatert til "${res.person.displayId}"`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Kunne ikke oppdatere deltakernavn', 'error');
+    } finally {
+      setPersonEditLoading(false);
+    }
+  };
+
+  // Toggle table tennis registration directly for participant
+  const handleToggleTournamentInModal = async (person: Person, isCurrentlyRegistered: boolean, participantId?: string) => {
+    setPersonEditLoading(true);
+    try {
+      if (isCurrentlyRegistered && participantId) {
+        await removeParticipant(participantId);
+        onRefresh();
+        showToast(`${person.displayId || person.firstName} er meldt av bordtennisturneringen.`, 'success');
+      } else {
+        if (state.tournament.status !== 'registration') {
+          showToast('Turneringen er allerede i gang og kan ikke endres.', 'error');
+          return;
+        }
+        await registerParticipant(person.firstName, undefined, person.id, person.anonymousToken);
+        onRefresh();
+        showToast(`${person.displayId || person.firstName} er meldt på bordtennisturneringen!`, 'success');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Kunne ikke endre bordtennispåmelding', 'error');
+    } finally {
+      setPersonEditLoading(false);
+    }
+  };
+
+  // Redeem popcorn bong directly for participant
+  const handleRedeemBongInModal = async (bongNumber: number) => {
+    setPersonEditLoading(true);
+    try {
+      await redeemPopcornBong(bongNumber);
+      onRefresh();
+      showToast(`Popcorn-bong #${bongNumber} markert som utlevert!`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Kunne ikke løse inn bong', 'error');
+    } finally {
+      setPersonEditLoading(false);
+    }
+  };
+
+  // Activate free popcorn bong directly for participant
+  const handleActivateBongInModal = async (person: Person) => {
+    setPersonEditLoading(true);
+    try {
+      await activatePopcornBong(person.anonymousToken, person.displayId, person.id);
+      onRefresh();
+      showToast(`Gratis popcorn-bong aktivert for ${person.displayId || person.firstName}!`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Kunne ikke aktivere popcorn-bong', 'error');
+    } finally {
+      setPersonEditLoading(false);
+    }
+  };
+
+  // Open participant's personal page directly
+  const handleOpenPersonProfile = (person: Person) => {
+    if (onOpenPersonProfile) {
+      onOpenPersonProfile(person);
+    } else if (onGoToProfile) {
+      onGoToProfile();
+    }
+    showToast(`Åpnet Min side for ${person.displayId || person.firstName}.`, 'info');
+  };
+
+  // Delete person from event
+  const handleDeletePerson = (person: Person) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: `Slett ${person.displayId || person.firstName}?`,
+      message: `Er du sikker på at du vil slette ${person.displayId || person.firstName} fra arrangementet? Dette fjerner personen og eventuell påmelding i bordtennisturneringen.`,
+      confirmLabel: 'Slett person',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await deletePerson(person.id);
+          if (selectedPersonForEdit?.id === person.id) {
+            setSelectedPersonForEdit(null);
+          }
+          onRefresh();
+          showToast(`${person.displayId || person.firstName} ble slettet fra arrangementet.`, 'success');
+        } catch (err: any) {
+          showToast(err.message || 'Kunne ikke slette person', 'error');
+        }
+      },
+    });
+  };
+
   const openScoreModal = (match: Match) => {
     setSelectedMatchId(match.id);
-    setScoreA(match.scoreA ?? 21);
-    setScoreB(match.scoreB ?? 18);
+    const target = match.targetPoints ?? 21;
+    const margin = match.winMargin ?? 2;
+    setScoreA(match.scoreA ?? target);
+    setScoreB(match.scoreB ?? Math.max(0, target - (margin === 2 ? 3 : 2)));
     setActionError(null);
     setCorrectionWarning(null);
   };
@@ -1223,11 +1364,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm space-y-6">
           <div>
             <h3 className="text-base font-black text-white uppercase">
-              Registrerte personer ({eventPersons.length})
+              Registrerte personer på arrangementet ({eventPersons.length})
             </h3>
             <p className="text-xs text-zinc-400 font-medium">
-              Alle som har registrert navnet sitt i appen, uavhengig av bordtennisturneringen
+              Alle som deltar på arrangementet. Her kan du opprette nye deltakere direkte uten bordtennis, eller åpne en deltakers side for å teste, endre eller melde av bordtennis.
             </p>
+          </div>
+
+          {/* Add person directly to event form */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-zinc-950 border border-zinc-800">
+            <div className="text-xs">
+              <span className="font-black text-white uppercase tracking-wider block">Legg til deltaker (Arrangement)</span>
+              <span className="text-zinc-400">Registreres for arrangementet uten automatisk bordtennispåmelding.</span>
+            </div>
+            <form onSubmit={handleAddEventPerson} className="flex gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                placeholder="Fornavn på ny deltaker"
+                value={newEventPersonName}
+                onChange={(e) => setNewEventPersonName(e.target.value)}
+                className="px-3.5 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-white text-xs font-bold focus:outline-none focus:border-sky-400 shadow-artistic-sm min-w-[200px]"
+              />
+              <button
+                type="submit"
+                disabled={!newEventPersonName.trim()}
+                className="px-4 py-2.5 rounded-2xl bg-sky-400 hover:bg-sky-300 disabled:opacity-50 text-zinc-950 font-black text-xs uppercase tracking-wider shadow-artistic-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Legg til</span>
+              </button>
+            </form>
           </div>
 
           <input
@@ -1238,7 +1404,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             className="w-full px-4 py-2.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white text-xs font-bold focus:outline-none focus:border-sky-400 shadow-artistic-sm"
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 max-h-[480px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 max-h-[540px] overflow-y-auto pr-1">
             {eventPersons
               .filter((p) => {
                 const q = eventParticipantSearch.trim().toLowerCase();
@@ -1246,28 +1412,116 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 const label = (p.displayId || p.firstName).toLowerCase();
                 return label.includes(q) || p.firstName.toLowerCase().includes(q);
               })
-              .map((p, idx) => (
-                <div
-                  key={p.id}
-                  className="p-3.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 shadow-artistic-sm"
-                >
-                  <span className="text-[10px] font-black text-zinc-500 block uppercase">#{idx + 1}</span>
-                  <strong className="text-sm font-black text-white block">
-                    {p.displayId || p.firstName}
-                  </strong>
-                  {p.displayId && p.displayId !== p.firstName && (
-                    <span className="text-[11px] text-zinc-400 font-medium">{p.firstName}</span>
-                  )}
-                  <span className="text-[10px] text-zinc-500 font-mono mt-1 block">
-                    {new Date(p.createdAt).toLocaleString('no-NO', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                </div>
-              ))}
+              .map((p, idx) => {
+                const ttParticipant = (tournament.participants || []).find(
+                  (part) => part.personId === p.id || (p.displayId && part.firstName === p.displayId)
+                );
+                const bong = (popcorn.claimedBongs || []).find(
+                  (b) =>
+                    (p.anonymousToken && b.clientToken === p.anonymousToken) ||
+                    (b.userName && (b.userName === p.displayId || b.userName === p.firstName))
+                );
+                const alpha = (alphaInterests || []).find(
+                  (a) =>
+                    (p.anonymousToken && a.clientToken === p.anonymousToken) ||
+                    (a.name && (a.name === p.displayId || a.name === p.firstName))
+                );
+
+                return (
+                  <div
+                    key={p.id}
+                    className="p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 hover:border-zinc-700 shadow-artistic-sm flex flex-col justify-between gap-3 transition-colors"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] font-black text-zinc-500 uppercase">#{idx + 1}</span>
+                        <span className="text-[10px] text-zinc-500 font-mono ml-auto">
+                          {new Date(p.createdAt).toLocaleString('no-NO', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+
+                      <strong className="text-base font-black text-white block truncate">
+                        {p.displayId || p.firstName}
+                      </strong>
+                      {p.displayId && p.displayId !== p.firstName && (
+                        <span className="text-xs text-zinc-400 font-medium block">{p.firstName}</span>
+                      )}
+
+                      {/* Status Badges */}
+                      <div className="mt-3 pt-3 border-t border-zinc-900 space-y-1.5 text-[11px]">
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400 flex items-center gap-1">
+                            <Trophy className="w-3 h-3 text-zinc-500" /> Bordtennis:
+                          </span>
+                          {ttParticipant ? (
+                            <span className="font-bold text-lime-400">Påmeldt (#{ttParticipant.seed})</span>
+                          ) : (
+                            <span className="text-zinc-500 font-medium">Ikke påmeldt</span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400 flex items-center gap-1">
+                            <Popcorn className="w-3 h-3 text-zinc-500" /> Popcorn:
+                          </span>
+                          {bong ? (
+                            <span className="font-bold text-amber-300">
+                              Bong #{bong.bongNumber} {bong.status === 'used' ? '✓' : '(aktiv)'}
+                            </span>
+                          ) : (
+                            <span className="text-zinc-500 font-medium">Ingen bong</span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-400 flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-zinc-500" /> Alpha:
+                          </span>
+                          {alpha ? (
+                            <span className="font-bold text-purple-400">Interessert</span>
+                          ) : (
+                            <span className="text-zinc-500 font-medium">-</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="pt-3 border-t border-zinc-900 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenPersonModal(p)}
+                        className="flex-1 px-3 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 border border-sky-500/30 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-artistic-sm cursor-pointer"
+                        title="Se og rediger deltakerens informasjon"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Se / Rediger</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenPersonProfile(p)}
+                        className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                        title="Åpne Min side for denne deltakeren"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePerson(p)}
+                        className="p-2 rounded-xl bg-zinc-900 hover:bg-rose-950 text-zinc-500 hover:text-rose-400 border border-zinc-800 hover:border-rose-800 transition-all cursor-pointer"
+                        title="Slett person fra arrangementet"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
 
           {eventPersons.length === 0 && (
@@ -1648,51 +1902,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <p className="text-xs text-zinc-400 font-medium mt-1">
               Test appen grundig mange ganger før arrangementet 18. september. Ingen reset-knapper rører arrangementets faste informasjon.
             </p>
-          </div>
-
-          {/* Testidentitet (kun denne nettleseren) */}
-          <div className="p-5 rounded-2xl bg-zinc-950 border-2 border-purple-500/40 shadow-artistic-sm">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center shrink-0">
-                <User className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-black text-white text-base">Testidentitet</h4>
-                <p className="text-xs text-zinc-400 font-medium mt-0.5">
-                  Simuler en registrert person i denne nettleseren. Gjelder kun testsesjonen og endrer ikke andre brukeres identitet.
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <select
-                id="admin-test-person-select"
-                value={testPersonOverrideId || ''}
-                onChange={(e) => onSetTestPersonOverride(e.target.value || null)}
-                className="flex-1 px-4 py-3 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-white text-sm font-bold focus:outline-none focus:border-purple-400"
-              >
-                <option value="">Ingen testidentitet (bruk vanlig profil)</option>
-                {(state.persons || []).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.displayId || `${p.firstName}_${p.nameNumber || 1}`}
-                  </option>
-                ))}
-              </select>
-              {testPersonOverrideId && (
-                <button
-                  type="button"
-                  onClick={() => onSetTestPersonOverride(null)}
-                  className="px-4 py-3 rounded-2xl bg-zinc-900 border-2 border-zinc-700 hover:border-zinc-500 text-zinc-300 text-xs font-black uppercase tracking-wider"
-                >
-                  Nullstill testidentitet
-                </button>
-              )}
-            </div>
-            {testPersonOverrideId && (
-              <p className="text-xs text-purple-300 font-bold mt-3">
-                Aktiv testidentitet:{' '}
-                {(state.persons || []).find((p) => p.id === testPersonOverrideId)?.displayId || testPersonOverrideId}
-              </p>
-            )}
           </div>
 
           {/* Reset Buttons Grid */}
@@ -2119,14 +2328,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             setActionError(null);
             setCorrectionWarning(null);
           }}
-          onSubmit={() => {
+          onSubmit={(setsPayload) => {
             if (selectedMatch.status === 'completed') {
-              handleCorrectScore(false);
+              handleCorrectScore(false, setsPayload);
             } else {
-              handleSubmitScore(false);
+              handleSubmitScore(false, undefined, setsPayload);
             }
           }}
-          onConfirmCorrection={() => handleCorrectScore(true)}
+          onConfirmCorrection={(setsPayload) => handleCorrectScore(true, setsPayload)}
           onWalkover={(slot) => handleSubmitScore(true, slot)}
           onRequestReset={() => {
             if (selectedMatch) openResetMatchModal(selectedMatch);
@@ -2259,6 +2468,244 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* ---------------- DIRECT PARTICIPANT VIEW / EDIT MODAL ---------------- */}
+      {selectedPersonForEdit && (() => {
+        const p = selectedPersonForEdit;
+        const currentPersonInState = (state.persons || []).find((pers) => pers.id === p.id) || p;
+        const ttPart = (tournament.participants || []).find(
+          (tp) => tp.personId === currentPersonInState.id || tp.anonymousToken === currentPersonInState.anonymousToken
+        );
+        const pBong = (popcorn?.bongs || []).find(
+          (b) =>
+            b.personId === currentPersonInState.id ||
+            b.clientToken === currentPersonInState.anonymousToken ||
+            b.userName === currentPersonInState.displayId ||
+            b.userName === currentPersonInState.firstName
+        );
+        const pAlpha = (alphaInterests || []).find(
+          (a) =>
+            (currentPersonInState.anonymousToken && a.clientToken === currentPersonInState.anonymousToken) ||
+            (a.name && (a.name === currentPersonInState.displayId || a.name === currentPersonInState.firstName))
+        );
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-zinc-950 border border-zinc-800 w-full max-w-lg rounded-3xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-start justify-between border-b border-zinc-900 pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-400 text-[10px] font-black uppercase tracking-wider border border-sky-500/30">
+                      Deltaker
+                    </span>
+                    <span className="text-zinc-500 text-xs font-mono">
+                      {new Date(currentPersonInState.createdAt).toLocaleString('no-NO')}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-black text-white mt-1">
+                    {currentPersonInState.displayId || currentPersonInState.firstName}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPersonForEdit(null)}
+                  className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Section 1: Rediger navn */}
+              <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3">
+                <label className="text-xs font-black uppercase tracking-wider text-zinc-300 block">
+                  Rediger deltakers fornavn
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editingPersonName}
+                    onChange={(e) => setEditingPersonName(e.target.value)}
+                    placeholder="Fornavn"
+                    disabled={personEditLoading}
+                    className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500"
+                  />
+                  <button
+                    type="button"
+                    disabled={personEditLoading || !editingPersonName.trim() || editingPersonName.trim() === currentPersonInState.firstName}
+                    onClick={handleSavePersonName}
+                    className="px-4 py-2 bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:hover:bg-sky-500 text-zinc-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-artistic-sm cursor-pointer"
+                  >
+                    {personEditLoading ? 'Lagrer...' : 'Lagre navn'}
+                  </button>
+                </div>
+                <p className="text-[11px] text-zinc-500">
+                  Id i arrangementet: <strong className="text-zinc-300 font-mono">{currentPersonInState.displayId}</strong>
+                </p>
+              </div>
+
+              {/* Section 2: Bordtennis turnering */}
+              <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-300">
+                    <Trophy className="w-4 h-4 text-lime-400" />
+                    <span>Bordtennisturnering</span>
+                  </div>
+                  {ttPart ? (
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-lime-500/20 text-lime-300 font-bold border border-lime-500/30">
+                      Påmeldt (#{ttPart.seed})
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold">
+                      Ikke påmeldt
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  {ttPart ? (
+                    <button
+                      type="button"
+                      disabled={personEditLoading}
+                      onClick={() => handleToggleTournamentInModal(currentPersonInState, true, ttPart.id)}
+                      className="px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <UserMinus className="w-3.5 h-3.5" />
+                      <span>Meld av bordtennis</span>
+                    </button>
+                  ) : tournament.status === 'registration' ? (
+                    <button
+                      type="button"
+                      disabled={personEditLoading}
+                      onClick={() => handleToggleTournamentInModal(currentPersonInState, false)}
+                      className="px-3 py-2 rounded-xl bg-lime-500/15 hover:bg-lime-500/25 text-lime-300 border border-lime-500/30 text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span>Meld på bordtennis</span>
+                    </button>
+                  ) : (
+                    <p className="text-xs text-zinc-500">
+                      Turneringen er i gang. Påmelding kan ikke endres.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 3: Popcorn Kiosk */}
+              <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-300">
+                    <Popcorn className="w-4 h-4 text-amber-400" />
+                    <span>Popcorn Kiosk</span>
+                  </div>
+                  {pBong ? (
+                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${
+                      pBong.status === 'used'
+                        ? 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                        : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    }`}>
+                      Bong #{pBong.bongNumber} {pBong.status === 'used' ? '(Utlevert)' : '(Aktiv)'}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold">
+                      Ingen bong
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  {pBong ? (
+                    pBong.status !== 'used' ? (
+                      <button
+                        type="button"
+                        disabled={personEditLoading}
+                        onClick={() => handleRedeemBongInModal(pBong.bongNumber)}
+                        className="px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Marker som utlevert i kiosk</span>
+                      </button>
+                    ) : (
+                      <span className="text-xs text-zinc-500 font-medium">
+                        Popcorn er allerede utlevert til denne deltakeren.
+                      </span>
+                    )
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={personEditLoading}
+                      onClick={() => handleActivateBongInModal(currentPersonInState)}
+                      className="px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Aktiver gratis popcorn-bong</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 4: UngdomsAlpha */}
+              <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-300">
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span>UngdomsAlpha</span>
+                  </div>
+                  {pAlpha ? (
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+                      Interessert
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold">
+                      Ikke registrert
+                    </span>
+                  )}
+                </div>
+                {pAlpha && (
+                  <div className="text-xs text-zinc-400 pt-1 space-y-1">
+                    {pAlpha.phone && <p>Telefon: <strong className="text-zinc-200">{pAlpha.phone}</strong></p>}
+                    {pAlpha.notes && <p>Notat: <span className="text-zinc-300 italic">{pAlpha.notes}</span></p>}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Actions */}
+              <div className="pt-2 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleOpenPersonProfile(currentPersonInState);
+                    setSelectedPersonForEdit(null);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <ExternalLink className="w-4 h-4 text-sky-400" />
+                  <span>Åpne Min side</span>
+                </button>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => handleDeletePerson(currentPersonInState)}
+                    className="px-3 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-950 text-rose-400 hover:text-rose-300 border border-rose-800/50 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Slett</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPersonForEdit(null)}
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Lukk
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ---------------- TOAST NOTIFICATION ---------------- */}
       {toast && (

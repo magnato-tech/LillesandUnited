@@ -1,4 +1,4 @@
-import { AppState, Participant, Match, AlphaInterest, PopcornBong, Person } from '../types';
+import { AppState, Participant, Match, AlphaInterest, PopcornBong, Person, TournamentFormatSettings } from '../types';
 
 const STATE_CACHE_KEY = 'lillesand_state_cache';
 
@@ -104,6 +104,42 @@ export async function fetchPerson(id: string): Promise<Person | null> {
   } catch (err) {
     return null;
   }
+}
+
+export async function updatePerson(id: string, updates: { firstName: string }): Promise<{ person: Person; state: AppState }> {
+  const res = await fetch(`/api/persons/${id}`, {
+    method: 'PATCH',
+    headers: getAdminHeaders(),
+    body: JSON.stringify(updates),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke oppdatere person');
+  return data;
+}
+
+export async function deletePerson(id: string): Promise<AppState> {
+  const res = await fetch(`/api/persons/${id}`, {
+    method: 'DELETE',
+    headers: getAdminHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke slette person');
+  return data.state;
+}
+
+export async function withdrawTournamentParticipant(options: {
+  participantId?: string;
+  personId?: string;
+  anonymousToken?: string;
+}): Promise<AppState> {
+  const res = await fetch('/api/tournament/withdraw', {
+    method: 'POST',
+    headers: getAdminHeaders(),
+    body: JSON.stringify(options),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke trekke påmelding');
+  return data.state;
 }
 
 // ----------------------------------------------------
@@ -275,17 +311,32 @@ export async function expandTournamentCapacity(capacity: 32 | 64): Promise<AppSt
   return data.state;
 }
 
+export async function updateTournamentFormat(
+  formatSettings?: TournamentFormatSettings,
+  estimatedMinutesPerMatch?: number
+): Promise<AppState> {
+  const res = await fetch('/api/tournament/format', {
+    method: 'PATCH',
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ formatSettings, estimatedMinutesPerMatch }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke oppdatere turneringsformat');
+  return data.state;
+}
+
 export async function submitMatchScore(
   matchId: string,
   scoreA: number,
   scoreB: number,
   isWalkover = false,
-  walkoverWinnerSlot?: 'A' | 'B'
+  walkoverWinnerSlot?: 'A' | 'B',
+  sets?: { scoreA: number; scoreB: number }[]
 ): Promise<AppState> {
   const res = await fetch('/api/tournament/match/score', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot }),
+    body: JSON.stringify({ matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot, sets }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke lagre resultat');
@@ -296,12 +347,13 @@ export async function correctMatchScore(
   matchId: string,
   newScoreA: number,
   newScoreB: number,
-  confirmCorrection = false
+  confirmCorrection = false,
+  sets?: { scoreA: number; scoreB: number }[]
 ): Promise<{ state?: AppState; requiresConfirmation?: boolean; warning?: string }> {
   const res = await fetch('/api/tournament/match/correct', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ matchId, newScoreA, newScoreB, confirmCorrection }),
+    body: JSON.stringify({ matchId, newScoreA, newScoreB, confirmCorrection, sets }),
   });
   const data = await res.json();
   if (res.status === 409 && data.requiresConfirmation) {

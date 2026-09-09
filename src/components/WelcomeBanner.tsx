@@ -38,7 +38,7 @@ export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
           <input
             id="welcome-firstname-input"
             type="text"
-            placeholder="Ditt fornavn (f.eks. Oliver, Emma)..."
+            placeholder="Skriv inn fornavnet ditt..."
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             required

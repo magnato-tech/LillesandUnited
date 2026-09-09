@@ -9,16 +9,44 @@ export interface Participant {
 
 export type MatchStatus = 'not_ready' | 'ready' | 'in_progress' | 'completed' | 'walkover';
 
+export type TargetPoints = 6 | 7 | 11 | 21;
+export type WinMargin = 1 | 2;
+export type NumberOfSets = 1 | 3;
+export type TournamentStage = 'regular' | 'semifinal' | 'final';
+
+export interface StageFormatConfig {
+  sets: NumberOfSets;         // 1 eller 3 sett
+  targetPoints: TargetPoints; // 6, 7, 11 eller 21
+  winMargin: WinMargin;       // 1 eller 2
+}
+
+export interface TournamentFormatSettings {
+  regular: StageFormatConfig;   // Vanlige cuprunder
+  semifinal: StageFormatConfig; // Semifinaler
+  final: StageFormatConfig;     // Finale
+}
+
+export interface MatchSetScore {
+  setNumber: number; // 1, 2 eller 3
+  scoreA: number;
+  scoreB: number;
+}
+
 export interface Match {
   id: string;
   round: number; // 1, 2, 3 ... final
   roundName: string; // e.g. "Runde 1", "Kvartfinale", "Semifinale", "Finale"
+  stage?: TournamentStage; // 'regular' | 'semifinal' | 'final'
   position: number; // 0, 1, 2...
   playerA: Participant | null;
   playerB: Participant | null;
   winnerId: string | null;
   scoreA: number | null;
   scoreB: number | null;
+  format?: StageFormatConfig;
+  sets?: MatchSetScore[];
+  setsWonA?: number | null;
+  setsWonB?: number | null;
   tableNumber: 1 | 2 | null;
   status: MatchStatus;
   isWalkover: boolean;
@@ -40,6 +68,7 @@ export interface Tournament {
   estimatedMinutesPerMatch: number; // default 10 min
   /** Fast bracket-størrelse: 16 (standard), 32 eller 64 spillere. */
   bracketCapacity?: 16 | 32 | 64;
+  formatSettings?: TournamentFormatSettings;
 }
 
 export interface AlphaInterest {

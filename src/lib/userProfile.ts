@@ -3,8 +3,57 @@
 
 export const ACTIVE_PERSON_ID_KEY = 'lillesand_active_person_id';
 export const ACTIVE_PERSON_TOKEN_KEY = 'lillesand_active_person_token';
-export const TEST_PERSON_OVERRIDE_ID_KEY = 'lillesand_test_person_override_id';
-export const TEST_PERSON_OVERRIDE_TOKEN_KEY = 'lillesand_test_person_override_token';
+export const ACTIVE_PERSON_NAME_KEY = 'lillesand_my_player_name';
+export const ACTIVE_PERSON_DISPLAY_KEY = 'lillesand_my_player_display_id';
+
+export interface StoredSession {
+  personId: string | null;
+  token: string | null;
+  firstName: string | null;
+  displayId: string | null;
+}
+
+export function getActiveSession(): StoredSession {
+  if (typeof window === 'undefined') {
+    return { personId: null, token: null, firstName: null, displayId: null };
+  }
+  return {
+    personId: localStorage.getItem(ACTIVE_PERSON_ID_KEY),
+    token: localStorage.getItem(ACTIVE_PERSON_TOKEN_KEY),
+    firstName: localStorage.getItem(ACTIVE_PERSON_NAME_KEY),
+    displayId: localStorage.getItem(ACTIVE_PERSON_DISPLAY_KEY),
+  };
+}
+
+export function saveActiveSession(person: {
+  id: string;
+  anonymousToken: string;
+  firstName: string;
+  displayId?: string | null;
+}): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(ACTIVE_PERSON_ID_KEY, person.id);
+  localStorage.setItem(ACTIVE_PERSON_TOKEN_KEY, person.anonymousToken);
+  localStorage.setItem(ACTIVE_PERSON_NAME_KEY, person.firstName);
+  localStorage.setItem(ACTIVE_PERSON_DISPLAY_KEY, person.displayId || person.firstName);
+}
+
+export function clearActiveSession(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(ACTIVE_PERSON_ID_KEY);
+  localStorage.removeItem(ACTIVE_PERSON_TOKEN_KEY);
+  localStorage.removeItem(ACTIVE_PERSON_NAME_KEY);
+  localStorage.removeItem(ACTIVE_PERSON_DISPLAY_KEY);
+}
+
+export function hasStoredSession(): boolean {
+  if (typeof window === 'undefined') return false;
+  return Boolean(
+    localStorage.getItem(ACTIVE_PERSON_ID_KEY) ||
+    localStorage.getItem(ACTIVE_PERSON_DISPLAY_KEY) ||
+    localStorage.getItem(ACTIVE_PERSON_NAME_KEY)
+  );
+}
 
 export function getActivePersonId(): string | null {
   if (typeof window === 'undefined') return null;
@@ -32,39 +81,6 @@ export function setActivePersonToken(token: string | null): void {
   } else {
     localStorage.removeItem(ACTIVE_PERSON_TOKEN_KEY);
   }
-}
-
-export function getTestPersonOverrideId(): string | null {
-  if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem(TEST_PERSON_OVERRIDE_ID_KEY);
-}
-
-export function setTestPersonOverrideId(id: string | null): void {
-  if (typeof window === 'undefined') return;
-  if (id) {
-    sessionStorage.setItem(TEST_PERSON_OVERRIDE_ID_KEY, id);
-  } else {
-    sessionStorage.removeItem(TEST_PERSON_OVERRIDE_ID_KEY);
-  }
-}
-
-export function getTestPersonOverrideToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem(TEST_PERSON_OVERRIDE_TOKEN_KEY);
-}
-
-export function setTestPersonOverrideToken(token: string | null): void {
-  if (typeof window === 'undefined') return;
-  if (token) {
-    sessionStorage.setItem(TEST_PERSON_OVERRIDE_TOKEN_KEY, token);
-  } else {
-    sessionStorage.removeItem(TEST_PERSON_OVERRIDE_TOKEN_KEY);
-  }
-}
-
-export function clearTestPersonOverride(): void {
-  setTestPersonOverrideId(null);
-  setTestPersonOverrideToken(null);
 }
 
 export function getUserToken(userName?: string | null, guestIdOverride?: string): string {

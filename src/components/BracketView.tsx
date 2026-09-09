@@ -166,9 +166,16 @@ export const BracketView: React.FC<BracketViewProps> = ({
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2 mb-2.5">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
-                            Kamp #{match.position + 1}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
+                              Kamp #{match.position + 1}
+                            </span>
+                            {(match.numberOfSets || match.targetPoints) && (
+                              <span className="text-[9px] font-bold text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800">
+                                {match.numberOfSets === 3 ? 'Best av 3' : '1 sett'} · {match.targetPoints ?? 21}p
+                              </span>
+                            )}
+                          </div>
 
                           {match.tableNumber ? (
                             <span
@@ -260,6 +267,15 @@ export const BracketView: React.FC<BracketViewProps> = ({
                             </div>
                             <span className="text-xs font-black ml-2 font-mono">
                               {match.scoreB !== null ? match.scoreB : '-'}
+                            </span>
+                          </div>
+                        )}
+
+                        {match.sets && match.sets.length > 0 && match.status === 'completed' && (
+                          <div className="mt-2 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+                            <span>Sett:</span>
+                            <span className="text-zinc-300">
+                              {match.sets.map((s) => `${s.scoreA}-${s.scoreB}`).join(', ')}
                             </span>
                           </div>
                         )}

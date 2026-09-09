@@ -15,6 +15,7 @@ import {
   getNextCapacityTier,
   getCapacityInfo,
   resolveBracketCapacity,
+  DEFAULT_FORMAT_SETTINGS,
 } from './src/lib/tournament';
 import { INITIAL_STATE, INITIAL_ACTIVITIES, INITIAL_POPCORN, createEmptyAppState, SIMULATION_NAMES_16, SIMULATION_NAMES_31, generateSimulationNames, TOURNAMENT_MAX_PARTICIPANTS, TOURNAMENT_DEFAULT_CAPACITY } from './src/lib/initial-data';
 import { initializeApp, getApps, getApp } from 'firebase/app';
@@ -468,6 +469,60 @@ app.get('/api/persons/:id', (req, res) => {
   res.json({ success: true, person });
 });
 
+// Update person (Admin)
+app.patch('/api/persons/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { firstName } = req.body || {};
+  const person = (state.persons || []).find((p) => p.id === id);
+  if (!person) {
+    return res.status(404).json({ error: 'Person ikke funnet.' });
+  }
+  if (typeof firstName === 'string' && firstName.trim()) {
+    const cleanName = firstName.trim();
+    person.firstName = cleanName;
+    person.displayId = `${cleanName}_${person.nameNumber || 1}`;
+    person.updatedAt = new Date().toISOString();
+
+    // Update in tournament participants
+    for (const part of state.tournament.participants) {
+      if (part.personId === person.id) {
+        part.firstName = person.firstName;
+        part.displayId = person.displayId;
+      }
+    }
+    // Update in popcorn bongs
+    if (state.popcorn?.bongs) {
+      for (const bong of state.popcorn.bongs) {
+        if (bong.personId === person.id) {
+          bong.userName = person.displayId;
+        }
+      }
+    }
+    // Update in alphaInterests
+    if (state.alphaInterests) {
+      for (const alpha of state.alphaInterests) {
+        if (alpha.personId === person.id) {
+          alpha.firstName = person.firstName;
+        }
+      }
+    }
+  }
+  saveState();
+  res.json({ success: true, person, state });
+});
+
+// Delete person (Admin)
+app.delete('/api/persons/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  state.persons = (state.persons || []).filter((p) => p.id !== id);
+  // Also remove from tournament participants if registration is open
+  if (state.tournament.status === 'registration') {
+    state.tournament.participants = state.tournament.participants.filter((p) => p.personId !== id);
+  }
+  saveState();
+  res.json({ success: true, state });
+});
+
 // Register participant for Table tennis
 app.post('/api/register', (req, res) => {
   const { firstName, userId, personId, anonymousToken } = req.body;
@@ -573,6 +628,37 @@ app.delete('/api/participants/:id', requireAdmin, (req, res) => {
   res.json({ success: true, state });
 });
 
+// Withdraw from tournament (User or Admin)
+app.post('/api/tournament/withdraw', (req, res) => {
+  const { participantId, personId, anonymousToken } = req.body || {};
+  const adminPin = req.headers['x-admin-pin'] || req.query.adminPin || (req.body && req.body.adminPin);
+  const isAdmin = isValidAdminPin(adminPin);
+
+  const target = state.tournament.participants.find(
+    (p) => (participantId && p.id === participantId) || (personId && p.personId === personId)
+  );
+
+  if (!target) {
+    return res.status(404).json({ error: 'Påmelding ikke funnet.' });
+  }
+
+  if (!isAdmin) {
+    if (state.tournament.status !== 'registration') {
+      return res.status(400).json({ error: 'Turneringen er allerede i gang. Kontakt arrangør for å trekke deg.' });
+    }
+    if (target.personId && anonymousToken) {
+      const person = (state.persons || []).find((p) => p.id === target.personId);
+      if (person && person.anonymousToken && person.anonymousToken !== anonymousToken) {
+        return res.status(403).json({ error: 'Ugyldig tilgang til denne deltakeren.' });
+      }
+    }
+  }
+
+  state.tournament.participants = state.tournament.participants.filter((p) => p.id !== target.id);
+  saveState();
+  res.json({ success: true, state, removedParticipantId: target.id });
+});
+
 // Start / Generate tournament bracket (Admin)
 app.post('/api/tournament/start', requireAdmin, (req, res) => {
   try {
@@ -591,7 +677,8 @@ app.post('/api/tournament/start', requireAdmin, (req, res) => {
       });
     }
 
-    const matches = generateBracket(state.tournament.participants, capacity as any);
+    const formatSettings = state.tournament.formatSettings || DEFAULT_FORMAT_SETTINGS;
+    const matches = generateBracket(state.tournament.participants, capacity as any, formatSettings);
     state.tournament.bracketCapacity = capacity as any;
     state.tournament.matches = matches;
     state.tournament.status = 'active';
@@ -617,7 +704,8 @@ app.post('/api/tournament/re-draw', requireAdmin, requireResetPin, (req, res) =>
       state.tournament.participants.length,
       state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
     );
-    const matches = generateBracket(state.tournament.participants, capacity as any);
+    const formatSettings = state.tournament.formatSettings || DEFAULT_FORMAT_SETTINGS;
+    const matches = generateBracket(state.tournament.participants, capacity as any, formatSettings);
     state.tournament.bracketCapacity = capacity as any;
     state.tournament.matches = matches;
     state.tournament.status = 'active';
@@ -632,10 +720,48 @@ app.post('/api/tournament/re-draw', requireAdmin, requireResetPin, (req, res) =>
   }
 });
 
+// Update tournament format settings and estimated duration (Admin)
+// Format changes ONLY apply to matches that are not started (status 'ready' or 'not_ready')
+app.patch('/api/tournament/format', requireAdmin, (req, res) => {
+  try {
+    const { formatSettings, estimatedMinutesPerMatch } = req.body;
+
+    if (estimatedMinutesPerMatch !== undefined) {
+      const minutes = Number(estimatedMinutesPerMatch);
+      if (minutes > 0 && minutes <= 60) {
+        state.tournament.estimatedMinutesPerMatch = minutes;
+      }
+    }
+
+    if (formatSettings) {
+      state.tournament.formatSettings = {
+        regular: formatSettings.regular || state.tournament.formatSettings?.regular || DEFAULT_FORMAT_SETTINGS.regular,
+        semifinal: formatSettings.semifinal || state.tournament.formatSettings?.semifinal || DEFAULT_FORMAT_SETTINGS.semifinal,
+        final: formatSettings.final || state.tournament.formatSettings?.final || DEFAULT_FORMAT_SETTINGS.final,
+      };
+
+      // Apply to unstarted matches only:
+      if (state.tournament.matches && state.tournament.matches.length > 0) {
+        for (const match of state.tournament.matches) {
+          if (match.status === 'ready' || match.status === 'not_ready') {
+            const stage = match.stage || 'regular';
+            match.format = { ...(state.tournament.formatSettings[stage] || DEFAULT_FORMAT_SETTINGS[stage]) };
+          }
+        }
+      }
+    }
+
+    saveState();
+    res.json({ success: true, state });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Feil ved oppdatering av turneringsformat' });
+  }
+});
+
 // Record match score (Admin)
 app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
   try {
-    const { matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot } = req.body;
+    const { matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot, sets } = req.body;
     if (!matchId) {
       return res.status(400).json({ error: 'Match ID mangler.' });
     }
@@ -660,7 +786,8 @@ app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
       Number(scoreA),
       Number(scoreB),
       Boolean(isWalkover),
-      walkoverWinnerSlot
+      walkoverWinnerSlot,
+      sets
     );
 
     state.tournament.matches = updatedMatches;
@@ -681,7 +808,7 @@ app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
 // Correct match score (with dependency invalidation) (Admin)
 app.post('/api/tournament/match/correct', requireAdmin, (req, res) => {
   try {
-    const { matchId, newScoreA, newScoreB, confirmCorrection } = req.body;
+    const { matchId, newScoreA, newScoreB, confirmCorrection, sets } = req.body;
     const match = state.tournament.matches.find((m) => m.id === matchId);
     if (!match) return res.status(404).json({ error: 'Kamp ikke funnet.' });
 
@@ -702,7 +829,10 @@ app.post('/api/tournament/match/correct', requireAdmin, (req, res) => {
       state.tournament.matches,
       matchId,
       Number(newScoreA),
-      Number(newScoreB)
+      Number(newScoreB),
+      false,
+      undefined,
+      sets
     );
 
     state.tournament.matches = updatedMatches;

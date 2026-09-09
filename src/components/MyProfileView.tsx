@@ -2,8 +2,6 @@ import React, { useState, useMemo } from 'react';
 import {
   User,
   UserCheck,
-  UserPlus,
-  ArrowRightLeft,
   RotateCcw,
   Trophy,
   Popcorn,
@@ -14,10 +12,17 @@ import {
   Clock,
   Edit2,
   ChevronRight,
+  UserMinus,
 } from 'lucide-react';
 import { AppState, PopcornBong, Person, Participant } from '../types';
-import { getUserToken, saveUserTokenForName, startNewGuestSession } from '../lib/userProfile';
-import { activatePopcornBong, registerParticipant, registerAlphaInterest, renameUser } from '../services/api';
+import { getUserToken, saveUserTokenForName } from '../lib/userProfile';
+import {
+  activatePopcornBong,
+  registerParticipant,
+  registerAlphaInterest,
+  renameUser,
+  withdrawTournamentParticipant,
+} from '../services/api';
 
 interface MyProfileViewProps {
   state: AppState;
@@ -40,8 +45,6 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
 }) => {
   const [editingName, setEditingName] = useState(false);
   const [newNameInput, setNewNameInput] = useState('');
-  const [showNewUserModal, setShowNewUserModal] = useState(false);
-  const [customUserInput, setCustomUserInput] = useState('');
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -217,6 +220,27 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
     }
   };
 
+  const handleWithdrawTableTennis = async () => {
+    if (!participant) return;
+    if (!window.confirm(`Vil du trekke ${participant.firstName} fra bordtennisturneringen?`)) {
+      return;
+    }
+    setLoadingAction('tabletennis');
+    setActionError(null);
+    try {
+      await withdrawTournamentParticipant({
+        participantId: participant.id,
+        personId: activePersonId || undefined,
+        anonymousToken: activePerson?.anonymousToken || userToken || undefined,
+      });
+      onRefreshState();
+    } catch (err: any) {
+      setActionError(err.message || 'Kunne ikke trekke påmelding.');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
   const handleRegisterAlpha = async () => {
     if (!currentUserName) {
       setEditingName(true);
@@ -254,17 +278,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
     }
   };
 
-  const handleCreateNewTestUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customUserInput.trim()) return;
-    const clean = customUserInput.trim();
-    onSetMyPlayer(clean);
-    setCustomUserInput('');
-    setShowNewUserModal(false);
-  };
-
-  const handleGuestSession = () => {
-    startNewGuestSession();
+  const handleLogout = () => {
     onSetMyPlayer(null);
     onRefreshState();
   };
@@ -296,20 +310,35 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
-            <button
-              id="btn-rename-user"
-              type="button"
-              onClick={() => {
-                setNewNameInput(currentUserName || '');
-                setEditingName(true);
-              }}
-              className="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-artistic-sm"
-              title="Endre fornavn på samme profil"
-            >
-              <Edit2 className="w-3.5 h-3.5 text-lime-400" />
-              <span>Bytt navn</span>
-            </button>
+          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end flex-wrap">
+            {currentUserName && (
+              <button
+                id="btn-rename-user"
+                type="button"
+                onClick={() => {
+                  setNewNameInput(currentUserName || '');
+                  setEditingName(true);
+                }}
+                className="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-artistic-sm"
+                title="Endre fornavn på samme profil"
+              >
+                <Edit2 className="w-3.5 h-3.5 text-lime-400" />
+                <span>Bytt navn</span>
+              </button>
+            )}
+
+            {currentUserName && (
+              <button
+                id="btn-logout-user"
+                type="button"
+                onClick={handleLogout}
+                className="px-3 py-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-rose-300 hover:text-rose-200 border border-zinc-800 hover:border-rose-800/60 text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-artistic-sm"
+                title="Logger ut denne enheten og lar en annen deltaker registrere seg"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
+                <span>Logg ut / Bytt bruker</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -327,7 +356,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
                 type="text"
                 value={newNameInput}
                 onChange={(e) => setNewNameInput(e.target.value)}
-                placeholder="F.eks. Sander"
+                placeholder="Fornavn"
                 autoFocus
                 required
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 text-sm text-white font-bold focus:outline-none focus:border-lime-400"
@@ -349,83 +378,6 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
                 Avbryt
               </button>
             </div>
-          </form>
-        )}
-
-        {/* Test Profile Toolbar (Section 11 & 12 & 16) */}
-        <div className="mt-5 pt-4 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-zinc-400 font-bold flex items-center gap-1">
-              <ArrowRightLeft className="w-3.5 h-3.5 text-zinc-500" />
-              Bytt testbruker:
-            </span>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {['Oliver', 'Emma', 'Sander', 'Thea'].map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => onSetMyPlayer(name)}
-                  className={`px-2.5 py-1 rounded-lg font-black text-xs transition-all border ${
-                    currentUserName?.toLowerCase() === name.toLowerCase()
-                      ? 'bg-lime-400 text-zinc-950 border-lime-400 shadow-artistic-sm'
-                      : 'bg-zinc-950 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'
-                  }`}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowNewUserModal(true)}
-              className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 font-bold text-xs flex items-center gap-1.5 transition-all"
-            >
-              <UserPlus className="w-3.5 h-3.5 text-amber-400" />
-              <span>Ny testbruker</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleGuestSession}
-              className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs font-bold flex items-center gap-1 transition-all"
-              title="Nullstiller gjesteøkt for å simulere en helt ny mobil"
-            >
-              <RotateCcw className="w-3 h-3 text-zinc-400" />
-              <span>Ny gjesteøkt</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Modal for adding custom test user */}
-        {showNewUserModal && (
-          <form
-            onSubmit={handleCreateNewTestUser}
-            className="w-full mt-4 p-3 bg-zinc-950 rounded-xl border border-zinc-700 flex items-center gap-2"
-          >
-            <input
-              type="text"
-              placeholder="Skriv inn fornavn (f.eks. Mia, Tobias)..."
-              value={customUserInput}
-              onChange={(e) => setCustomUserInput(e.target.value)}
-              className="flex-1 bg-zinc-900 border border-zinc-700 px-3 py-1.5 rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-lime-400"
-              autoFocus
-            />
-            <button
-              type="submit"
-              className="px-3 py-1.5 bg-lime-400 text-zinc-950 rounded-lg font-black text-xs uppercase"
-            >
-              Velg
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowNewUserModal(false)}
-              className="px-2 py-1.5 text-zinc-400 hover:text-white text-xs"
-            >
-              Avbryt
-            </button>
           </form>
         )}
       </div>
@@ -488,15 +440,28 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => onGoToTab('tabletennis')}
-                    className="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all"
+                    className="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer"
                   >
                     <span>Åpne Bordtenniscup & Kamper</span>
                     <ChevronRight className="w-4 h-4 text-lime-400" />
                   </button>
+
+                  {state.tournament?.status === 'registration' && (
+                    <button
+                      type="button"
+                      disabled={loadingAction === 'tabletennis'}
+                      onClick={handleWithdrawTableTennis}
+                      className="px-3.5 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer"
+                      title="Trekke påmelding fra bordtenniscupen"
+                    >
+                      <UserMinus className="w-4 h-4 text-rose-400" />
+                      <span>Meld av / Trekk påmelding</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (

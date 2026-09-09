@@ -13,7 +13,12 @@ import { WelcomeBanner } from './components/WelcomeBanner';
 import { AppState, Person } from './types';
 import { INITIAL_STATE } from './lib/initial-data';
 import { fetchState, registerParticipant, createPerson } from './services/api';
-import { getActivePersonId, setActivePersonId, setActivePersonToken, getTestPersonOverrideId, setTestPersonOverrideId, setTestPersonOverrideToken, clearTestPersonOverride } from './lib/userProfile';
+import {
+  getActiveSession,
+  saveActiveSession,
+  clearActiveSession,
+  StoredSession,
+} from './lib/userProfile';
 
 type AppTab = 'home' | 'profile' | 'tabletennis' | 'alpha' | 'kiosk' | 'display' | 'admin';
 type AdminTab =
@@ -58,21 +63,43 @@ export default function App() {
   const [adminInitialTab, setAdminInitialTabState] = useState<AdminTab>(() =>
     readStoredAdminTab('kiosk_popcorn')
   );
-  const [activePersonId, setActivePersonIdState] = useState<string | null>(() => {
-    return getActivePersonId();
-  });
-  const [testPersonOverrideId, setTestPersonOverrideIdState] = useState<string | null>(() => {
-    return getTestPersonOverrideId();
-  });
-  const [myPlayerName, setMyPlayerName] = useState<string | null>(() => {
-    return localStorage.getItem('lillesand_my_player_name');
-  });
+  const [activeSession, setActiveSessionState] = useState<StoredSession>(getActiveSession);
+  const [isStateLoaded, setIsStateLoaded] = useState(false);
 
-  const effectiveActivePersonId = testPersonOverrideId ?? activePersonId;
-  const effectiveActivePerson = useMemo(() => {
-    if (!effectiveActivePersonId) return null;
-    return (state.persons || []).find((p) => p.id === effectiveActivePersonId) || null;
-  }, [effectiveActivePersonId, state.persons]);
+  // Single source of truth: find active person matching stored session
+  const effectiveActivePerson = useMemo<Person | null>(() => {
+    const persons = state.persons || [];
+    if (activeSession.personId) {
+      const match = persons.find((p) => p.id === activeSession.personId);
+      if (match) return match;
+    }
+    if (activeSession.displayId) {
+      const match = persons.find(
+        (p) => p.displayId?.toLowerCase() === activeSession.displayId?.toLowerCase()
+      );
+      if (match) return match;
+    }
+    if (activeSession.firstName) {
+      const match = persons.find(
+        (p) => p.firstName?.toLowerCase() === activeSession.firstName?.toLowerCase()
+      );
+      if (match) return match;
+    }
+    return null;
+  }, [activeSession, state.persons]);
+
+  // hasActiveUser determines whether an active session exists
+  // Single source of truth:
+  // - If effectiveActivePerson is found in state.persons -> true
+  // - While initial state is loading (isStateLoaded is false), if localStorage holds a session -> true (prevents flash of onboarding on refresh)
+  // - Otherwise -> false
+  const hasActiveUser = Boolean(
+    effectiveActivePerson ||
+    (!isStateLoaded && (activeSession.personId || activeSession.displayId || activeSession.firstName))
+  );
+
+  const activePersonId = effectiveActivePerson?.id || activeSession.personId;
+  const currentUserName = effectiveActivePerson?.firstName || (hasActiveUser ? activeSession.firstName : null);
 
   const previousWinnerRef = useRef<string | null>(null);
 
@@ -81,16 +108,41 @@ export default function App() {
     try {
       const data = await fetchState();
       setState(data);
+      setIsStateLoaded(true);
 
-      // Sync active person name if activePersonId is set (not test override)
-      const overrideId = getTestPersonOverrideId();
-      const currentId = overrideId ?? getActivePersonId();
-      if (currentId && data.persons && Array.isArray(data.persons)) {
-        const matchingPerson = data.persons.find((p) => p.id === currentId);
-        if (matchingPerson && !overrideId) {
-          setMyPlayerName(matchingPerson.firstName);
-          localStorage.setItem('lillesand_my_player_name', matchingPerson.firstName);
-          localStorage.setItem('lillesand_my_player_display_id', matchingPerson.displayId);
+      // Verify and sync active session against the latest persons in database
+      const session = getActiveSession();
+      if (session.personId || session.displayId || session.firstName) {
+        const persons = data.persons || [];
+        const match =
+          (session.personId && persons.find((p) => p.id === session.personId)) ||
+          (session.displayId &&
+            persons.find(
+              (p) => p.displayId?.toLowerCase() === session.displayId?.toLowerCase()
+            )) ||
+          (session.firstName &&
+            persons.find(
+              (p) => p.firstName?.toLowerCase() === session.firstName?.toLowerCase()
+            )) ||
+          null;
+
+        if (match) {
+          saveActiveSession(match);
+          setActiveSessionState({
+            personId: match.id,
+            token: match.anonymousToken,
+            firstName: match.firstName,
+            displayId: match.displayId,
+          });
+        } else {
+          // If the person no longer exists in database (e.g. database was reset)
+          clearActiveSession();
+          setActiveSessionState({
+            personId: null,
+            token: null,
+            firstName: null,
+            displayId: null,
+          });
         }
       }
 
@@ -118,19 +170,21 @@ export default function App() {
 
   const handleSelectPerson = (person: Person | null) => {
     if (person) {
-      setActivePersonIdState(person.id);
-      setActivePersonId(person.id);
-      setActivePersonToken(person.anonymousToken);
-      setMyPlayerName(person.firstName);
-      localStorage.setItem('lillesand_my_player_name', person.firstName);
-      localStorage.setItem('lillesand_my_player_display_id', person.displayId);
+      saveActiveSession(person);
+      setActiveSessionState({
+        personId: person.id,
+        token: person.anonymousToken,
+        firstName: person.firstName,
+        displayId: person.displayId,
+      });
     } else {
-      setActivePersonIdState(null);
-      setActivePersonId(null);
-      setActivePersonToken(null);
-      setMyPlayerName(null);
-      localStorage.removeItem('lillesand_my_player_name');
-      localStorage.removeItem('lillesand_my_player_display_id');
+      clearActiveSession();
+      setActiveSessionState({
+        personId: null,
+        token: null,
+        firstName: null,
+        displayId: null,
+      });
     }
   };
 
@@ -147,7 +201,7 @@ export default function App() {
   };
 
   const handleSetMyPlayer = async (name: string | null) => {
-    if (!name) {
+    if (!name || !name.trim()) {
       handleSelectPerson(null);
       return;
     }
@@ -155,23 +209,11 @@ export default function App() {
     const matches = (state.persons || []).filter(
       (p) => p.firstName.toLowerCase() === clean.toLowerCase()
     );
-    // Kun én eksisterende profil med dette fornavnet → velg den. Ellers opprett ny (Oliver_2, Oliver_3 …).
     if (matches.length === 1) {
       handleSelectPerson(matches[0]);
       return;
     }
     await handleCreatePerson(clean);
-  };
-
-  const handleSetTestPersonOverride = (personId: string | null) => {
-    setTestPersonOverrideIdState(personId);
-    if (personId) {
-      const person = (state.persons || []).find((p) => p.id === personId);
-      setTestPersonOverrideId(personId);
-      setTestPersonOverrideToken(person?.anonymousToken || null);
-    } else {
-      clearTestPersonOverride();
-    }
   };
 
   const handleRegisterPlayer = async (name: string, personId: string) => {
@@ -233,7 +275,7 @@ export default function App() {
           currentTab={currentTab}
           setCurrentTab={handleNavigate}
           tournamentActive={state.tournament.status === 'active'}
-          myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
+          myPlayerName={currentUserName}
           activePerson={effectiveActivePerson}
         />
 
@@ -241,16 +283,16 @@ export default function App() {
         <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
           {currentTab === 'home' && (
             <>
-              {!effectiveActivePerson && (
-                <WelcomeBanner onSetMyPlayer={(name) => handleSetMyPlayer(name)} />
+              {!hasActiveUser && (
+                <WelcomeBanner onSetMyPlayer={handleSetMyPlayer} />
               )}
               <EventHero
                 state={state}
                 onGoToTableTennis={() => setCurrentTab('tabletennis')}
                 onGoToAlpha={() => setCurrentTab('alpha')}
-                myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
+                myPlayerName={currentUserName}
                 onBongClaimed={loadLatestState}
-                activePersonId={effectiveActivePersonId}
+                activePersonId={activePersonId}
                 activePerson={effectiveActivePerson}
                 onCreatePerson={handleCreatePerson}
                 onGoToProfile={() => setCurrentTab('profile')}
@@ -265,11 +307,11 @@ export default function App() {
           {currentTab === 'profile' && (
             <MyProfileView
               state={state}
-              myPlayerName={myPlayerName}
+              myPlayerName={currentUserName}
               onSetMyPlayer={handleSetMyPlayer}
               onGoToTab={setCurrentTab}
               onRefreshState={loadLatestState}
-              activePersonId={effectiveActivePersonId}
+              activePersonId={activePersonId}
               activePerson={effectiveActivePerson}
             />
           )}
@@ -277,21 +319,21 @@ export default function App() {
           {currentTab === 'tabletennis' && (
             <TableTennisView
               state={state}
-              myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
+              myPlayerName={currentUserName}
               onSetMyPlayer={handleSetMyPlayer}
               onRegister={handleRegisterPlayer}
               onGoToAdmin={() => {
                 setAdminInitialTab('matches');
                 setCurrentTab('admin');
               }}
-              activePersonId={effectiveActivePersonId}
+              activePersonId={activePersonId}
               activePerson={effectiveActivePerson}
             />
           )}
 
           {currentTab === 'alpha' && (
             <AlphaView
-              myPlayerName={myPlayerName}
+              myPlayerName={currentUserName}
               onSuccessRegistered={() => {
                 loadLatestState();
               }}
@@ -301,9 +343,9 @@ export default function App() {
           {currentTab === 'kiosk' && (
             <KioskSection
               state={state}
-              myPlayerName={effectiveActivePerson?.firstName || myPlayerName}
+              myPlayerName={currentUserName}
               onBongClaimed={loadLatestState}
-              activePersonId={effectiveActivePersonId}
+              activePersonId={activePersonId}
               activePerson={effectiveActivePerson}
               onCreatePerson={handleCreatePerson}
               onGoToProfile={() => setCurrentTab('profile')}
@@ -315,9 +357,12 @@ export default function App() {
               state={state}
               onRefresh={loadLatestState}
               onOpenDisplay={() => setCurrentTab('display')}
+              onGoToProfile={() => setCurrentTab('profile')}
+              onOpenPersonProfile={(person: Person) => {
+                handleSelectPerson(person);
+                handleNavigate('profile');
+              }}
               initialTab={adminInitialTab}
-              testPersonOverrideId={testPersonOverrideId}
-              onSetTestPersonOverride={handleSetTestPersonOverride}
             />
           )}
         </main>

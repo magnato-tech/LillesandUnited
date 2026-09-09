@@ -1,6 +1,31 @@
-import { Match, MatchStatus, Participant, Tournament } from '../types';
+import {
+  Match,
+  MatchStatus,
+  Participant,
+  Tournament,
+  TargetPoints,
+  WinMargin,
+  NumberOfSets,
+  StageFormatConfig,
+  TournamentFormatSettings,
+  TournamentStage,
+  MatchSetScore,
+} from '../types';
 import type { BracketCapacity } from './initial-data';
 import { TOURNAMENT_DEFAULT_CAPACITY } from './initial-data';
+
+export const DEFAULT_FORMAT_SETTINGS: TournamentFormatSettings = {
+  regular: { sets: 1, targetPoints: 21, winMargin: 2 },
+  semifinal: { sets: 1, targetPoints: 21, winMargin: 2 },
+  final: { sets: 1, targetPoints: 21, winMargin: 2 },
+};
+
+export function getStageForRound(round: number, totalRounds: number): TournamentStage {
+  const diff = totalRounds - round;
+  if (diff === 0) return 'final';
+  if (diff === 1) return 'semifinal';
+  return 'regular';
+}
 
 export function resolveBracketCapacity(
   participantCount: number,
@@ -117,7 +142,8 @@ export function shuffleArray<T>(array: T[]): T[] {
  */
 export function generateBracket(
   participants: Participant[],
-  capacity?: BracketCapacity | null
+  capacity?: BracketCapacity | null,
+  formatSettings: TournamentFormatSettings = DEFAULT_FORMAT_SETTINGS
 ): Match[] {
   if (participants.length < 2) {
     throw new Error('Minst 2 deltakere kreves for å starte en turnering.');
@@ -153,6 +179,8 @@ export function generateBracket(
   for (let r = 1; r <= totalRounds; r++) {
     const matchesInRound = bracketSize / Math.pow(2, r);
     const roundList: Match[] = [];
+    const stage = getStageForRound(r, totalRounds);
+    const stageFormat = { ...(formatSettings[stage] || DEFAULT_FORMAT_SETTINGS[stage]) };
 
     for (let p = 0; p < matchesInRound; p++) {
       const matchId = `match_r${r}_p${p}`;
@@ -160,12 +188,17 @@ export function generateBracket(
         id: matchId,
         round: r,
         roundName: getRoundName(r, totalRounds),
+        stage,
+        format: stageFormat,
         position: p,
         playerA: null,
         playerB: null,
         winnerId: null,
         scoreA: null,
         scoreB: null,
+        sets: [],
+        setsWonA: null,
+        setsWonB: null,
         tableNumber: null,
         status: 'not_ready',
         isWalkover: false,
@@ -207,8 +240,24 @@ export function generateBracket(
       match.walkoverPlayerId = player.id;
       match.winnerId = player.id;
       match.status = 'walkover';
-      match.scoreA = 21;
-      match.scoreB = 0;
+      const targetPts = match.format?.targetPoints || 21;
+      const isBo3 = match.format?.sets === 3;
+      if (isBo3) {
+        match.scoreA = 2;
+        match.scoreB = 0;
+        match.setsWonA = 2;
+        match.setsWonB = 0;
+        match.sets = [
+          { setNumber: 1, scoreA: targetPts, scoreB: 0 },
+          { setNumber: 2, scoreA: targetPts, scoreB: 0 },
+        ];
+      } else {
+        match.scoreA = targetPts;
+        match.scoreB = 0;
+        match.setsWonA = 1;
+        match.setsWonB = 0;
+        match.sets = [{ setNumber: 1, scoreA: targetPts, scoreB: 0 }];
+      }
       match.completedAt = new Date().toISOString();
 
       // Automatically advance to Round 2
@@ -294,47 +343,87 @@ export function autoAssignTables(matches: Match[]): void {
 
 /**
  * Validates table tennis score according to rules:
- * - 1 game to 21 points
- * - At 20-20, play continues until one player leads by 2 points (e.g., 22-20, 23-21)
+ * - targetPoints: 6, 7, 11 or 21
+ * - winMargin:
+ *     1 = First player to reach targetPoints wins immediately (e.g. 6-5, 7-6, 11-10, 21-20)
+ *     2 = Must reach targetPoints AND lead by at least 2. Deuce when trailing player has (targetPoints - 1),
+ *         requiring exact 2-point lead to conclude (e.g. 12-10, 22-20).
  */
 export function validateScore(
   scoreA: number,
-  scoreB: number
+  scoreB: number,
+  targetPoints: TargetPoints = 21,
+  winMargin: WinMargin = 2
 ): { isValid: boolean; winnerSlot: 'A' | 'B' | null; error?: string } {
   if (scoreA < 0 || scoreB < 0) {
     return { isValid: false, winnerSlot: null, error: 'Poeng kan ikke være negative.' };
+  }
+  if (scoreA === scoreB) {
+    return { isValid: false, winnerSlot: null, error: 'Et sett kan ikke ende uavgjort.' };
   }
 
   const maxScore = Math.max(scoreA, scoreB);
   const minScore = Math.min(scoreA, scoreB);
   const diff = maxScore - minScore;
+  const winnerSlot: 'A' | 'B' = scoreA > scoreB ? 'A' : 'B';
 
-  if (maxScore < 21) {
-    return { isValid: false, winnerSlot: null, error: 'Vinneren må ha minst 21 poeng.' };
+  // GREIN 1: Margin 1 (Førstemann til målpoeng vinner umiddelbart)
+  if (winMargin === 1) {
+    if (maxScore !== targetPoints) {
+      return {
+        isValid: false,
+        winnerSlot: null,
+        error: `Settet skal avsluttes nøyaktig når en spiller når ${targetPoints} poeng (fikk ${maxScore}).`,
+      };
+    }
+    return { isValid: true, winnerSlot };
   }
 
-  // If score is 21 and the other is <= 19 -> valid standard win
-  if (maxScore === 21 && minScore <= 19) {
-    return { isValid: true, winnerSlot: scoreA > scoreB ? 'A' : 'B' };
+  // GREIN 2: Margin 2 (Må nå målpoeng og ha minst 2 poengs ledelse)
+  if (maxScore < targetPoints) {
+    return {
+      isValid: false,
+      winnerSlot: null,
+      error: `Vinneren må ha minst ${targetPoints} poeng.`,
+    };
   }
 
-  // If both >= 20 (deuce situations: 20-20, 21-21, 22-22...), winner must lead by exactly 2 (e.g., 22-20, 23-21)
-  if (minScore >= 20) {
+  const deuceThreshold = targetPoints - 1;
+
+  // Normal seier uten forlengelse (f.eks. 21-15, 11-8, 7-4, 6-3)
+  if (maxScore === targetPoints && minScore < deuceThreshold) {
+    return { isValid: true, winnerSlot };
+  }
+
+  // Ved eller over deuce-terskel (f.eks. minScore >= 20 ved 21p, >= 10 ved 11p)
+  if (minScore >= deuceThreshold) {
     if (diff === 2) {
-      return { isValid: true, winnerSlot: scoreA > scoreB ? 'A' : 'B' };
+      return { isValid: true, winnerSlot };
     }
     if (diff > 2) {
-      return { isValid: false, winnerSlot: null, error: 'Ved 20-20 avsluttes spillet så snart en leder med 2 poeng.' };
+      return {
+        isValid: false,
+        winnerSlot: null,
+        error: `Ved forlengelse skal settet avsluttes straks en leder med 2 poeng (${minScore + 2}–${minScore}).`,
+      };
     }
-    return { isValid: false, winnerSlot: null, error: 'Ved 20-20 må en spiller lede med 2 poeng for å vinne.' };
+    return {
+      isValid: false,
+      winnerSlot: null,
+      error: `Det må være 2 poengs differanse (stillingen er ${maxScore}–${minScore}).`,
+    };
   }
 
-  // E.g., 25-10 would be invalid because it should have ended at 21
-  if (maxScore > 21 && minScore < 20) {
-    return { isValid: false, winnerSlot: null, error: 'Spillet skal avsluttes ved 21 poeng når motstander har under 20.' };
+  // E.g., overskrider målpoeng uten at det var forlengelse (f.eks. 22-15 ved 21p)
+  if (maxScore > targetPoints && minScore < deuceThreshold) {
+    return {
+      isValid: false,
+      winnerSlot: null,
+      error: `Spillet skal avsluttes ved ${targetPoints} poeng når motstander har under ${deuceThreshold}.`,
+    };
   }
 
-  return { isValid: true, winnerSlot: scoreA > scoreB ? 'A' : 'B' };
+  return { isValid: true, winnerSlot };
 }
 
 /**
@@ -407,6 +496,9 @@ export function resetMatchResult(
   match.winnerId = null;
   match.scoreA = null;
   match.scoreB = null;
+  match.sets = [];
+  match.setsWonA = null;
+  match.setsWonB = null;
   match.completedAt = null;
   match.startedAt = null;
   match.tableNumber = null;
@@ -454,6 +546,9 @@ export function invalidateDependencies(matchId: string, allMatches: Match[]): vo
     depMatch.winnerId = null;
     depMatch.scoreA = null;
     depMatch.scoreB = null;
+    depMatch.sets = [];
+    depMatch.setsWonA = null;
+    depMatch.setsWonB = null;
     depMatch.tableNumber = null;
     depMatch.startedAt = null;
     depMatch.completedAt = null;
@@ -469,6 +564,7 @@ export function invalidateDependencies(matchId: string, allMatches: Match[]): vo
 
 /**
  * Records a match result and advances the winner.
+ * Supports both single-set matches and best-of-3 set matches.
  */
 export function recordMatchResult(
   matches: Match[],
@@ -476,7 +572,8 @@ export function recordMatchResult(
   scoreA: number,
   scoreB: number,
   isWalkoverOverride: boolean = false,
-  walkoverWinnerSlot?: 'A' | 'B'
+  walkoverWinnerSlot?: 'A' | 'B',
+  setsPayload?: { scoreA: number; scoreB: number }[]
 ): { updatedMatches: Match[]; tournamentWinner: Participant | null } {
   const match = matches.find((m) => m.id === matchId);
   if (!match) throw new Error(`Kamp med ID ${matchId} ble ikke funnet.`);
@@ -484,25 +581,102 @@ export function recordMatchResult(
     throw new Error('Begge spillere må være klare for å registrere resultat.');
   }
 
-  // Validate score
+  const format = match.format || DEFAULT_FORMAT_SETTINGS[match.stage || 'regular'];
+  const targetPts = format.targetPoints || 21;
+  const winMargin = format.winMargin || 2;
+  const isBo3 = format.sets === 3;
+
   let winnerSlot: 'A' | 'B';
+
   if (isWalkoverOverride && walkoverWinnerSlot) {
     winnerSlot = walkoverWinnerSlot;
     match.isWalkover = true;
     match.status = 'walkover';
+    if (isBo3) {
+      match.scoreA = winnerSlot === 'A' ? 2 : 0;
+      match.scoreB = winnerSlot === 'B' ? 2 : 0;
+      match.setsWonA = match.scoreA;
+      match.setsWonB = match.scoreB;
+      match.sets = [
+        {
+          setNumber: 1,
+          scoreA: winnerSlot === 'A' ? targetPts : 0,
+          scoreB: winnerSlot === 'B' ? targetPts : 0,
+        },
+        {
+          setNumber: 2,
+          scoreA: winnerSlot === 'A' ? targetPts : 0,
+          scoreB: winnerSlot === 'B' ? targetPts : 0,
+        },
+      ];
+    } else {
+      match.scoreA = winnerSlot === 'A' ? targetPts : 0;
+      match.scoreB = winnerSlot === 'B' ? targetPts : 0;
+      match.setsWonA = winnerSlot === 'A' ? 1 : 0;
+      match.setsWonB = winnerSlot === 'B' ? 1 : 0;
+      match.sets = [
+        {
+          setNumber: 1,
+          scoreA: match.scoreA,
+          scoreB: match.scoreB,
+        },
+      ];
+    }
+  } else if (isBo3 && setsPayload && setsPayload.length >= 2) {
+    // Best av 3: valider hvert delsett
+    const setResults: MatchSetScore[] = [];
+    let winsA = 0;
+    let winsB = 0;
+
+    for (let i = 0; i < setsPayload.length; i++) {
+      const s = setsPayload[i];
+      const val = validateScore(s.scoreA, s.scoreB, targetPts, winMargin);
+      if (!val.isValid || !val.winnerSlot) {
+        throw new Error(`Ugyldig score i sett ${i + 1}: ${val.error || 'Feil'}`);
+      }
+      if (val.winnerSlot === 'A') winsA++;
+      else winsB++;
+
+      setResults.push({
+        setNumber: i + 1,
+        scoreA: s.scoreA,
+        scoreB: s.scoreB,
+      });
+
+      // Hvis en spiller har 2 seire etter sett 2, skal sett 3 ikke være registrert
+      if (i === 1 && (winsA === 2 || winsB === 2) && setsPayload.length > 2) {
+        throw new Error('Kampen er avgjort 2–0 etter 2 sett. Sett 3 skal ikke spilles eller registreres.');
+      }
+    }
+
+    if (winsA < 2 && winsB < 2) {
+      throw new Error('En spiller må vinne 2 sett for å vinne kampen (best av 3).');
+    }
+
+    winnerSlot = winsA === 2 ? 'A' : 'B';
+    match.setsWonA = winsA;
+    match.setsWonB = winsB;
+    match.scoreA = winsA;
+    match.scoreB = winsB;
+    match.sets = setResults;
+    match.status = 'completed';
   } else {
-    const val = validateScore(scoreA, scoreB);
+    // 1 sett (eller fallback hvis scoreA/scoreB sendes)
+    const val = validateScore(scoreA, scoreB, targetPts, winMargin);
     if (!val.isValid || !val.winnerSlot) {
       throw new Error(val.error || 'Ugyldig poengsum.');
     }
     winnerSlot = val.winnerSlot;
+    match.setsWonA = winnerSlot === 'A' ? 1 : 0;
+    match.setsWonB = winnerSlot === 'B' ? 1 : 0;
+    match.scoreA = scoreA;
+    match.scoreB = scoreB;
+    match.sets = [{ setNumber: 1, scoreA, scoreB }];
     match.status = 'completed';
   }
 
   const winner = winnerSlot === 'A' ? match.playerA! : match.playerB!;
   match.winnerId = winner.id;
-  match.scoreA = scoreA;
-  match.scoreB = scoreB;
   match.completedAt = new Date().toISOString();
   match.tableNumber = null; // Free up table
 
