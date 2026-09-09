@@ -230,39 +230,61 @@ async function runRetest() {
   console.log('✓ Test 5 BESTÅTT: Walkover for 3, 5 og 7 spillere fungerer plettfritt uten ugyldige brackets.\n');
 
   // ----------------------------------------------------
-  // TEST 6: 21–20 scoring og deuce-logikk
+  // TEST 6: Teknisk poengvalidering (ingen regelmotor)
   // ----------------------------------------------------
-  console.log('Test 6: 21–20 scoring og deuce-regel...');
-  // 20-20 er uavgjort/ikke avgjort
-  const v20_20 = validateScore(20, 20);
-  assert(!v20_20.isValid, '20-20 skal ikke være gyldig som sluttresultat');
+  console.log('Test 6: Teknisk poengvalidering (ingen regelmotor)...');
+  const vNeg = validateScore(-1, 5);
+  assert(!vNeg.isValid, 'Negative poeng skal avvises');
 
-  // 21-20: Kampen skal fortsette (må lede med 2)
+  const vNaN = validateScore(Number.NaN, 5);
+  assert(!vNaN.isValid, 'NaN skal avvises');
+
+  const v21_18 = validateScore(21, 18);
+  assert(v21_18.isValid, '21-18 skal godtas teknisk');
+
   const v21_20 = validateScore(21, 20);
-  assert(!v21_20.isValid, '21-20 skal IKKE være gyldig som sluttresultat (kampen fortsetter)');
-  assert(
-    Boolean(v21_20.error?.includes('2 poeng')),
-    `Forventet feilmelding om 2 poengs ledelse, fikk: ${v21_20.error}`
-  );
+  assert(v21_20.isValid, '21-20 skal godtas teknisk');
 
-  // 22-20: Skal avslutte kampen
-  const v22_20 = validateScore(22, 20);
-  assert(v22_20.isValid, '22-20 skal være gyldig sluttresultat');
-  assert(v22_20.winnerSlot === 'A', 'Spiller A skal være vinner ved 22-20');
-
-  // 20-22: Spiller B vinner
-  const v20_22 = validateScore(20, 22);
-  assert(v20_22.isValid, '20-22 skal være gyldig sluttresultat');
-  assert(v20_22.winnerSlot === 'B', 'Spiller B skal være vinner ved 20-22');
-
-  // 23-21: Gyldig
-  const v23_21 = validateScore(23, 21);
-  assert(v23_21.isValid, '23-21 skal være gyldig sluttresultat');
-
-  // 23-20: Ugyldig (kampen skulle endt på 22-20)
   const v23_20 = validateScore(23, 20);
-  assert(!v23_20.isValid, '23-20 skal være ugyldig');
-  console.log('✓ Test 6 BESTÅTT: 21-20 fortsetter kampen, 22-20 avslutter korrekt.\n');
+  assert(v23_20.isValid, '23-20 skal godtas teknisk');
+
+  const v20_20 = validateScore(20, 20);
+  assert(v20_20.isValid, '20-20 skal godtas teknisk (vinner velges separat)');
+
+  const samplePlayers: Participant[] = [
+    { id: 'p_a', firstName: 'Dommer_A', registeredAt: new Date().toISOString() },
+    { id: 'p_b', firstName: 'Dommer_B', registeredAt: new Date().toISOString() },
+  ];
+  const sampleMatch: Match = {
+    id: 'm_dommer',
+    round: 1,
+    roundName: 'Test',
+    position: 0,
+    playerA: samplePlayers[0],
+    playerB: samplePlayers[1],
+    winnerId: null,
+    scoreA: null,
+    scoreB: null,
+    tableNumber: null,
+    status: 'ready',
+    isWalkover: false,
+    nextMatchId: null,
+    nextMatchSlot: null,
+  };
+  const { updatedMatches: atypicalMatches } = recordMatchResult(
+    [sampleMatch],
+    'm_dommer',
+    18,
+    21,
+    false,
+    undefined,
+    undefined,
+    'A'
+  );
+  const atypical = atypicalMatches.find((m) => m.id === 'm_dommer')!;
+  assert(atypical.winnerId === 'p_a', 'Eksplisitt vinner skal overstyre poengsummen');
+  assert(atypical.scoreA === 18 && atypical.scoreB === 21, 'Poengsummen skal lagres som dømt');
+  console.log('✓ Test 6 BESTÅTT: Teknisk validering + eksplisitt dommervalg fungerer.\n');
 
   // ----------------------------------------------------
   // TEST 7: Serveregel (5 server før 20-20, 1 serve ved deuce)
@@ -382,8 +404,9 @@ async function runRetest() {
     method: 'POST',
     body: JSON.stringify({
       matchId: match1.id,
-      scoreA: 15,
-      scoreB: 21,
+      newScoreA: 15,
+      newScoreB: 21,
+      winnerSlot: 'B',
       confirmCorrection: true,
     }),
   });

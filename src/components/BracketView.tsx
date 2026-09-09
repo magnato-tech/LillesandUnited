@@ -152,6 +152,35 @@ export const BracketView: React.FC<BracketViewProps> = ({
 
                     const isMyMatch = isPlayerMe(match.playerA) || isPlayerMe(match.playerB);
                     const isTableActive = match.tableNumber && match.status === 'in_progress';
+                    const matchSets = match.format?.sets ?? 1;
+                    const isBestOf3 = matchSets === 3;
+                    const targetPoints = match.format?.targetPoints ?? 21;
+                    const playedSets = match.sets ?? [];
+                    const showSetBreakdown =
+                      isBestOf3 &&
+                      playedSets.length > 0 &&
+                      (match.status === 'completed' || match.status === 'walkover');
+
+                    const renderScore = (slot: 'A' | 'B') => {
+                      const setsWon = slot === 'A' ? match.scoreA : match.scoreB;
+                      if (setsWon === null) return '-';
+                      if (isBestOf3) {
+                        return (
+                          <span className="flex flex-col items-end leading-none">
+                            <span>{setsWon}</span>
+                            <span className="text-[8px] font-bold uppercase text-zinc-500">sett</span>
+                          </span>
+                        );
+                      }
+                      const setScore = playedSets[0];
+                      const points =
+                        setScore !== undefined
+                          ? slot === 'A'
+                            ? setScore.scoreA
+                            : setScore.scoreB
+                          : setsWon;
+                      return points;
+                    };
 
                     return (
                       <div
@@ -170,9 +199,9 @@ export const BracketView: React.FC<BracketViewProps> = ({
                             <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
                               Kamp #{match.position + 1}
                             </span>
-                            {(match.numberOfSets || match.targetPoints) && (
+                            {match.format && (
                               <span className="text-[9px] font-bold text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800">
-                                {match.numberOfSets === 3 ? 'Best av 3' : '1 sett'} · {match.targetPoints ?? 21}p
+                                {isBestOf3 ? 'Best av 3' : '1 sett'} · {targetPoints}p
                               </span>
                             )}
                           </div>
@@ -229,7 +258,7 @@ export const BracketView: React.FC<BracketViewProps> = ({
                             )}
                           </div>
                           <span className="text-xs font-black ml-2 font-mono">
-                            {match.scoreA !== null ? match.scoreA : '-'}
+                            {renderScore('A')}
                           </span>
                         </div>
 
@@ -266,19 +295,42 @@ export const BracketView: React.FC<BracketViewProps> = ({
                               )}
                             </div>
                             <span className="text-xs font-black ml-2 font-mono">
-                              {match.scoreB !== null ? match.scoreB : '-'}
+                              {renderScore('B')}
                             </span>
                           </div>
                         )}
 
-                        {match.sets && match.sets.length > 0 && match.status === 'completed' && (
-                          <div className="mt-2 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
-                            <span>Sett:</span>
-                            <span className="text-zinc-300">
-                              {match.sets.map((s) => `${s.scoreA}-${s.scoreB}`).join(', ')}
-                            </span>
+                        {showSetBreakdown && (
+                          <div className="mt-2 pt-2 border-t border-zinc-800/80 space-y-1">
+                            {[0, 1, 2].map((idx) => {
+                              const set = playedSets[idx];
+                              const isSkipped = !set && playedSets.length === 2 && idx === 2;
+                              if (!set && !isSkipped) return null;
+                              return (
+                                <div
+                                  key={idx}
+                                  className="flex items-center justify-between text-[10px] font-mono text-zinc-500"
+                                >
+                                  <span>Sett {idx + 1}</span>
+                                  <span className="text-zinc-300">
+                                    {set ? `${set.scoreA}–${set.scoreB}` : '—'}
+                                  </span>
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
+
+                        {!isBestOf3 &&
+                          playedSets.length > 0 &&
+                          (match.status === 'completed' || match.status === 'walkover') && (
+                            <div className="mt-2 pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+                              <span>Sett:</span>
+                              <span className="text-zinc-300">
+                                {playedSets.map((s) => `${s.scoreA}-${s.scoreB}`).join(', ')}
+                              </span>
+                            </div>
+                          )}
                       </div>
                     );
                   })}

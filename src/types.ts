@@ -67,7 +67,7 @@ export interface Tournament {
   winner: Participant | null;
   estimatedMinutesPerMatch: number; // default 10 min
   /** Fast bracket-størrelse: 16 (standard), 32 eller 64 spillere. */
-  bracketCapacity?: 16 | 32 | 64;
+  bracketCapacity?: 4 | 8 | 16 | 32 | 64;
   formatSettings?: TournamentFormatSettings;
 }
 

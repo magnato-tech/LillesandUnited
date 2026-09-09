@@ -351,14 +351,75 @@ export async function runResetTests() {
   const unfinished = finalState.tournament.matches.filter((m: Match) => m.status !== 'completed' && m.status !== 'walkover');
   assert(unfinished.length === 0, 'Det finnes ufullførte kamper');
 
+  // ----------------------------------------------------
+  // DEL D: FLEKSIBEL TREKNING OG START-GUARD
+  // ----------------------------------------------------
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('DEL D: FLEKSIBEL TREKNING OG START-GUARD');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+  await adminApi('/api/tournament/reset', {
+    method: 'POST',
+    body: JSON.stringify({ keepParticipants: false }),
+  });
+
+  const fivePersons: Person[] = [];
+  for (let i = 1; i <= 5; i++) {
+    const pRes = await api('/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ firstName: `FemSpiller${i}` }),
+    });
+    assert(pRes.ok, `Kunne ikke opprette FemSpiller${i}`);
+    fivePersons.push(pRes.data.person);
+  }
+
+  for (const p of fivePersons) {
+    const regRes = await api('/api/register', {
+      method: 'POST',
+      body: JSON.stringify({ personId: p.id }),
+    });
+    assert(regRes.ok, `Kunne ikke melde på ${p.displayId}`);
+  }
+
+  const startFive = await adminApi('/api/tournament/start', { method: 'POST' });
+  assert(startFive.ok, `Start med 5 spillere feilet: ${JSON.stringify(startFive.data)}`);
+  let fiveState: AppState = (await api('/api/state')).data;
+  assert(fiveState.tournament.bracketCapacity === 8, '5 spillere skal bruke 8-slots cup');
+  assert(fiveState.tournament.matches.length === 7, '5 spillere på 8-cup skal gi 7 kamper');
+  assert(
+    fiveState.tournament.matches.some((m) => m.status === 'walkover'),
+    '5 spillere skal ha walkovers'
+  );
+
+  const startAgain = await adminApi('/api/tournament/start', { method: 'POST' });
+  assert(startAgain.status === 400, 'Andre start-forsøk skal avvises');
+  assert(
+    String(startAgain.data.error || '').includes('Nullstill cup'),
+    'Start-guard skal peke til Test-fanen'
+  );
+
+  const resetCup = await adminApi('/api/tournament/reset', {
+    method: 'POST',
+    body: JSON.stringify({ keepParticipants: true }),
+  });
+  assert(resetCup.ok, 'Nullstill cup feilet');
+  fiveState = (await api('/api/state')).data;
+  assert(fiveState.tournament.matches.length === 0, 'Cup skal være tom etter reset');
+  assert(fiveState.tournament.participants.length === 5, '5 spillere skal beholdes');
+
+  const restartFive = await adminApi('/api/tournament/start', { method: 'POST' });
+  assert(restartFive.ok, 'Ny trekning etter nullstill cup skal fungere');
+  console.log('✓ Del D: 5-spiller trekning og start-guard OK');
+
   console.log('\n====================================================');
-  console.log('🎉 ALLE TESTER (DEL A, DEL B, DEL C) ER BESTÅTT! 🎉');
+  console.log('🎉 ALLE TESTER (DEL A–D) ER BESTÅTT! 🎉');
   console.log('====================================================');
 
   return {
     delA: true,
     delB: true,
     delC: true,
+    delD: true,
     winnerDelA: cup1.winnerDisplayId,
     winnerDelA2: cup2.winnerDisplayId,
     winnerDelC: cup3.winnerDisplayId,

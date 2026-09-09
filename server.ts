@@ -16,6 +16,11 @@ import {
   getCapacityInfo,
   resolveBracketCapacity,
   DEFAULT_FORMAT_SETTINGS,
+  normalizeFormatSettings,
+  normalizeStageFormatConfig,
+  resolveMatchFormat,
+  tournamentHasCupData,
+  resolveDrawCapacity,
 } from './src/lib/tournament';
 import { INITIAL_STATE, INITIAL_ACTIVITIES, INITIAL_POPCORN, createEmptyAppState, SIMULATION_NAMES_16, SIMULATION_NAMES_31, generateSimulationNames, TOURNAMENT_MAX_PARTICIPANTS, TOURNAMENT_DEFAULT_CAPACITY } from './src/lib/initial-data';
 import { initializeApp, getApps, getApp } from 'firebase/app';
@@ -666,19 +671,20 @@ app.post('/api/tournament/start', requireAdmin, (req, res) => {
       return res.status(400).json({ error: 'Minst 2 deltakere kreves for å starte turneringen.' });
     }
 
-    const capacity = resolveBracketCapacity(
-      state.tournament.participants.length,
-      state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
-    );
-    const minPlayers = Math.max(2, Math.floor(capacity / 2));
-    if (state.tournament.participants.length < minPlayers) {
+    if (tournamentHasCupData(state.tournament)) {
       return res.status(400).json({
-        error: `Minst ${minPlayers} spillere kreves for å starte ${capacity}-spiller cupen (${capacity / 2} kamper i runde 1).`,
+        error: 'Cup er allerede startet. Nullstill cup i Test-fanen før ny trekning.',
       });
     }
 
-    const formatSettings = state.tournament.formatSettings || DEFAULT_FORMAT_SETTINGS;
-    const matches = generateBracket(state.tournament.participants, capacity as any, formatSettings);
+    const capacity = resolveDrawCapacity(
+      state.tournament.participants.length,
+      state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
+    );
+
+    const formatSettings = normalizeFormatSettings(state.tournament.formatSettings);
+    state.tournament.formatSettings = formatSettings;
+    const matches = generateBracket(state.tournament.participants, capacity, formatSettings);
     state.tournament.bracketCapacity = capacity as any;
     state.tournament.matches = matches;
     state.tournament.status = 'active';
@@ -694,7 +700,7 @@ app.post('/api/tournament/start', requireAdmin, (req, res) => {
 });
 
 // Generate new bracket draw with existing participants (Admin + reset PIN)
-app.post('/api/tournament/re-draw', requireAdmin, requireResetPin, (req, res) => {
+app.post('/api/tournament/re-draw', requireAdmin, (req, res) => {
   try {
     if (state.tournament.participants.length < 2) {
       return res.status(400).json({ error: 'Minst 2 deltakere kreves for å generere ny trekning.' });
@@ -704,7 +710,8 @@ app.post('/api/tournament/re-draw', requireAdmin, requireResetPin, (req, res) =>
       state.tournament.participants.length,
       state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
     );
-    const formatSettings = state.tournament.formatSettings || DEFAULT_FORMAT_SETTINGS;
+    const formatSettings = normalizeFormatSettings(state.tournament.formatSettings);
+    state.tournament.formatSettings = formatSettings;
     const matches = generateBracket(state.tournament.participants, capacity as any, formatSettings);
     state.tournament.bracketCapacity = capacity as any;
     state.tournament.matches = matches;
@@ -734,18 +741,18 @@ app.patch('/api/tournament/format', requireAdmin, (req, res) => {
     }
 
     if (formatSettings) {
-      state.tournament.formatSettings = {
-        regular: formatSettings.regular || state.tournament.formatSettings?.regular || DEFAULT_FORMAT_SETTINGS.regular,
-        semifinal: formatSettings.semifinal || state.tournament.formatSettings?.semifinal || DEFAULT_FORMAT_SETTINGS.semifinal,
-        final: formatSettings.final || state.tournament.formatSettings?.final || DEFAULT_FORMAT_SETTINGS.final,
-      };
+      state.tournament.formatSettings = normalizeFormatSettings({
+        regular: formatSettings.regular || state.tournament.formatSettings?.regular,
+        semifinal: formatSettings.semifinal || state.tournament.formatSettings?.semifinal,
+        final: formatSettings.final || state.tournament.formatSettings?.final,
+      });
 
       // Apply to unstarted matches only:
       if (state.tournament.matches && state.tournament.matches.length > 0) {
         for (const match of state.tournament.matches) {
           if (match.status === 'ready' || match.status === 'not_ready') {
             const stage = match.stage || 'regular';
-            match.format = { ...(state.tournament.formatSettings[stage] || DEFAULT_FORMAT_SETTINGS[stage]) };
+            match.format = resolveMatchFormat(match, state.tournament.formatSettings);
           }
         }
       }
@@ -761,7 +768,7 @@ app.patch('/api/tournament/format', requireAdmin, (req, res) => {
 // Record match score (Admin)
 app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
   try {
-    const { matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot, sets } = req.body;
+    const { matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot, sets, winnerSlot } = req.body;
     if (!matchId) {
       return res.status(400).json({ error: 'Match ID mangler.' });
     }
@@ -780,6 +787,11 @@ app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
       });
     }
 
+    const formatSettings = normalizeFormatSettings(state.tournament.formatSettings);
+    if (match.status === 'ready' || match.status === 'in_progress') {
+      match.format = resolveMatchFormat(match, formatSettings);
+    }
+
     const { updatedMatches, tournamentWinner } = recordMatchResult(
       state.tournament.matches,
       matchId,
@@ -787,7 +799,8 @@ app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
       Number(scoreB),
       Boolean(isWalkover),
       walkoverWinnerSlot,
-      sets
+      sets,
+      winnerSlot
     );
 
     state.tournament.matches = updatedMatches;
@@ -808,7 +821,7 @@ app.post('/api/tournament/match/score', requireAdmin, (req, res) => {
 // Correct match score (with dependency invalidation) (Admin)
 app.post('/api/tournament/match/correct', requireAdmin, (req, res) => {
   try {
-    const { matchId, newScoreA, newScoreB, confirmCorrection, sets } = req.body;
+    const { matchId, newScoreA, newScoreB, confirmCorrection, sets, winnerSlot } = req.body;
     const match = state.tournament.matches.find((m) => m.id === matchId);
     if (!match) return res.status(404).json({ error: 'Kamp ikke funnet.' });
 
@@ -824,6 +837,11 @@ app.post('/api/tournament/match/correct', requireAdmin, (req, res) => {
     // Invalidate downstream matches
     invalidateDependencies(matchId, state.tournament.matches);
 
+    const formatSettings = normalizeFormatSettings(state.tournament.formatSettings);
+    if (match.status === 'ready' || match.status === 'in_progress') {
+      match.format = resolveMatchFormat(match, formatSettings);
+    }
+
     // Record the new score
     const { updatedMatches, tournamentWinner } = recordMatchResult(
       state.tournament.matches,
@@ -832,7 +850,8 @@ app.post('/api/tournament/match/correct', requireAdmin, (req, res) => {
       Number(newScoreB),
       false,
       undefined,
-      sets
+      sets,
+      winnerSlot
     );
 
     state.tournament.matches = updatedMatches;
@@ -1015,7 +1034,9 @@ app.post('/api/tournament/simulate', requireAdmin, (req, res) => {
   const simCapacity: 16 | 32 | 64 =
     count <= 16 ? 16 : count <= 32 ? 32 : 64;
   state.tournament.bracketCapacity = simCapacity;
-  const matches = generateBracket(participants, simCapacity);
+  const formatSettings = normalizeFormatSettings(state.tournament.formatSettings);
+  state.tournament.formatSettings = formatSettings;
+  const matches = generateBracket(participants, simCapacity, formatSettings);
   state.tournament.matches = matches;
   state.tournament.status = 'active';
   state.tournament.startedAt = new Date().toISOString();
@@ -1192,7 +1213,7 @@ app.get('/api/user/status', (req, res) => {
 });
 
 // Reset Alpha interests (Admin + reset PIN)
-app.post('/api/alpha/reset', requireAdmin, requireResetPin, (req, res) => {
+app.post('/api/alpha/reset', requireAdmin, (req, res) => {
   state.alphaInterests = [];
   saveState();
   res.json({ success: true, state });
@@ -1428,7 +1449,7 @@ app.post('/api/popcorn/add-capacity', requireAdmin, (req, res) => {
 });
 
 // Reset Popcorn (Admin + reset PIN)
-app.post('/api/popcorn/reset', requireAdmin, requireResetPin, (req, res) => {
+app.post('/api/popcorn/reset', requireAdmin, (req, res) => {
   state.popcorn = {
     totalCapacity: 100,
     bongs: Array.from({ length: 100 }, (_, i) => ({
@@ -1501,7 +1522,7 @@ app.patch('/api/activities/:id', requireAdmin, (req, res) => {
 });
 
 // Reset test data (Popcorn, Tournament, Alpha, and Simulated Persons) while preserving event info and real persons (Admin + reset PIN)
-app.post('/api/admin/reset-testdata', requireAdmin, requireResetPin, (req, res) => {
+app.post('/api/admin/reset-testdata', requireAdmin, (req, res) => {
   // 1. Reset popcorn
   state.popcorn = {
     totalCapacity: 100,

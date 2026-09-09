@@ -207,11 +207,10 @@ export async function addPopcornCapacity(count = 10): Promise<{ totalCapacity: n
   return data;
 }
 
-export async function resetPopcorn(resetPin: string): Promise<AppState> {
+export async function resetPopcorn(): Promise<AppState> {
   const res = await fetch('/api/popcorn/reset', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille popcorn');
@@ -289,11 +288,10 @@ export async function startTournament(): Promise<AppState> {
   return data.state;
 }
 
-export async function reDrawTournament(resetPin: string): Promise<AppState> {
+export async function reDrawTournament(): Promise<AppState> {
   const res = await fetch('/api/tournament/re-draw', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke generere ny trekning');
@@ -331,12 +329,13 @@ export async function submitMatchScore(
   scoreB: number,
   isWalkover = false,
   walkoverWinnerSlot?: 'A' | 'B',
-  sets?: { scoreA: number; scoreB: number }[]
+  sets?: { scoreA: number; scoreB: number }[],
+  winnerSlot?: 'A' | 'B'
 ): Promise<AppState> {
   const res = await fetch('/api/tournament/match/score', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot, sets }),
+    body: JSON.stringify({ matchId, scoreA, scoreB, isWalkover, walkoverWinnerSlot, sets, winnerSlot }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke lagre resultat');
@@ -348,12 +347,13 @@ export async function correctMatchScore(
   newScoreA: number,
   newScoreB: number,
   confirmCorrection = false,
-  sets?: { scoreA: number; scoreB: number }[]
+  sets?: { scoreA: number; scoreB: number }[],
+  winnerSlot?: 'A' | 'B'
 ): Promise<{ state?: AppState; requiresConfirmation?: boolean; warning?: string }> {
   const res = await fetch('/api/tournament/match/correct', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ matchId, newScoreA, newScoreB, confirmCorrection, sets }),
+    body: JSON.stringify({ matchId, newScoreA, newScoreB, confirmCorrection, sets, winnerSlot }),
   });
   const data = await res.json();
   if (res.status === 409 && data.requiresConfirmation) {
@@ -447,11 +447,10 @@ export async function registerAlphaInterest(
   return data.state;
 }
 
-export async function resetAlpha(resetPin: string): Promise<AppState> {
+export async function resetAlpha(): Promise<AppState> {
   const res = await fetch('/api/alpha/reset', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille Alpha');
@@ -508,11 +507,10 @@ export async function updateActivity(
   return data.state;
 }
 
-export async function resetTestData(resetPin: string): Promise<AppState> {
+export async function resetTestData(): Promise<AppState> {
   const res = await fetch('/api/admin/reset-testdata', {
     method: 'POST',
     headers: getAdminHeaders(),
-    body: JSON.stringify({ resetPin }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Kunne ikke tilbakestille testdata');

@@ -162,6 +162,8 @@ export const SIMULATION_NAMES_31 = [
 export const TOURNAMENT_DEFAULT_CAPACITY = 16;
 export const TOURNAMENT_CAPACITY_TIERS = [16, 32, 64] as const;
 export type BracketCapacity = (typeof TOURNAMENT_CAPACITY_TIERS)[number];
+export const DRAW_BRACKET_SIZES = [4, 8, 16, 32, 64] as const;
+export type DrawBracketCapacity = (typeof DRAW_BRACKET_SIZES)[number];
 export const TOURNAMENT_MAX_PARTICIPANTS = 64;
 
 /** Generer unike testnavn for simulering (2–128 spillere). */

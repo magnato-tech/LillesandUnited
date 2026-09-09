@@ -32,7 +32,7 @@ import {
   UserMinus,
   ExternalLink,
 } from 'lucide-react';
-import { AppState, Match, PopcornBong, Person } from '../types';
+import { AppState, Match, PopcornBong, Person, Tournament } from '../types';
 import {
   startTournament,
   submitMatchScore,
@@ -56,7 +56,6 @@ import {
   addPopcornCapacity,
   resetPopcorn,
   updatePerson,
-  reDrawTournament,
   resetAlpha,
   resetTestData,
   resetAllData,
@@ -64,7 +63,14 @@ import {
   getFirestoreStatus,
   syncFirestore,
 } from '../services/api';
-import { calculateTournamentStats, resolveBracketCapacity, hasPlayedDependencies } from '../lib/tournament';
+import {
+  calculateTournamentStats,
+  canDrawCup,
+  resolveDrawCapacity,
+  resolveBracketCapacity,
+  tournamentHasCupData,
+  hasPlayedDependencies,
+} from '../lib/tournament';
 import { TableTennisAdminPanel, ScoreEntryModal, ResetMatchConfirmModal } from './TableTennisAdminPanel';
 import { BracketView } from './BracketView';
 
@@ -140,6 +146,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Match score entry form state
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [simTournament, setSimTournament] = useState<Tournament | null>(null);
   const [scoreA, setScoreA] = useState<number>(21);
   const [scoreB, setScoreB] = useState<number>(18);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -401,13 +408,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       message: 'Setter alle bonger tilbake til blank/nøytral, og nullstiller aktiveringer og hentet-statuser. Neste nummer blir igjen #1.',
       confirmLabel: 'Reset Popcorn',
       variant: 'warning',
-      requiresResetPin: true,
-      onConfirm: async (resetPin) => {
-        if (!resetPin.trim()) {
-          showToast('Nullstillings-PIN er påkrevd.', 'error');
-          throw new Error('reset pin required');
-        }
-        await resetPopcorn(resetPin.trim());
+      onConfirm: async () => {
+        await resetPopcorn();
         setSelectedBong(null);
         onRefresh();
         showToast('Popcorn-bonger er nullstilt. Neste nummer er nå #1.', 'success');
@@ -415,80 +417,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     });
   };
 
-  const handleResetTournamentData = () => {
-    setDialogResetPin('');
+  const handleResetCup = () => {
     setConfirmDialog({
       isOpen: true,
-      title: 'Reset Bordtennisturnering',
+      title: 'Nullstill cup',
       message:
-        'Fjerner alle eksisterende kamper, resultater og cup-tre, og setter turneringen tilbake til påmeldingsfasen. Du kan velge om du også vil fjerne påmeldte spillere eller beholde dem.\n\nSkriv inn nullstillings-PIN for å bekrefte.',
-      confirmLabel: 'Nullstill alt (tøm deltakere)',
-      variant: 'danger',
-      requiresResetPin: true,
-      secondaryAction: {
-        label: 'Nullstill cup (behold påmeldte spillere)',
-        onClick: async (resetPin) => {
-          if (!resetPin.trim()) {
-            showToast('Nullstillings-PIN er påkrevd.', 'error');
-            throw new Error('reset pin required');
-          }
-          await resetTournament(true, resetPin.trim());
-          onRefresh();
-          showToast('Turneringen er nullstilt. Påmeldte spillere er beholdt.', 'success');
-        },
-      },
-      onConfirm: async (resetPin) => {
-        if (!resetPin.trim()) {
-          showToast('Nullstillings-PIN er påkrevd.', 'error');
-          throw new Error('reset pin required');
-        }
-        await resetTournament(false, resetPin.trim());
+        'Fjerner kamper, resultater og cup-tre. Påmeldte spillere beholdes, og turneringen settes tilbake til påmelding. Du kan deretter trekke cup på nytt i Bordtennis-fanen.',
+      confirmLabel: 'Nullstill cup',
+      variant: 'warning',
+      onConfirm: async () => {
+        await resetTournament(true);
         onRefresh();
-        showToast('Turneringen er nullstilt og deltakerlisten er tømt.', 'success');
+        showToast('Cup er nullstilt. Påmeldte spillere er beholdt.', 'success');
       },
     });
   };
 
-  const handleReDraw = () => {
-    if (tournament.participants.length < 2) {
-      setConfirmDialog({
-        isOpen: true,
-        title: 'Minst 2 deltakere kreves',
-        message: `Det er for øyeblikket kun ${tournament.participants.length} påmeldt(e) deltaker(e). Minst 2 deltakere kreves for å generere en trekning. Vil du opprette en 16-spillers test-cup for å starte turneringen?`,
-        confirmLabel: 'Simuler 16 spillere & start cup',
-        variant: 'primary',
-        onConfirm: async () => {
-          try {
-            await simulateTournament(16);
-            onRefresh();
-            showToast('16 spillere registrert og turnering startet!', 'success');
-          } catch (err: any) {
-            showToast(err.message || 'Kunne ikke generere test-turnering', 'error');
-          }
-        },
-      });
-      return;
-    }
-
-    setDialogResetPin('');
+  const handleResetTournamentClear = () => {
     setConfirmDialog({
       isOpen: true,
-      title: 'Generer ny trekning',
-      message: `Vil du generere en ny tilfeldig trekning for de ${tournament.participants.length} påmeldte spillerne? Alle eksisterende resultater og kamper nullstilles, og turneringen starter på nytt med de samme spillerne.`,
-      confirmLabel: 'Generer ny trekning',
-      variant: 'primary',
-      requiresResetPin: true,
-      onConfirm: async (resetPin) => {
-        if (!resetPin.trim()) {
-          showToast('Nullstillings-PIN er påkrevd.', 'error');
-          throw new Error('reset pin required');
-        }
-        await reDrawTournament(resetPin.trim());
+      title: 'Nullstill turnering',
+      message:
+        'Fjerner alle påmeldte spillere, kamper og cup-tre. Turneringen settes tilbake til tom påmelding.',
+      confirmLabel: 'Nullstill turnering',
+      variant: 'danger',
+      onConfirm: async () => {
+        await resetTournament(false);
         onRefresh();
-        showToast(
-          `Ny trekning generert for ${tournament.participants.length} spillere! Turneringen har startet på nytt.`,
-          'success'
-        );
+        showToast('Turneringen er nullstilt og deltakerlisten er tømt.', 'success');
       },
     });
   };
@@ -501,13 +457,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       message: 'Fjerner alle testregistreringer og tømmer interesselisten for UngdomsAlpha.',
       confirmLabel: 'Reset Alpha',
       variant: 'warning',
-      requiresResetPin: true,
-      onConfirm: async (resetPin) => {
-        if (!resetPin.trim()) {
-          showToast('Nullstillings-PIN er påkrevd.', 'error');
-          throw new Error('reset pin required');
-        }
-        await resetAlpha(resetPin.trim());
+      onConfirm: async () => {
+        await resetAlpha();
         onRefresh();
         showToast('Interesselisten for UngdomsAlpha er tømt.', 'success');
       },
@@ -522,13 +473,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       message: 'Nullstiller Popcorn, Bordtennis og Alpha i én operasjon. Rører aldri tidspunkter eller arrangementets faste program. Simulerte testpersoner fjernes automatisk.',
       confirmLabel: 'Reset Alt Testdata',
       variant: 'danger',
-      requiresResetPin: true,
-      onConfirm: async (resetPin) => {
-        if (!resetPin.trim()) {
-          showToast('Nullstillings-PIN er påkrevd.', 'error');
-          throw new Error('reset pin required');
-        }
-        await resetTestData(resetPin.trim());
+      onConfirm: async () => {
+        await resetTestData();
         setSelectedBong(null);
         onRefresh();
         showToast('All testdata er nullstilt. Arrangementets program er bevart.', 'success');
@@ -559,25 +505,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     });
   };
 
-  // Start tournament
-  const handleStartTournament = () => {
-    if (tournament.participants.length < 2) {
-      showToast('Minst 2 deltakere kreves for å starte turneringen.', 'error');
+  const handleDrawCup = () => {
+    if (!canDrawCup(tournament)) {
+      if (tournamentHasCupData(tournament)) {
+        showToast('Cup er allerede trukket. Nullstill cup i Test-fanen før ny trekning.', 'error');
+      } else if (tournament.participants.length < 2) {
+        showToast('Minst 2 deltakere kreves for å trekke cup.', 'error');
+      }
       return;
     }
+
+    const capacity = resolveDrawCapacity(
+      tournament.participants.length,
+      tournament.bracketCapacity
+    );
+    const walkovers = capacity - tournament.participants.length;
+    const walkoverNote =
+      walkovers > 0
+        ? ` Cup-størrelse ${capacity} med ${walkovers} walkover${walkovers > 1 ? 's' : ''} i runde 1.`
+        : ` Cup-størrelse ${capacity}.`;
+
     setConfirmDialog({
       isOpen: true,
-      title: 'Steng påmelding og start cup',
-      message: `Er du sikker på at du vil stenge påmeldingen og generere cup-tre for ${tournament.participants.length} spillere?`,
-      confirmLabel: 'Start cup',
+      title: 'Trekk cup',
+      message: `Steng påmelding og trekk cup for ${tournament.participants.length} spillere?${walkoverNote} Kampformat fra Innstillinger brukes på alle kamper.`,
+      confirmLabel: 'Trekk cup',
       variant: 'primary',
       onConfirm: async () => {
         try {
           await startTournament();
           onRefresh();
-          showToast(`Turneringen er startet med ${tournament.participants.length} deltakere!`, 'success');
+          showToast(`Cup er trukket for ${tournament.participants.length} spillere!`, 'success');
         } catch (err: any) {
-          showToast(err.message || 'Feil ved start av turnering', 'error');
+          showToast(err.message || 'Kunne ikke trekke cup', 'error');
         }
       },
     });
@@ -587,14 +547,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleSubmitScore = async (
     isWalkover = false,
     woSlot?: 'A' | 'B',
-    sets?: { scoreA: number; scoreB: number }[]
+    sets?: { scoreA: number; scoreB: number }[],
+    winnerSlot?: 'A' | 'B'
   ) => {
     if (!selectedMatchId) return;
     setActionError(null);
     setCorrectionWarning(null);
 
     try {
-      await submitMatchScore(selectedMatchId, scoreA, scoreB, isWalkover, woSlot, sets);
+      await submitMatchScore(selectedMatchId, scoreA, scoreB, isWalkover, woSlot, sets, winnerSlot);
       setSelectedMatchId(null);
       onRefresh();
       showToast('Resultat lagret!', 'success');
@@ -606,13 +567,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Correct match score
   const handleCorrectScore = async (
     forceConfirm = false,
-    sets?: { scoreA: number; scoreB: number }[]
+    sets?: { scoreA: number; scoreB: number }[],
+    winnerSlot?: 'A' | 'B'
   ) => {
     if (!selectedMatchId) return;
     setActionError(null);
 
     try {
-      const res = await correctMatchScore(selectedMatchId, scoreA, scoreB, forceConfirm, sets);
+      const res = await correctMatchScore(selectedMatchId, scoreA, scoreB, forceConfirm, sets, winnerSlot);
       if (res.requiresConfirmation && !forceConfirm) {
         setCorrectionWarning(res.warning || 'Advarsel om avhengigheter');
         return;
@@ -635,23 +597,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     } catch (err: any) {
       showToast(err.message || 'Kunne ikke tildele bord', 'error');
     }
-  };
-
-  // Reset tournament to registration (keep players)
-  const handleReopenRegistration = () => {
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Gjenåpne påmelding',
-      message:
-        'Tilbakestille turneringen til påmeldingsfasen? Eksisterende påmeldte deltakere beholdes, men pågående kamper og resultater nullstilles.',
-      confirmLabel: 'Gjenåpne påmelding',
-      variant: 'warning',
-      onConfirm: async () => {
-        await resetTournament(true);
-        onRefresh();
-        showToast('Turneringen er satt tilbake til påmelding. Deltakerne er beholdt.', 'success');
-      },
-    });
   };
 
   // Run test simulation
@@ -831,8 +776,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const openScoreModal = (match: Match) => {
     setSelectedMatchId(match.id);
-    const target = match.targetPoints ?? 21;
-    const margin = match.winMargin ?? 2;
+    const target = match.format?.targetPoints ?? 21;
+    const margin = match.format?.winMargin ?? 2;
     setScoreA(match.scoreA ?? target);
     setScoreB(match.scoreB ?? Math.max(0, target - (margin === 2 ? 3 : 2)));
     setActionError(null);
@@ -1074,7 +1019,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       id: 'matches',
       shortLabel: 'KAMP',
       countLabel: String(tournament.matches.length),
-      tooltip: 'Bordtenniskamper — cup-tre, resultater og bordtildeling',
+      tooltip:
+        tournament.matches.length === 0 && tournament.status === 'registration'
+          ? 'Ingen cup-tre ennå — trekkes under Innstillinger i Bordtennis-fanen'
+          : 'Bordtenniskamper — totalt antall kamper i cup-tre, resultater og bordtildeling',
       icon: Trophy,
       activeClass: 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
     },
@@ -1104,7 +1052,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     {
       id: 'test',
       shortLabel: 'TEST',
-      tooltip: 'Test & Reset — testidentitet, nullstilling og simulering (krever nullstillings-PIN)',
+      tooltip: 'Test & Reset — testidentitet, nullstilling og simulering (krever PIN for å åpne fanen)',
       icon: Settings,
       activeClass: 'bg-rose-500 text-zinc-950 border-zinc-950 shadow-artistic-sm',
     },
@@ -1328,17 +1276,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="space-y-6">
           <TableTennisAdminPanel
             tournament={tournament}
+            persons={eventPersons}
             onRefresh={onRefresh}
-            onStartTournament={handleStartTournament}
-            onReopenRegistration={handleReopenRegistration}
-            onReDraw={handleReDraw}
+            onDrawCup={handleDrawCup}
             onAssignTable={handleAssignTable}
             onOpenScoreModal={openScoreModal}
             onRequestResetMatch={openResetMatchModal}
             onExpandCapacity={handleExpandCapacity}
+            onSimTournamentChange={setSimTournament}
           />
 
-          {tournament.matches.length > 0 && (
+          {(simTournament ?? tournament).matches.length > 0 && (
             <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm space-y-4">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 block">
@@ -1350,8 +1298,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </p>
               </div>
               <BracketView
-                matches={tournament.matches}
-                winner={tournament.winner}
+                matches={(simTournament ?? tournament).matches}
+                winner={(simTournament ?? tournament).winner}
                 myPlayerName={null}
               />
             </div>
@@ -1926,43 +1874,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               </button>
             </div>
 
-            {/* 2. RESET TURNERING */}
+            {/* 2. NULLSTILL CUP */}
             <div className="p-5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex flex-col justify-between shadow-artistic-sm">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 block mb-1">
                   Bordtennis
                 </span>
-                <h4 className="font-black text-white text-base mb-1">Reset Turnering</h4>
+                <h4 className="font-black text-white text-base mb-1">Nullstill cup</h4>
                 <p className="text-xs text-zinc-400 mb-4 font-medium">
-                  Fjerner alle testspillere, kamper og cup-tre. Setter status tilbake til påmelding.
+                  Fjerner kamper, resultater og cup-tre. Beholder påmeldte spillere slik at du kan trekke cup på nytt i Bordtennis-fanen.
+                </p>
+              </div>
+              <button
+                id="admin-reset-cup-btn"
+                onClick={handleResetCup}
+                className="w-full py-3 rounded-2xl bg-zinc-900 border-2 border-lime-400/50 hover:border-lime-400 text-lime-300 text-xs font-black uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
+              >
+                Nullstill cup
+              </button>
+            </div>
+
+            {/* 3. NULLSTILL TURNERING */}
+            <div className="p-5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex flex-col justify-between shadow-artistic-sm">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 block mb-1">
+                  Bordtennis
+                </span>
+                <h4 className="font-black text-white text-base mb-1">Nullstill turnering</h4>
+                <p className="text-xs text-zinc-400 mb-4 font-medium">
+                  Fjerner alle påmeldte spillere, kamper og cup-tre. Setter turneringen tilbake til tom påmelding.
                 </p>
               </div>
               <button
                 id="admin-reset-tournament-btn"
-                onClick={handleResetTournamentData}
+                onClick={handleResetTournamentClear}
                 className="w-full py-3 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
-                Reset Turnering
-              </button>
-            </div>
-
-            {/* 3. GENERER NY TREKNING */}
-            <div className="p-5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex flex-col justify-between shadow-artistic-sm">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 block mb-1">
-                  Bordtennis
-                </span>
-                <h4 className="font-black text-white text-base mb-1">Generer ny trekning</h4>
-                <p className="text-xs text-zinc-400 mb-4 font-medium">
-                  Beholder deltakerlisten, fjerner eksisterende tre/kamper og genererer nytt tilfeldig cup-tre med korrekte walkovers.
-                </p>
-              </div>
-              <button
-                id="admin-redraw-btn"
-                onClick={handleReDraw}
-                className="w-full py-3 rounded-2xl bg-zinc-900 border-2 border-lime-400/50 hover:border-lime-400 text-lime-300 text-xs font-black uppercase tracking-wider shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
-              >
-                Generer ny trekning
+                Nullstill turnering
               </button>
             </div>
 
@@ -2314,7 +2262,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* ---------------- SCORE ENTRY / CORRECTION MODAL ---------------- */}
-      {selectedMatch && (
+      {selectedMatch && !simTournament && (
         <ScoreEntryModal
           match={selectedMatch}
           scoreA={scoreA}
@@ -2328,14 +2276,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             setActionError(null);
             setCorrectionWarning(null);
           }}
-          onSubmit={(setsPayload) => {
+          onSubmit={(setsPayload, winnerSlot) => {
             if (selectedMatch.status === 'completed') {
-              handleCorrectScore(false, setsPayload);
+              handleCorrectScore(false, setsPayload, winnerSlot);
             } else {
-              handleSubmitScore(false, undefined, setsPayload);
+              handleSubmitScore(false, undefined, setsPayload, winnerSlot);
             }
           }}
-          onConfirmCorrection={(setsPayload) => handleCorrectScore(true, setsPayload)}
+          onConfirmCorrection={(setsPayload, winnerSlot) =>
+            handleCorrectScore(true, setsPayload, winnerSlot)
+          }
           onWalkover={(slot) => handleSubmitScore(true, slot)}
           onRequestReset={() => {
             if (selectedMatch) openResetMatchModal(selectedMatch);

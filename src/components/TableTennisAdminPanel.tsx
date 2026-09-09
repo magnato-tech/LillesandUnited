@@ -1,12 +1,21 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Play, RotateCcw, RefreshCw, Trophy, Check, AlertTriangle, Clock, Maximize2, Sliders, CheckCircle2 } from 'lucide-react';
-import { Match, Tournament, TournamentFormatSettings, TargetPoints, WinMargin, NumberOfSets, TournamentStage } from '../types';
+import { Play, Pause, Square, RotateCcw, RefreshCw, Trophy, Check, AlertTriangle, Clock, Maximize2, Sliders, CheckCircle2, FastForward, FlaskConical, X, Lock, Unlock } from 'lucide-react';
+import { Match, Person, Tournament, TournamentFormatSettings, TargetPoints, WinMargin, NumberOfSets, TournamentStage } from '../types';
+import { useTournamentSimulator, SimulatorDelay } from '../hooks/useTournamentSimulator';
+import {
+  canRunSimulation,
+  countTotalPlayableMatches,
+} from '../lib/tournament-simulator';
 import {
   calculateTournamentStats,
+  canDrawCup,
   getCapacityInfo,
   getNextCapacityTier,
   resolveBracketCapacity,
+  resolveDrawCapacity,
+  tournamentHasCupData,
   DEFAULT_FORMAT_SETTINGS,
+  normalizeFormatSettings,
   validateScore,
 } from '../lib/tournament';
 import { updateTournamentFormat } from '../services/api';
@@ -50,38 +59,37 @@ function playerLabel(player: Match['playerA']): string {
 
 interface TableTennisAdminPanelProps {
   tournament: Tournament;
+  persons: Person[];
   onRefresh: () => void;
-  onStartTournament: () => void;
-  onReopenRegistration: () => void;
-  onReDraw?: () => void;
+  onDrawCup: () => void;
   onAssignTable: (matchId: string, tableNumber: 1 | 2 | null, status?: string) => void;
   onOpenScoreModal: (match: Match) => void;
   onRequestResetMatch?: (match: Match) => void;
   onExpandCapacity?: (capacity: 32 | 64) => void | Promise<void>;
+  onSimTournamentChange?: (tournament: Tournament | null) => void;
 }
 
 export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
   tournament,
+  persons,
   onRefresh,
-  onStartTournament,
-  onReopenRegistration,
-  onReDraw,
+  onDrawCup,
   onAssignTable,
   onOpenScoreModal,
   onRequestResetMatch,
   onExpandCapacity,
+  onSimTournamentChange,
 }) => {
   const [showAllCompleted, setShowAllCompleted] = useState(false);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
   const [showExpandPanel, setShowExpandPanel] = useState(false);
   const [showFormatPanel, setShowFormatPanel] = useState(false);
+  const [showSimulatorPanel, setShowSimulatorPanel] = useState(false);
 
   // Editable format configuration per stage
-  const [formatDraft, setFormatDraft] = useState<TournamentFormatSettings>(() => ({
-    regular: tournament.formatSettings?.regular || { ...DEFAULT_FORMAT_SETTINGS.regular },
-    semifinal: tournament.formatSettings?.semifinal || { ...DEFAULT_FORMAT_SETTINGS.semifinal },
-    final: tournament.formatSettings?.final || { ...DEFAULT_FORMAT_SETTINGS.final },
-  }));
+  const [formatDraft, setFormatDraft] = useState<TournamentFormatSettings>(() =>
+    normalizeFormatSettings(tournament.formatSettings)
+  );
 
   // Editable match duration
   const [estimatedMinutes, setEstimatedMinutes] = useState<number>(
@@ -94,11 +102,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
   // Keep state in sync with tournament updates
   useEffect(() => {
     if (tournament.formatSettings) {
-      setFormatDraft({
-        regular: { ...tournament.formatSettings.regular },
-        semifinal: { ...tournament.formatSettings.semifinal },
-        final: { ...tournament.formatSettings.final },
-      });
+      setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
     }
     if (tournament.estimatedMinutesPerMatch !== undefined) {
       setEstimatedMinutes(tournament.estimatedMinutesPerMatch);
@@ -106,6 +110,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
   }, [tournament.formatSettings, tournament.estimatedMinutesPerMatch]);
 
   const handleSaveFormat = async () => {
+    if (overlayOpen) return;
     setFormatSaveLoading(true);
     setFormatSaveError(null);
     try {
@@ -121,6 +126,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
   };
 
   const handleMinutesChange = async (newMinutes: number) => {
+    if (overlayOpen) return;
     setEstimatedMinutes(newMinutes);
     try {
       await updateTournamentFormat(undefined, newMinutes);
@@ -130,29 +136,41 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
     }
   };
 
+  const simulator = useTournamentSimulator(onRefresh);
+  const overlayOpen = simulator.overlayOpen;
+  const displayTournament = simulator.simTournament ?? tournament;
+
+  useEffect(() => {
+    onSimTournamentChange?.(simulator.simTournament);
+  }, [simulator.simTournament, onSimTournamentChange]);
+
+  useEffect(() => {
+    if (overlayOpen) setShowSimulatorPanel(true);
+  }, [overlayOpen]);
+
   const bracketCapacity = resolveBracketCapacity(
-    tournament.participants.length,
-    tournament.bracketCapacity ?? 16
+    displayTournament.participants.length,
+    displayTournament.bracketCapacity ?? 16
   );
   const capacityInfo = getCapacityInfo(bracketCapacity);
   const nextCapacityTier = getNextCapacityTier(bracketCapacity);
 
-  const stats = calculateTournamentStats(tournament.matches, tournament.estimatedMinutesPerMatch);
+  const stats = calculateTournamentStats(displayTournament.matches, displayTournament.estimatedMinutesPerMatch);
 
   const completedMatches = useMemo(
     () =>
-      tournament.matches
+      displayTournament.matches
         .filter((m) => m.status === 'completed' || m.status === 'walkover')
         .sort((a, b) => {
           if (a.round !== b.round) return a.round - b.round;
           return a.position - b.position;
         }),
-    [tournament.matches]
+    [displayTournament.matches]
   );
 
   const upcomingMatches = useMemo(
     () =>
-      tournament.matches
+      displayTournament.matches
         .filter(
           (m) =>
             m.status !== 'completed' &&
@@ -165,23 +183,52 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
           if (a.round !== b.round) return a.round - b.round;
           return a.position - b.position;
         }),
-    [tournament.matches]
+    [displayTournament.matches]
   );
 
   const visibleCompleted = showAllCompleted ? completedMatches : completedMatches.slice(-10);
   const visibleUpcoming = showAllUpcoming ? upcomingMatches : upcomingMatches.slice(0, 10);
 
-  const finalMatch = tournament.matches.find((m) => m.roundName === 'Finale') || null;
-  const finalWinner = tournament.winner;
+  const finalMatch = displayTournament.matches.find((m) => m.roundName === 'Finale') || null;
+  const finalWinner = displayTournament.winner;
 
   const tableMatches = [1, 2].map((tableNum) =>
-    tournament.matches.find(
+    displayTournament.matches.find(
       (m) => m.tableNumber === tableNum && m.status !== 'completed' && m.status !== 'walkover'
     )
   );
 
   const isTableOccupied = (tableNum: 1 | 2) =>
-    tournament.matches.some((m) => m.tableNumber === tableNum && m.status === 'in_progress');
+    displayTournament.matches.some((m) => m.tableNumber === tableNum && m.status === 'in_progress');
+
+  const simulationGate = canRunSimulation(tournament.participants, persons);
+  const totalPlayableMatches = countTotalPlayableMatches(displayTournament.matches);
+
+  const delayOptions: { label: string; value: SimulatorDelay }[] = [
+    { label: '0s', value: 0 },
+    { label: '1s', value: 1000 },
+    { label: '2s', value: 2000 },
+  ];
+
+  const currentSimMatch = simulator.currentMatchId
+    ? displayTournament.matches.find((m) => m.id === simulator.currentMatchId)
+    : null;
+
+  const isRegistrationOpen = tournament.status === 'registration';
+  const cupAlreadyDrawn = tournamentHasCupData(tournament);
+  const drawCupEnabled = canDrawCup(tournament) && !overlayOpen;
+  const drawCupCapacity = resolveDrawCapacity(
+    tournament.participants.length,
+    tournament.bracketCapacity
+  );
+  const drawCupWalkovers = Math.max(0, drawCupCapacity - tournament.participants.length);
+
+  const tournamentStatusLabel =
+    tournament.status === 'registration'
+      ? 'Påmelding pågår'
+      : tournament.status === 'active'
+      ? 'Turnering pågår'
+      : 'Fullført';
 
   return (
     <div className="space-y-6">
@@ -196,15 +243,188 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
             Registrer resultater, følg med på bordene og se hvem som er klare for finale.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onRefresh}
-          className="self-start px-4 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 hover:border-zinc-700 text-zinc-300 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Oppdater
-        </button>
+        <div className="flex items-center gap-2 self-start">
+          {tournament.status === 'active' && (
+            <button
+              type="button"
+              onClick={() => setShowSimulatorPanel((open) => !open)}
+              title="Auto-spill turnering (demo i minnet)"
+              className={`relative p-2.5 rounded-2xl border-2 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm transition-colors ${
+                showSimulatorPanel || overlayOpen
+                  ? 'bg-purple-500/20 border-purple-400 text-purple-200'
+                  : 'bg-zinc-900 border-zinc-800 hover:border-purple-500/50 text-zinc-400 hover:text-purple-300'
+              }`}
+            >
+              <FlaskConical className="w-4 h-4" />
+              {overlayOpen && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-purple-400 ring-2 ring-zinc-900 animate-pulse" />
+              )}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={overlayOpen}
+            className="px-4 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 hover:border-zinc-700 text-zinc-300 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm disabled:opacity-40"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Oppdater
+          </button>
+        </div>
       </div>
+
+      {tournament.status === 'active' && showSimulatorPanel && (
+        <div className="p-4 sm:p-5 rounded-3xl bg-zinc-900 border-2 border-purple-500/30 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">
+                Demo / Simulering
+              </span>
+              <h3 className="text-lg font-black text-white uppercase">Auto-spill turnering</h3>
+              <p className="text-xs text-zinc-400 font-medium mt-1 max-w-2xl">
+                Tester produksjonsmotoren i minnet. Ingen resultater skrives til database.
+                Bruker antall sett fra formatoppsett · scorer alltid 21p / margin 2.
+              </p>
+            </div>
+            <div className="flex items-start gap-2 shrink-0">
+              <div className="flex flex-wrap gap-2">
+                {delayOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    disabled={simulator.isActive}
+                    onClick={() => simulator.setDelayMs(opt.value)}
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border ${
+                      simulator.delayMs === opt.value
+                        ? 'bg-purple-500/20 border-purple-400 text-purple-200'
+                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
+                    } disabled:opacity-50`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {!overlayOpen && (
+                <button
+                  type="button"
+                  onClick={() => setShowSimulatorPanel(false)}
+                  className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-700"
+                  title="Lukk"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {!simulationGate.allowed && (
+            <p className="text-xs text-amber-300 font-medium bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2">
+              {simulationGate.reason}
+            </p>
+          )}
+
+          {simulator.error && (
+            <p className="text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2">
+              {simulator.error}
+            </p>
+          )}
+
+          {overlayOpen && (
+            <p className="text-xs text-purple-200 font-medium bg-purple-500/10 border border-purple-400/30 rounded-xl px-3 py-2">
+              Simulering i minnet — skrives ikke til database. Storskjerm viser ekte state.
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            {!overlayOpen && (
+              <button
+                type="button"
+                disabled={!simulationGate.allowed}
+                onClick={() => simulator.start(tournament)}
+                className="px-4 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2"
+              >
+                <Play className="w-3.5 h-3.5" />
+                Start simulering
+              </button>
+            )}
+            {simulator.status === 'running' && (
+              <button
+                type="button"
+                onClick={simulator.pause}
+                className="px-4 py-2.5 rounded-xl bg-zinc-950 border-2 border-zinc-700 text-white text-xs font-black uppercase tracking-wider flex items-center gap-2"
+              >
+                <Pause className="w-3.5 h-3.5" />
+                Pause
+              </button>
+            )}
+            {simulator.status === 'paused' && (
+              <button
+                type="button"
+                onClick={simulator.resume}
+                className="px-4 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2"
+              >
+                <Play className="w-3.5 h-3.5" />
+                Fortsett
+              </button>
+            )}
+            {simulator.isActive && (
+              <button
+                type="button"
+                onClick={simulator.stop}
+                className="px-4 py-2.5 rounded-xl bg-zinc-950 border-2 border-rose-500/50 text-rose-400 text-xs font-black uppercase tracking-wider flex items-center gap-2"
+              >
+                <Square className="w-3.5 h-3.5" />
+                Stopp
+              </button>
+            )}
+            {overlayOpen && (
+              <button
+                type="button"
+                onClick={() => {
+                  simulator.exit();
+                  setShowSimulatorPanel(false);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs font-black uppercase tracking-wider"
+              >
+                Avslutt simulering
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-zinc-400">
+            <span className="flex items-center gap-1.5">
+              <FastForward className="w-3.5 h-3.5 text-purple-400" />
+              {simulator.status === 'running' && 'Kjører'}
+              {simulator.status === 'paused' && 'Pauset'}
+              {simulator.status === 'completed' && 'Ferdig'}
+              {simulator.status === 'stopped' && 'Stoppet'}
+              {simulator.status === 'idle' && 'Klar'}
+            </span>
+            <span>•</span>
+            <span>
+              Kamp {simulator.matchesPlayed}
+              {totalPlayableMatches > 0 ? ` / ${totalPlayableMatches}` : ''}
+            </span>
+            {currentSimMatch && (
+              <>
+                <span>•</span>
+                <span>
+                  {currentSimMatch.roundName}: {playerLabel(currentSimMatch.playerA)} vs{' '}
+                  {playerLabel(currentSimMatch.playerB)}
+                </span>
+              </>
+            )}
+            {simulator.status === 'completed' && displayTournament.winner && (
+              <>
+                <span>•</span>
+                <span className="text-lime-400 font-black">
+                  Vinner: {displayTournament.winner.displayId || displayTournament.winner.firstName}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Cup capacity — standard 16, expandable to 32 / 64 */}
       {tournament.status === 'registration' && (
@@ -314,6 +534,79 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
           </button>
         </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-4 p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
+          <div className="min-w-0">
+            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block mb-1">
+              Status på turnering
+            </span>
+            <strong className="text-sm font-black text-lime-400 uppercase">{tournamentStatusLabel}</strong>
+            <span className="text-[11px] text-zinc-500 font-medium block mt-0.5">
+              {tournament.participants.length} spillere · {capacityInfo.round1Matches} kamper r1 ·{' '}
+              {stats.totalMatches} kamper · {stats.completedMatches} ferdige
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <div className="text-right">
+              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block">
+                Påmelding
+              </span>
+              <span
+                className={`text-xs font-black uppercase ${
+                  isRegistrationOpen ? 'text-lime-400' : 'text-zinc-400'
+                }`}
+              >
+                {isRegistrationOpen ? 'Åpen' : 'Låst'}
+              </span>
+            </div>
+            <div
+              role="status"
+              aria-label={isRegistrationOpen ? 'Påmelding åpen' : 'Påmelding låst'}
+              title={
+                cupAlreadyDrawn
+                  ? 'Cup er trukket. Nullstill cup i Test-fanen for å åpne påmelding på nytt.'
+                  : isRegistrationOpen
+                  ? 'Påmelding er åpen til du trekker cupen'
+                  : 'Påmelding er låst'
+              }
+              className={`relative w-14 h-8 rounded-full ${
+                isRegistrationOpen ? 'bg-lime-400' : 'bg-zinc-700'
+              }`}
+            >
+              <span
+                className={`absolute top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ${
+                  isRegistrationOpen ? 'left-7' : 'left-1'
+                }`}
+              >
+                {isRegistrationOpen ? (
+                  <Unlock className="w-3.5 h-3.5 text-lime-600" />
+                ) : (
+                  <Lock className="w-3.5 h-3.5 text-zinc-500" />
+                )}
+              </span>
+            </div>
+
+            {isRegistrationOpen && !cupAlreadyDrawn && (
+              <button
+                type="button"
+                onClick={onDrawCup}
+                disabled={!drawCupEnabled}
+                title={
+                  drawCupEnabled
+                    ? drawCupWalkovers > 0
+                      ? `Trekk ${drawCupCapacity}-slots cup med ${drawCupWalkovers} walkover${drawCupWalkovers > 1 ? 's' : ''}`
+                      : `Trekk cup for ${tournament.participants.length} spillere`
+                    : 'Cup er allerede trukket. Nullstill cup i Test-fanen før ny trekning.'
+                }
+                className="px-4 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm"
+              >
+                <Play className="w-4 h-4" />
+                Trekk cup
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Quick Summary Badges */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
           {(
@@ -323,14 +616,15 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
               { key: 'final' as TournamentStage, title: 'Finale' },
             ] as const
           ).map(({ key, title }) => {
-            const conf = tournament.formatSettings?.[key] || DEFAULT_FORMAT_SETTINGS[key];
+            const conf =
+              normalizeFormatSettings(tournament.formatSettings)[key] || DEFAULT_FORMAT_SETTINGS[key];
             return (
               <div key={key} className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs">
                 <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block mb-1">
                   {title}
                 </span>
                 <div className="font-bold text-white flex items-center gap-1.5">
-                  <span className="text-lime-400">{conf.numberOfSets} sett</span>
+                  <span className="text-lime-400">{conf.sets} sett</span>
                   <span className="text-zinc-600">·</span>
                   <span>{conf.targetPoints}p (margin {conf.winMargin})</span>
                 </div>
@@ -418,11 +712,11 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                             onClick={() =>
                               setFormatDraft((prev) => ({
                                 ...prev,
-                                [key]: { ...prev[key], numberOfSets: sets },
+                                [key]: { ...prev[key], sets },
                               }))
                             }
                             className={`py-1.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
-                              conf.numberOfSets === sets
+                              conf.sets === sets
                                 ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
                                 : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
                             }`}
@@ -500,7 +794,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 type="button"
-                disabled={formatSaveLoading}
+                disabled={formatSaveLoading || overlayOpen}
                 onClick={handleSaveFormat}
                 className="px-5 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50"
               >
@@ -523,76 +817,6 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                 Lukk
               </button>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Tournament control */}
-      <div className="p-4 rounded-2xl bg-zinc-900 border-2 border-zinc-800 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-black uppercase text-zinc-500">Status:</span>
-            <strong className="text-sm font-black text-lime-400 uppercase">
-              {tournament.status === 'registration'
-                ? 'Påmelding pågår'
-                : tournament.status === 'active'
-                ? 'Turnering pågår'
-                : 'Fullført'}
-            </strong>
-            <span className="text-zinc-600">•</span>
-          <span className="text-xs text-zinc-400 font-medium">
-            {tournament.participants.length} spillere · {capacityInfo.round1Matches} kamper r1 ·{' '}
-            {stats.totalMatches} kamper · {stats.completedMatches} ferdige
-          </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {tournament.status === 'registration' ? (
-              <button
-                type="button"
-                onClick={onStartTournament}
-                disabled={tournament.participants.length < 2}
-                className="px-5 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 disabled:opacity-50 text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2"
-              >
-                <Play className="w-4 h-4" />
-                Steng påmelding & Start cup
-              </button>
-            ) : (
-              <>
-                {onReDraw && tournament.participants.length >= 2 && (
-                  <button
-                    type="button"
-                    onClick={onReDraw}
-                    className="px-4 py-2.5 rounded-2xl bg-zinc-950 border-2 border-lime-400/40 hover:border-lime-400 text-lime-300 text-xs font-black uppercase tracking-wider flex items-center gap-1.5"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    Ny trekning
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={onReopenRegistration}
-                  className="px-4 py-2.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-zinc-300 text-xs font-black uppercase tracking-wider flex items-center gap-1.5"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  Gjenåpne påmelding
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {tournament.status !== 'registration' && stats.remainingMatches > 0 && (
-          <div className="flex flex-wrap items-center gap-3 text-xs font-medium">
-            <span className="text-zinc-400 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              Estimert resttid: ~{stats.estimatedRemainingMinutes} min
-            </span>
-            {stats.isOverCapacity && (
-              <span className="text-amber-300 flex items-center gap-1.5 bg-amber-400/10 border border-amber-400/30 px-2.5 py-1 rounded-lg font-bold">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                Over 2 timer — vurder å øke tempo eller redusere antall kamper
-              </span>
-            )}
           </div>
         )}
       </div>
@@ -658,14 +882,16 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                       <button
                         type="button"
                         onClick={() => onOpenScoreModal(match)}
-                        className="flex-1 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 text-xs font-black uppercase tracking-wider"
+                        disabled={overlayOpen}
+                        className="flex-1 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 text-xs font-black uppercase tracking-wider disabled:opacity-40"
                       >
                         Døm kamp
                       </button>
                       <button
                         type="button"
                         onClick={() => onAssignTable(match.id, null)}
-                        className="px-3 py-2.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-zinc-400 hover:text-white text-[10px] font-black uppercase"
+                        disabled={overlayOpen}
+                        className="px-3 py-2.5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-zinc-400 hover:text-white text-[10px] font-black uppercase disabled:opacity-40"
                         title="Frigjør bordet"
                       >
                         Frigjør
@@ -733,8 +959,9 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
           {finalMatch && !finalMatch.isWalkover && finalMatch.playerA && finalMatch.playerB && (
             <button
               type="button"
+              disabled={overlayOpen}
               onClick={() => onOpenScoreModal(finalMatch)}
-              className="w-full py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-800 hover:border-lime-400/50 text-zinc-300 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-2xl bg-zinc-950 border-2 border-zinc-800 hover:border-lime-400/50 text-zinc-300 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-40"
             >
               <RotateCcw className="w-4 h-4" />
               Korriger finaleresultat
@@ -777,7 +1004,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => onAssignTable(m.id, 1, 'in_progress')}
-                  disabled={isTableOccupied(1)}
+                  disabled={isTableOccupied(1) || overlayOpen}
                   className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] font-black uppercase disabled:opacity-40"
                 >
                   Bord 1
@@ -785,7 +1012,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => onAssignTable(m.id, 2, 'in_progress')}
-                  disabled={isTableOccupied(2)}
+                  disabled={isTableOccupied(2) || overlayOpen}
                   className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] font-black uppercase disabled:opacity-40"
                 >
                   Bord 2
@@ -793,7 +1020,8 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenScoreModal(m)}
-                  className="px-3 py-1.5 rounded-xl bg-lime-400 text-zinc-950 text-[10px] font-black uppercase"
+                  disabled={overlayOpen}
+                  className="px-3 py-1.5 rounded-xl bg-lime-400 text-zinc-950 text-[10px] font-black uppercase disabled:opacity-40"
                 >
                   Sett score
                 </button>
@@ -862,8 +1090,9 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                   {!m.isWalkover && m.playerA && m.playerB && (
                     <button
                       type="button"
+                      disabled={overlayOpen}
                       onClick={() => onOpenScoreModal(m)}
-                      className="text-xs font-black uppercase text-zinc-400 hover:text-lime-400"
+                      className="text-xs font-black uppercase text-zinc-400 hover:text-lime-400 disabled:opacity-40"
                     >
                       Korriger →
                     </button>
@@ -871,8 +1100,9 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                   {onRequestResetMatch && (
                     <button
                       type="button"
+                      disabled={overlayOpen}
                       onClick={() => onRequestResetMatch(m)}
-                      className="text-xs font-black uppercase text-rose-400 hover:text-rose-300"
+                      className="text-xs font-black uppercase text-rose-400 hover:text-rose-300 disabled:opacity-40"
                     >
                       Nullstill
                     </button>
@@ -905,7 +1135,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
       {tournament.matches.length === 0 && tournament.status === 'registration' && (
         <div className="p-8 rounded-3xl bg-zinc-900 border-2 border-dashed border-zinc-800 text-center">
           <p className="text-sm font-bold text-zinc-500">
-            Ingen kamper ennå. Legg til deltakere og klikk «Steng påmelding & Start cup».
+            Ingen kamper ennå. Legg til minst 2 spillere og klikk «Trekk cup» over for å generere cup-tre.
           </p>
         </div>
       )}
@@ -922,8 +1152,8 @@ interface ScoreEntryModalProps {
   onScoreAChange: (value: number) => void;
   onScoreBChange: (value: number) => void;
   onClose: () => void;
-  onSubmit: (setsPayload?: { scoreA: number; scoreB: number }[]) => void;
-  onConfirmCorrection: (setsPayload?: { scoreA: number; scoreB: number }[]) => void;
+  onSubmit: (setsPayload?: { scoreA: number; scoreB: number }[], winnerSlot?: 'A' | 'B') => void;
+  onConfirmCorrection: (setsPayload?: { scoreA: number; scoreB: number }[], winnerSlot?: 'A' | 'B') => void;
   onWalkover?: (slot: 'A' | 'B') => void;
   onRequestReset?: () => void;
 }
@@ -943,10 +1173,11 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
   onRequestReset,
 }) => {
   const isCorrection = match.status === 'completed' || match.status === 'walkover';
-  const numberOfSets = match.numberOfSets ?? 1;
+  const matchFormat = match.format;
+  const numberOfSets = matchFormat?.sets ?? 1;
   const isBestOf3 = numberOfSets === 3;
-  const targetPoints = match.targetPoints ?? 21;
-  const winMargin = match.winMargin ?? 2;
+  const targetPoints = matchFormat?.targetPoints ?? 21;
+  const winMargin = matchFormat?.winMargin ?? 2;
 
   // Local state for set scores if best-of-3
   const [sets, setSets] = useState<{ scoreA: number; scoreB: number }[]>(() => {
@@ -961,29 +1192,37 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
   });
 
   const [localValidationErr, setLocalValidationErr] = useState<string | null>(null);
+  const [winnerSlot, setWinnerSlot] = useState<'A' | 'B' | null>(() => {
+    if (match.winnerId && match.playerA?.id === match.winnerId) return 'A';
+    if (match.winnerId && match.playerB?.id === match.winnerId) return 'B';
+    if (scoreA > scoreB) return 'A';
+    if (scoreB > scoreA) return 'B';
+    return null;
+  });
+  const [winnerManuallySet, setWinnerManuallySet] = useState(false);
 
-  // Calculate sets won so far
+  useEffect(() => {
+    if (winnerManuallySet || isBestOf3) return;
+    if (scoreA > scoreB) setWinnerSlot('A');
+    else if (scoreB > scoreA) setWinnerSlot('B');
+    else setWinnerSlot(null);
+  }, [scoreA, scoreB, winnerManuallySet, isBestOf3]);
+
   const setsWonA = useMemo(() => {
     let count = 0;
-    if (sets[0] && validateScore(sets[0].scoreA, sets[0].scoreB, targetPoints, winMargin).valid) {
-      if (sets[0].scoreA > sets[0].scoreB) count++;
-    }
-    if (sets[1] && validateScore(sets[1].scoreA, sets[1].scoreB, targetPoints, winMargin).valid) {
-      if (sets[1].scoreA > sets[1].scoreB) count++;
-    }
+    if (sets[0] && sets[0].scoreA > sets[0].scoreB) count++;
+    if (sets[1] && sets[1].scoreA > sets[1].scoreB) count++;
+    if (sets[2] && sets[2].scoreA > sets[2].scoreB) count++;
     return count;
-  }, [sets, targetPoints, winMargin]);
+  }, [sets]);
 
   const setsWonB = useMemo(() => {
     let count = 0;
-    if (sets[0] && validateScore(sets[0].scoreA, sets[0].scoreB, targetPoints, winMargin).valid) {
-      if (sets[0].scoreB > sets[0].scoreA) count++;
-    }
-    if (sets[1] && validateScore(sets[1].scoreA, sets[1].scoreB, targetPoints, winMargin).valid) {
-      if (sets[1].scoreB > sets[1].scoreA) count++;
-    }
+    if (sets[0] && sets[0].scoreB > sets[0].scoreA) count++;
+    if (sets[1] && sets[1].scoreB > sets[1].scoreA) count++;
+    if (sets[2] && sets[2].scoreB > sets[2].scoreA) count++;
     return count;
-  }, [sets, targetPoints, winMargin]);
+  }, [sets]);
 
   const set3Needed = setsWonA === 1 && setsWonB === 1;
   const matchDecidedIn2 = setsWonA === 2 || setsWonB === 2;
@@ -1001,53 +1240,112 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
     });
   };
 
+  const validateTechnicalScores = (
+    entries: { scoreA: number; scoreB: number }[],
+    labelPrefix = ''
+  ): string | null => {
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const result = validateScore(entry.scoreA, entry.scoreB);
+      if (!result.isValid) {
+        const prefix = labelPrefix || (entries.length > 1 ? `Sett ${i + 1}: ` : '');
+        return `${prefix}${result.error || 'Ugyldig poengsum'}`;
+      }
+    }
+    return null;
+  };
+
+  const validateBo3Structure = (
+    payload: { scoreA: number; scoreB: number }[],
+    selectedWinner: 'A' | 'B'
+  ): string | null => {
+    let winsA = 0;
+    let winsB = 0;
+    for (const entry of payload) {
+      if (entry.scoreA > entry.scoreB) winsA++;
+      else if (entry.scoreB > entry.scoreA) winsB++;
+    }
+
+    if (winsA !== 2 && winsB !== 2) {
+      return 'Best av 3 krever at én spiller vinner 2 sett.';
+    }
+    if (winsA === 2 && winsB === 0 && payload.length !== 2) {
+      return '2–0 i sett krever nøyaktig 2 registrerte sett.';
+    }
+    if (winsA === 0 && winsB === 2 && payload.length !== 2) {
+      return '0–2 i sett krever nøyaktig 2 registrerte sett.';
+    }
+    if ((winsA === 2 && winsB === 1) || (winsA === 1 && winsB === 2)) {
+      if (payload.length !== 3) {
+        return '2–1 i sett krever nøyaktig 3 registrerte sett.';
+      }
+    }
+
+    const winnerWins = selectedWinner === 'A' ? winsA : winsB;
+    if (winnerWins !== 2) {
+      return 'Valgt vinner må ha vunnet 2 sett.';
+    }
+
+    return null;
+  };
+
   const handleModalSubmit = () => {
     setLocalValidationErr(null);
 
+    if (!winnerSlot) {
+      setLocalValidationErr('Velg hvem som vant kampen.');
+      return;
+    }
+
     if (isBestOf3) {
-      // Validate set 1
-      const s1Val = validateScore(sets[0].scoreA, sets[0].scoreB, targetPoints, winMargin);
-      if (!s1Val.valid) {
-        setLocalValidationErr(`Sett 1: ${s1Val.reason || 'Ugyldig resultat'}`);
+      const payload = matchDecidedIn2 ? [sets[0], sets[1]] : [sets[0], sets[1], sets[2]];
+      const err = validateTechnicalScores(payload);
+      if (err) {
+        setLocalValidationErr(err);
         return;
       }
-      // Validate set 2
-      const s2Val = validateScore(sets[1].scoreA, sets[1].scoreB, targetPoints, winMargin);
-      if (!s2Val.valid) {
-        setLocalValidationErr(`Sett 2: ${s2Val.reason || 'Ugyldig resultat'}`);
+      const bo3Err = validateBo3Structure(payload, winnerSlot);
+      if (bo3Err) {
+        setLocalValidationErr(bo3Err);
         return;
       }
-
-      let payload: { scoreA: number; scoreB: number }[] = [sets[0], sets[1]];
-
-      // If 1-1, set 3 must also be valid
-      if (set3Needed) {
-        const s3Val = validateScore(sets[2].scoreA, sets[2].scoreB, targetPoints, winMargin);
-        if (!s3Val.valid) {
-          setLocalValidationErr(`Sett 3: ${s3Val.reason || 'Ugyldig resultat for avgjørende sett'}`);
-          return;
-        }
-        payload.push(sets[2]);
-      }
-
-      onSubmit(payload);
+      onSubmit(payload, winnerSlot);
     } else {
-      // Single set
-      const v = validateScore(scoreA, scoreB, targetPoints, winMargin);
-      if (!v.valid) {
-        setLocalValidationErr(v.reason || 'Ugyldig resultat');
+      const err = validateTechnicalScores([{ scoreA, scoreB }]);
+      if (err) {
+        setLocalValidationErr(err);
         return;
       }
-      onSubmit();
+      onSubmit(undefined, winnerSlot);
     }
   };
 
   const handleModalConfirmCorrection = () => {
+    if (!winnerSlot) {
+      setLocalValidationErr('Velg hvem som vant kampen.');
+      return;
+    }
+
     if (isBestOf3) {
       const payload = matchDecidedIn2 ? [sets[0], sets[1]] : [sets[0], sets[1], sets[2]];
-      onConfirmCorrection(payload);
+      const err = validateTechnicalScores(payload);
+      if (err) {
+        setLocalValidationErr(err);
+        return;
+      }
+      const bo3Err = validateBo3Structure(payload, winnerSlot);
+      if (bo3Err) {
+        setLocalValidationErr(bo3Err);
+        return;
+      }
+      onConfirmCorrection(payload, winnerSlot);
     } else {
-      onConfirmCorrection();
+      const err = validateTechnicalScores([{ scoreA, scoreB }]);
+      if (err) {
+        setLocalValidationErr(err);
+        return;
+      }
+      onConfirmCorrection(undefined, winnerSlot);
     }
   };
 
@@ -1070,6 +1368,7 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
           <div>
             <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 block mb-0.5">
               {match.roundName} · {isBestOf3 ? 'Best av 3 sett' : '1 sett'} · {targetPoints}p
+              {winMargin === 2 ? ' · margin 2' : ' · margin 1'}
             </span>
             <h2 className="text-xl sm:text-2xl font-black text-white">
               {isCorrection ? 'Korriger kampresultat' : 'Registrer kampresultat'}
@@ -1107,7 +1406,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                   <input
                     type="number"
                     min={0}
-                    max={60}
                     value={sets[0]?.scoreA ?? 0}
                     onChange={(e) => updateSetScore(0, 'A', parseInt(e.target.value, 10) || 0)}
                     className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-black text-2xl text-center focus:outline-none focus:border-lime-400"
@@ -1118,7 +1416,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                   <input
                     type="number"
                     min={0}
-                    max={60}
                     value={sets[0]?.scoreB ?? 0}
                     onChange={(e) => updateSetScore(0, 'B', parseInt(e.target.value, 10) || 0)}
                     className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-black text-2xl text-center focus:outline-none focus:border-lime-400"
@@ -1137,7 +1434,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                   <input
                     type="number"
                     min={0}
-                    max={60}
                     value={sets[1]?.scoreA ?? 0}
                     onChange={(e) => updateSetScore(1, 'A', parseInt(e.target.value, 10) || 0)}
                     className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-black text-2xl text-center focus:outline-none focus:border-lime-400"
@@ -1148,7 +1444,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                   <input
                     type="number"
                     min={0}
-                    max={60}
                     value={sets[1]?.scoreB ?? 0}
                     onChange={(e) => updateSetScore(1, 'B', parseInt(e.target.value, 10) || 0)}
                     className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-black text-2xl text-center focus:outline-none focus:border-lime-400"
@@ -1177,7 +1472,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                     <input
                       type="number"
                       min={0}
-                      max={60}
                       value={sets[2]?.scoreA ?? 0}
                       onChange={(e) => updateSetScore(2, 'A', parseInt(e.target.value, 10) || 0)}
                       className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-black text-2xl text-center focus:outline-none focus:border-lime-400"
@@ -1188,7 +1482,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                     <input
                       type="number"
                       min={0}
-                      max={60}
                       value={sets[2]?.scoreB ?? 0}
                       onChange={(e) => updateSetScore(2, 'B', parseInt(e.target.value, 10) || 0)}
                       className="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-black text-2xl text-center focus:outline-none focus:border-lime-400"
@@ -1209,7 +1502,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                 <input
                   type="number"
                   min={0}
-                  max={60}
                   value={scoreA}
                   onChange={(e) => onScoreAChange(parseInt(e.target.value, 10) || 0)}
                   className="w-full px-3 py-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white font-mono font-black text-3xl text-center focus:outline-none focus:border-lime-400"
@@ -1223,7 +1515,6 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                 <input
                   type="number"
                   min={0}
-                  max={60}
                   value={scoreB}
                   onChange={(e) => onScoreBChange(parseInt(e.target.value, 10) || 0)}
                   className="w-full px-3 py-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-white font-mono font-black text-3xl text-center focus:outline-none focus:border-lime-400"
@@ -1248,6 +1539,44 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
               ))}
             </div>
           </>
+        )}
+
+        {match.playerA && match.playerB && (
+          <div className="mb-6 p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 space-y-2">
+            <span className="text-[10px] font-black uppercase text-zinc-500 block">Kampvinner</span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setWinnerManuallySet(true);
+                  setWinnerSlot('A');
+                  setLocalValidationErr(null);
+                }}
+                className={`flex-1 py-2.5 rounded-xl border text-[10px] font-black uppercase transition-colors ${
+                  winnerSlot === 'A'
+                    ? 'bg-lime-400/20 border-lime-400 text-lime-200'
+                    : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white'
+                }`}
+              >
+                {playerLabel(match.playerA)} vant
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setWinnerManuallySet(true);
+                  setWinnerSlot('B');
+                  setLocalValidationErr(null);
+                }}
+                className={`flex-1 py-2.5 rounded-xl border text-[10px] font-black uppercase transition-colors ${
+                  winnerSlot === 'B'
+                    ? 'bg-lime-400/20 border-lime-400 text-lime-200'
+                    : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white'
+                }`}
+              >
+                {playerLabel(match.playerB)} vant
+              </button>
+            </div>
+          </div>
         )}
 
         {!isCorrection && onWalkover && match.playerA && match.playerB && (
