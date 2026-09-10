@@ -66,6 +66,7 @@ export function useTournamentSimulator(onRefresh: () => void | Promise<void>) {
       setCurrentMatchId(null);
       publishClone(clone);
       setStatus('running');
+      statusRef.current = 'running';
 
       const run = async () => {
         while (!abortRef.current && loopIdRef.current === loopId) {
@@ -79,14 +80,13 @@ export function useTournamentSimulator(onRefresh: () => void | Promise<void>) {
           const next = getNextPlayableMatch(current.matches);
           if (!next) {
             setCurrentMatchId(null);
-            setStatus(
-              isTournamentComplete(current.matches, current.winner) ? 'completed' : 'stopped'
-            );
+            const finalStatus = isTournamentComplete(current.matches, current.winner)
+              ? 'completed'
+              : 'stopped';
+            setStatus(finalStatus);
+            statusRef.current = finalStatus;
             break;
           }
-
-          const stillPlayable = getNextPlayableMatch(current.matches);
-          if (!stillPlayable || stillPlayable.id !== next.id) continue;
 
           setCurrentMatchId(next.id);
           try {
@@ -94,16 +94,17 @@ export function useTournamentSimulator(onRefresh: () => void | Promise<void>) {
             publishClone(current);
             setMatchesPlayed((n) => n + 1);
           } catch (err: any) {
+            console.error('Simulering feilet for kamp:', next.id, err);
             setError(err.message || 'Kunne ikke simulere kamp');
             setStatus('stopped');
+            statusRef.current = 'stopped';
             setCurrentMatchId(null);
             break;
           }
 
           const delay = delayRef.current;
-          if (delay > 0) {
-            await new Promise((resolve) => setTimeout(resolve, delay));
-          }
+          // Yield to browser event loop even on 0s delay to allow React rendering & prevent nested update depth exhaustion
+          await new Promise((resolve) => setTimeout(resolve, delay > 0 ? delay : 20));
         }
       };
 
@@ -115,12 +116,14 @@ export function useTournamentSimulator(onRefresh: () => void | Promise<void>) {
   const pause = useCallback(() => {
     if (statusRef.current === 'running') {
       setStatus('paused');
+      statusRef.current = 'paused';
     }
   }, []);
 
   const resume = useCallback(() => {
     if (statusRef.current === 'paused' && simTournamentRef.current) {
       setStatus('running');
+      statusRef.current = 'running';
     }
   }, []);
 
@@ -128,6 +131,7 @@ export function useTournamentSimulator(onRefresh: () => void | Promise<void>) {
     abortRef.current = true;
     loopIdRef.current += 1;
     setStatus('stopped');
+    statusRef.current = 'stopped';
     setCurrentMatchId(null);
   }, []);
 
@@ -136,6 +140,7 @@ export function useTournamentSimulator(onRefresh: () => void | Promise<void>) {
     loopIdRef.current += 1;
     publishClone(null);
     setStatus('idle');
+    statusRef.current = 'idle';
     setCurrentMatchId(null);
     setMatchesPlayed(0);
     setError(null);

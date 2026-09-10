@@ -274,17 +274,14 @@ async function runRetest() {
   const { updatedMatches: atypicalMatches } = recordMatchResult(
     [sampleMatch],
     'm_dommer',
-    18,
     21,
-    false,
-    undefined,
-    undefined,
-    'A'
+    18,
+    false
   );
   const atypical = atypicalMatches.find((m) => m.id === 'm_dommer')!;
-  assert(atypical.winnerId === 'p_a', 'Eksplisitt vinner skal overstyre poengsummen');
-  assert(atypical.scoreA === 18 && atypical.scoreB === 21, 'Poengsummen skal lagres som dømt');
-  console.log('✓ Test 6 BESTÅTT: Teknisk validering + eksplisitt dommervalg fungerer.\n');
+  assert(atypical.winnerId === 'p_a', 'Spiller A med høyest score (21–18) skal automatisk settes som vinner');
+  assert(atypical.scoreA === 21 && atypical.scoreB === 18, 'Poengsummen skal lagres som dømt');
+  console.log('✓ Test 6 BESTÅTT: Teknisk validering + automatisk vinnerkåring (Single Source of Truth) fungerer.\n');
 
   // ----------------------------------------------------
   // TEST 7: Serveregel (5 server før 20-20, 1 serve ved deuce)

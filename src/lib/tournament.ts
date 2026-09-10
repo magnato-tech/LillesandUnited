@@ -423,13 +423,17 @@ export function updateMatchStatuses(matches: Match[]): void {
  * 2. Position left to right
  */
 export function autoAssignTables(matches: Match[]): void {
-  // Find which tables are currently occupied by 'in_progress' matches
-  const activeTable1 = matches.find((m) => m.status === 'in_progress' && m.tableNumber === 1);
-  const activeTable2 = matches.find((m) => m.status === 'in_progress' && m.tableNumber === 2);
+  // Find which tables are currently occupied by any uncompleted match
+  const occupiedTable1 = matches.some(
+    (m) => m.tableNumber === 1 && m.status !== 'completed' && m.status !== 'walkover'
+  );
+  const occupiedTable2 = matches.some(
+    (m) => m.tableNumber === 2 && m.status !== 'completed' && m.status !== 'walkover'
+  );
 
   const availableTables: (1 | 2)[] = [];
-  if (!activeTable1) availableTables.push(1);
-  if (!activeTable2) availableTables.push(2);
+  if (!occupiedTable1) availableTables.push(1);
+  if (!occupiedTable2) availableTables.push(2);
 
   if (availableTables.length === 0) return;
 
@@ -466,15 +470,15 @@ export function validateScore(
   return { isValid: true };
 }
 
-function resolveWinnerSlot(
+export function resolveWinnerSlot(
   scoreA: number,
   scoreB: number,
   explicitWinnerSlot?: 'A' | 'B'
 ): 'A' | 'B' {
-  if (explicitWinnerSlot) return explicitWinnerSlot;
   if (scoreA > scoreB) return 'A';
   if (scoreB > scoreA) return 'B';
-  throw new Error('Velg hvem som vant kampen.');
+  if (explicitWinnerSlot) return explicitWinnerSlot;
+  throw new Error('Score kan ikke være uavgjort. Én spiller må ha flest poeng.');
 }
 
 /**

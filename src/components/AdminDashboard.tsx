@@ -70,6 +70,7 @@ import {
   resolveBracketCapacity,
   tournamentHasCupData,
   hasPlayedDependencies,
+  resolveMatchFormat,
 } from '../lib/tournament';
 import { TableTennisAdminPanel, ScoreEntryModal, ResetMatchConfirmModal } from './TableTennisAdminPanel';
 import { BracketView } from './BracketView';
@@ -776,8 +777,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const openScoreModal = (match: Match) => {
     setSelectedMatchId(match.id);
-    const target = match.format?.targetPoints ?? 21;
-    const margin = match.format?.winMargin ?? 2;
+    const resolvedFormat = resolveMatchFormat(match, tournament.formatSettings);
+    const target = resolvedFormat.targetPoints ?? 21;
+    const margin = resolvedFormat.winMargin ?? 2;
     setScoreA(match.scoreA ?? target);
     setScoreB(match.scoreB ?? Math.max(0, target - (margin === 2 ? 3 : 2)));
     setActionError(null);
@@ -2265,6 +2267,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {selectedMatch && !simTournament && (
         <ScoreEntryModal
           match={selectedMatch}
+          formatSettings={tournament.formatSettings}
           scoreA={scoreA}
           scoreB={scoreB}
           actionError={actionError}

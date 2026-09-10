@@ -16,6 +16,7 @@ import {
   tournamentHasCupData,
   DEFAULT_FORMAT_SETTINGS,
   normalizeFormatSettings,
+  resolveMatchFormat,
   validateScore,
 } from '../lib/tournament';
 import { updateTournamentFormat } from '../services/api';
@@ -99,15 +100,26 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
   const [formatSaveSuccess, setFormatSaveSuccess] = useState(false);
   const [formatSaveError, setFormatSaveError] = useState<string | null>(null);
 
-  // Keep state in sync with tournament updates
+  // Track if there are unsaved draft changes
+  const hasUnsavedFormatChanges = useMemo(() => {
+    const saved = normalizeFormatSettings(tournament.formatSettings);
+    return JSON.stringify(formatDraft) !== JSON.stringify(saved);
+  }, [formatDraft, tournament.formatSettings]);
+
+  // Keep state in sync with tournament updates ONLY when user is NOT editing format panel
   useEffect(() => {
-    if (tournament.formatSettings) {
+    if (!showFormatPanel && !hasUnsavedFormatChanges && tournament.formatSettings) {
       setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
     }
     if (tournament.estimatedMinutesPerMatch !== undefined) {
       setEstimatedMinutes(tournament.estimatedMinutesPerMatch);
     }
-  }, [tournament.formatSettings, tournament.estimatedMinutesPerMatch]);
+  }, [
+    tournament.formatSettings,
+    tournament.estimatedMinutesPerMatch,
+    showFormatPanel,
+    hasUnsavedFormatChanges,
+  ]);
 
   const handleSaveFormat = async () => {
     if (overlayOpen) return;
@@ -116,7 +128,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
     try {
       await updateTournamentFormat(formatDraft, estimatedMinutes);
       setFormatSaveSuccess(true);
-      setTimeout(() => setFormatSaveSuccess(false), 3000);
+      setTimeout(() => setFormatSaveSuccess(false), 3500);
       onRefresh();
     } catch (err: any) {
       setFormatSaveError(err.message || 'Kunne ikke lagre format');
@@ -526,8 +538,15 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
 
           <button
             type="button"
-            onClick={() => setShowFormatPanel(!showFormatPanel)}
-            className="self-start px-4 py-2 rounded-2xl bg-zinc-950 border-2 border-zinc-800 hover:border-lime-400 text-zinc-200 text-xs font-black uppercase tracking-wider flex items-center gap-2"
+            onClick={() => {
+              if (!showFormatPanel) {
+                setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
+                setFormatSaveSuccess(false);
+                setFormatSaveError(null);
+              }
+              setShowFormatPanel(!showFormatPanel);
+            }}
+            className="self-start px-4 py-2 rounded-2xl bg-zinc-950 border-2 border-zinc-800 hover:border-lime-400 text-zinc-200 text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-colors"
           >
             <Sliders className="w-3.5 h-3.5 text-lime-400" />
             {showFormatPanel ? 'Skjul oppsett' : 'Endre oppsett'}
@@ -679,10 +698,26 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
 
         {/* Expandable Configuration Drawer */}
         {showFormatPanel && (
-          <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-lime-400/30 space-y-4">
-            <p className="text-xs font-bold text-zinc-300">
-              Juster innstillingene for hvert trinn i turneringen:
-            </p>
+          <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-lime-400/40 space-y-4 shadow-artistic-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+              <div>
+                <p className="text-xs font-bold text-zinc-200">
+                  Juster innstillingene for hvert trinn i turneringen:
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  Gjør alle de valgene du ønsker på tvers av rundene, og klikk deretter «Lagre formatendringer».
+                </p>
+              </div>
+              {hasUnsavedFormatChanges ? (
+                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 animate-pulse">
+                  ● Ulagrede endringer
+                </span>
+              ) : (
+                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-500 border border-zinc-800">
+                  Valg er lagret
+                </span>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {(
@@ -796,7 +831,11 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                 type="button"
                 disabled={formatSaveLoading || overlayOpen}
                 onClick={handleSaveFormat}
-                className="px-5 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50"
+                className={`px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 transition-all ${
+                  hasUnsavedFormatChanges
+                    ? 'bg-lime-400 hover:bg-lime-300 text-zinc-950 ring-2 ring-lime-400/60'
+                    : 'bg-lime-400/80 hover:bg-lime-400 text-zinc-950'
+                }`}
               >
                 <Check className="w-4 h-4" />
                 {formatSaveLoading ? 'Lagrer...' : 'Lagre formatendringer'}
@@ -811,8 +850,11 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
 
               <button
                 type="button"
-                onClick={() => setShowFormatPanel(false)}
-                className="px-4 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 text-xs font-black uppercase tracking-wider"
+                onClick={() => {
+                  setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
+                  setShowFormatPanel(false);
+                }}
+                className="px-4 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white text-xs font-black uppercase tracking-wider transition-colors"
               >
                 Lukk
               </button>
@@ -1145,6 +1187,7 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
 
 interface ScoreEntryModalProps {
   match: Match;
+  formatSettings?: TournamentFormatSettings;
   scoreA: number;
   scoreB: number;
   actionError: string | null;
@@ -1160,6 +1203,7 @@ interface ScoreEntryModalProps {
 
 export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
   match,
+  formatSettings,
   scoreA,
   scoreB,
   actionError,
@@ -1173,7 +1217,7 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
   onRequestReset,
 }) => {
   const isCorrection = match.status === 'completed' || match.status === 'walkover';
-  const matchFormat = match.format;
+  const matchFormat = resolveMatchFormat(match, formatSettings);
   const numberOfSets = matchFormat?.sets ?? 1;
   const isBestOf3 = numberOfSets === 3;
   const targetPoints = matchFormat?.targetPoints ?? 21;
@@ -1181,51 +1225,88 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
 
   // Local state for set scores if best-of-3
   const [sets, setSets] = useState<{ scoreA: number; scoreB: number }[]>(() => {
+    const defaultWinDiff = winMargin === 2 ? 3 : 2;
     if (match.sets && match.sets.length > 0) {
-      return match.sets.map((s) => ({ scoreA: s.scoreA, scoreB: s.scoreB }));
+      const existing = match.sets.map((s) => ({ scoreA: s.scoreA, scoreB: s.scoreB }));
+      while (existing.length < 3) {
+        existing.push({
+          scoreA: targetPoints,
+          scoreB: Math.max(0, targetPoints - defaultWinDiff),
+        });
+      }
+      return existing;
     }
+    // Default initial state: Player A wins first two sets (2-0 default), set 3 pre-configured if 1-1 occurs
     return [
-      { scoreA: targetPoints, scoreB: Math.max(0, targetPoints - (winMargin === 2 ? 3 : 2)) },
-      { scoreA: Math.max(0, targetPoints - (winMargin === 2 ? 3 : 2)), scoreB: targetPoints },
-      { scoreA: targetPoints, scoreB: Math.max(0, targetPoints - (winMargin === 2 ? 3 : 2)) },
+      { scoreA: targetPoints, scoreB: Math.max(0, targetPoints - defaultWinDiff) },
+      { scoreA: targetPoints, scoreB: Math.max(0, targetPoints - defaultWinDiff) },
+      { scoreA: targetPoints, scoreB: Math.max(0, targetPoints - defaultWinDiff) },
     ];
   });
 
   const [localValidationErr, setLocalValidationErr] = useState<string | null>(null);
-  const [winnerSlot, setWinnerSlot] = useState<'A' | 'B' | null>(() => {
-    if (match.winnerId && match.playerA?.id === match.winnerId) return 'A';
-    if (match.winnerId && match.playerB?.id === match.winnerId) return 'B';
-    if (scoreA > scoreB) return 'A';
-    if (scoreB > scoreA) return 'B';
+
+  // Determine individual set winners
+  const set1Winner: 'A' | 'B' | null = useMemo(() => {
+    if (!sets[0]) return null;
+    if (sets[0].scoreA > sets[0].scoreB) return 'A';
+    if (sets[0].scoreB > sets[0].scoreA) return 'B';
     return null;
-  });
-  const [winnerManuallySet, setWinnerManuallySet] = useState(false);
-
-  useEffect(() => {
-    if (winnerManuallySet || isBestOf3) return;
-    if (scoreA > scoreB) setWinnerSlot('A');
-    else if (scoreB > scoreA) setWinnerSlot('B');
-    else setWinnerSlot(null);
-  }, [scoreA, scoreB, winnerManuallySet, isBestOf3]);
-
-  const setsWonA = useMemo(() => {
-    let count = 0;
-    if (sets[0] && sets[0].scoreA > sets[0].scoreB) count++;
-    if (sets[1] && sets[1].scoreA > sets[1].scoreB) count++;
-    if (sets[2] && sets[2].scoreA > sets[2].scoreB) count++;
-    return count;
   }, [sets]);
 
-  const setsWonB = useMemo(() => {
-    let count = 0;
-    if (sets[0] && sets[0].scoreB > sets[0].scoreA) count++;
-    if (sets[1] && sets[1].scoreB > sets[1].scoreA) count++;
-    if (sets[2] && sets[2].scoreB > sets[2].scoreA) count++;
-    return count;
+  const set2Winner: 'A' | 'B' | null = useMemo(() => {
+    if (!sets[1]) return null;
+    if (sets[1].scoreA > sets[1].scoreB) return 'A';
+    if (sets[1].scoreB > sets[1].scoreA) return 'B';
+    return null;
   }, [sets]);
 
-  const set3Needed = setsWonA === 1 && setsWonB === 1;
-  const matchDecidedIn2 = setsWonA === 2 || setsWonB === 2;
+  const winsAfter2A = (set1Winner === 'A' ? 1 : 0) + (set2Winner === 'A' ? 1 : 0);
+  const winsAfter2B = (set1Winner === 'B' ? 1 : 0) + (set2Winner === 'B' ? 1 : 0);
+
+  // Match is decided in 2 sets if either player has won both set 1 and set 2 (2-0 or 0-2)
+  const matchDecidedIn2 = winsAfter2A === 2 || winsAfter2B === 2;
+
+  // Set 3 is needed dynamically if and only if score is 1-1 after the first two sets
+  const set3Needed = winsAfter2A === 1 && winsAfter2B === 1;
+
+  const set3Winner: 'A' | 'B' | null = useMemo(() => {
+    if (!set3Needed || !sets[2]) return null;
+    if (sets[2].scoreA > sets[2].scoreB) return 'A';
+    if (sets[2].scoreB > sets[2].scoreA) return 'B';
+    return null;
+  }, [set3Needed, sets]);
+
+  // Overall sets won (only counting active sets)
+  const setsWonA = winsAfter2A + (set3Needed && set3Winner === 'A' ? 1 : 0);
+  const setsWonB = winsAfter2B + (set3Needed && set3Winner === 'B' ? 1 : 0);
+
+  // Single Source of Truth: Kampvinner beregnes automatisk ut fra flest vunne sett / poeng
+  const autoWinnerSlot: 'A' | 'B' | null = useMemo(() => {
+    if (isBestOf3) {
+      if (matchDecidedIn2) {
+        return winsAfter2A === 2 ? 'A' : 'B';
+      }
+      if (set3Needed) {
+        if (set3Winner === 'A') return 'A';
+        if (set3Winner === 'B') return 'B';
+        return null;
+      }
+      return null;
+    } else {
+      if (scoreA > scoreB) return 'A';
+      if (scoreB > scoreA) return 'B';
+      return null;
+    }
+  }, [
+    isBestOf3,
+    matchDecidedIn2,
+    winsAfter2A,
+    set3Needed,
+    set3Winner,
+    scoreA,
+    scoreB,
+  ]);
 
   const updateSetScore = (setIdx: number, slot: 'A' | 'B', value: number) => {
     setLocalValidationErr(null);
@@ -1256,14 +1337,15 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
   };
 
   const validateBo3Structure = (
-    payload: { scoreA: number; scoreB: number }[],
-    selectedWinner: 'A' | 'B'
+    payload: { scoreA: number; scoreB: number }[]
   ): string | null => {
     let winsA = 0;
     let winsB = 0;
-    for (const entry of payload) {
+    for (let i = 0; i < payload.length; i++) {
+      const entry = payload[i];
       if (entry.scoreA > entry.scoreB) winsA++;
       else if (entry.scoreB > entry.scoreA) winsB++;
+      else return `Sett ${i + 1} kan ikke være uavgjort (${entry.scoreA}–${entry.scoreB}).`;
     }
 
     if (winsA !== 2 && winsB !== 2) {
@@ -1281,19 +1363,22 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
       }
     }
 
-    const winnerWins = selectedWinner === 'A' ? winsA : winsB;
-    if (winnerWins !== 2) {
-      return 'Valgt vinner må ha vunnet 2 sett.';
-    }
-
     return null;
   };
 
   const handleModalSubmit = () => {
     setLocalValidationErr(null);
 
-    if (!winnerSlot) {
-      setLocalValidationErr('Velg hvem som vant kampen.');
+    if (!autoWinnerSlot) {
+      if (isBestOf3) {
+        if (set3Needed && !set3Winner) {
+          setLocalValidationErr('Stillingen er 1–1 i sett. Sett 3 må ha en vinner for å kåre kampvinner.');
+        } else {
+          setLocalValidationErr('Best av 3 krever at én spiller vinner 2 sett.');
+        }
+      } else {
+        setLocalValidationErr('Score kan ikke være uavgjort. Én spiller må ha flere poeng.');
+      }
       return;
     }
 
@@ -1304,25 +1389,35 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
         setLocalValidationErr(err);
         return;
       }
-      const bo3Err = validateBo3Structure(payload, winnerSlot);
+      const bo3Err = validateBo3Structure(payload);
       if (bo3Err) {
         setLocalValidationErr(bo3Err);
         return;
       }
-      onSubmit(payload, winnerSlot);
+      onSubmit(payload, autoWinnerSlot);
     } else {
       const err = validateTechnicalScores([{ scoreA, scoreB }]);
       if (err) {
         setLocalValidationErr(err);
         return;
       }
-      onSubmit(undefined, winnerSlot);
+      onSubmit(undefined, autoWinnerSlot);
     }
   };
 
   const handleModalConfirmCorrection = () => {
-    if (!winnerSlot) {
-      setLocalValidationErr('Velg hvem som vant kampen.');
+    setLocalValidationErr(null);
+
+    if (!autoWinnerSlot) {
+      if (isBestOf3) {
+        if (set3Needed && !set3Winner) {
+          setLocalValidationErr('Stillingen er 1–1 i sett. Sett 3 må ha en vinner for å kåre kampvinner.');
+        } else {
+          setLocalValidationErr('Best av 3 krever at én spiller vinner 2 sett.');
+        }
+      } else {
+        setLocalValidationErr('Score kan ikke være uavgjort. Én spiller må ha flere poeng.');
+      }
       return;
     }
 
@@ -1333,19 +1428,19 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
         setLocalValidationErr(err);
         return;
       }
-      const bo3Err = validateBo3Structure(payload, winnerSlot);
+      const bo3Err = validateBo3Structure(payload);
       if (bo3Err) {
         setLocalValidationErr(bo3Err);
         return;
       }
-      onConfirmCorrection(payload, winnerSlot);
+      onConfirmCorrection(payload, autoWinnerSlot);
     } else {
       const err = validateTechnicalScores([{ scoreA, scoreB }]);
       if (err) {
         setLocalValidationErr(err);
         return;
       }
-      onConfirmCorrection(undefined, winnerSlot);
+      onConfirmCorrection(undefined, autoWinnerSlot);
     }
   };
 
@@ -1422,6 +1517,22 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                   />
                 </div>
               </div>
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[9px] font-bold text-zinc-500 uppercase">Hurtigvalg:</span>
+                {quickScorePairs.map(([a, b]) => (
+                  <button
+                    key={`s1-${a}-${b}`}
+                    type="button"
+                    onClick={() => {
+                      updateSetScore(0, 'A', a);
+                      updateSetScore(0, 'B', b);
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] font-mono font-bold text-zinc-300 hover:text-white"
+                  >
+                    {a}–{b}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Set 2 */}
@@ -1450,22 +1561,40 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                   />
                 </div>
               </div>
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[9px] font-bold text-zinc-500 uppercase">Hurtigvalg:</span>
+                {quickScorePairs.map(([a, b]) => (
+                  <button
+                    key={`s2-${a}-${b}`}
+                    type="button"
+                    onClick={() => {
+                      updateSetScore(1, 'A', a);
+                      updateSetScore(1, 'B', b);
+                    }}
+                    className="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] font-mono font-bold text-zinc-300 hover:text-white"
+                  >
+                    {a}–{b}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Set 3 (Conditional upon 1-1) */}
             {matchDecidedIn2 ? (
               <div className="p-3 rounded-xl bg-zinc-950/60 border border-dashed border-zinc-800 text-center">
-                <span className="text-xs font-bold text-zinc-500">
-                  Sett 3 spilles ikke (avgjort {setsWonA > setsWonB ? '2–0 til ' + playerLabel(match.playerA) : '0–2 til ' + playerLabel(match.playerB)})
+                <span className="text-xs font-bold text-zinc-400">
+                  Sett 3 spilles ikke (avgjort {winsAfter2A === 2 ? '2–0 til ' + playerLabel(match.playerA) : '0–2 til ' + playerLabel(match.playerB)})
                 </span>
               </div>
-            ) : (
+            ) : set3Needed ? (
               <div className="p-3.5 rounded-2xl bg-zinc-950 border-2 border-lime-400/40 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-black uppercase text-lime-400 block">
                     Sett 3 (Avgjørende sett — mål {targetPoints}p)
                   </span>
-                  <span className="text-[10px] font-bold text-zinc-500">1–1 i sett</span>
+                  <span className="text-[10px] font-bold text-lime-400/90 bg-lime-400/10 px-2 py-0.5 rounded-full">
+                    1–1 i sett
+                  </span>
                 </div>
                 <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
                   <div>
@@ -1488,8 +1617,24 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
                     />
                   </div>
                 </div>
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase">Hurtigvalg:</span>
+                  {quickScorePairs.map(([a, b]) => (
+                    <button
+                      key={`s3-${a}-${b}`}
+                      type="button"
+                      onClick={() => {
+                        updateSetScore(2, 'A', a);
+                        updateSetScore(2, 'B', b);
+                      }}
+                      className="px-2 py-0.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[10px] font-mono font-bold text-zinc-300 hover:text-white"
+                    >
+                      {a}–{b}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+            ) : null}
           </div>
         ) : (
           /* Single set layout */
@@ -1543,39 +1688,48 @@ export const ScoreEntryModal: React.FC<ScoreEntryModalProps> = ({
 
         {match.playerA && match.playerB && (
           <div className="mb-6 p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 space-y-2">
-            <span className="text-[10px] font-black uppercase text-zinc-500 block">Kampvinner</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setWinnerManuallySet(true);
-                  setWinnerSlot('A');
-                  setLocalValidationErr(null);
-                }}
-                className={`flex-1 py-2.5 rounded-xl border text-[10px] font-black uppercase transition-colors ${
-                  winnerSlot === 'A'
-                    ? 'bg-lime-400/20 border-lime-400 text-lime-200'
-                    : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white'
-                }`}
-              >
-                {playerLabel(match.playerA)} vant
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setWinnerManuallySet(true);
-                  setWinnerSlot('B');
-                  setLocalValidationErr(null);
-                }}
-                className={`flex-1 py-2.5 rounded-xl border text-[10px] font-black uppercase transition-colors ${
-                  winnerSlot === 'B'
-                    ? 'bg-lime-400/20 border-lime-400 text-lime-200'
-                    : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white'
-                }`}
-              >
-                {playerLabel(match.playerB)} vant
-              </button>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase text-zinc-400">
+                Kampvinner (beregnes automatisk)
+              </span>
+              <span className="text-[9px] font-bold text-zinc-500 uppercase">
+                Single Source of Truth
+              </span>
             </div>
+
+            {autoWinnerSlot ? (
+              <div className="p-3 rounded-xl bg-lime-400/15 border-2 border-lime-400/60 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <Trophy className="w-5 h-5 text-lime-400 shrink-0" />
+                  <div>
+                    <span className="text-sm font-black text-white block">
+                      {playerLabel(autoWinnerSlot === 'A' ? match.playerA : match.playerB)} kåres til vinner
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-lime-300">
+                      {isBestOf3
+                        ? `Vant ${autoWinnerSlot === 'A' ? setsWonA : setsWonB}–${autoWinnerSlot === 'A' ? setsWonB : setsWonA} i sett`
+                        : `Vant ${autoWinnerSlot === 'A' ? `${scoreA}–${scoreB}` : `${scoreB}–${scoreA}`} i poeng`}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] bg-lime-400 text-zinc-950 font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  Vinner
+                </span>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-zinc-900/80 border border-dashed border-zinc-700 text-center">
+                <span className="text-xs font-bold text-amber-400">
+                  {isBestOf3
+                    ? set3Needed
+                      ? 'Stillingen er 1–1 i sett. Registrer poeng i avgjørende sett 3.'
+                      : 'Sett poeng for settene for å kåre vinner.'
+                    : 'Uavgjort – sett score for å kåre vinner.'}
+                </span>
+              </div>
+            )}
+            <p className="text-[10px] text-zinc-500 pt-0.5">
+              Som dommer registrerer du kun scoren. Vinneren kåres automatisk etter hvem som har vunnet flest sett eller poeng.
+            </p>
           </div>
         )}
 
