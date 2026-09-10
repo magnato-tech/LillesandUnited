@@ -110,15 +110,23 @@ export function resolveBracketCapacity(
   participantCount: number,
   configured?: number | null
 ): number {
-  if (participantCount <= 4) return 4;
-  if (participantCount <= 8) return 8;
-  if (configured === 16 || configured === 32 || configured === 64) {
+  if (
+    configured === 4 ||
+    configured === 8 ||
+    configured === 16 ||
+    configured === 32 ||
+    configured === 64
+  ) {
     if (participantCount > configured) {
+      if (participantCount <= 8) return 8;
+      if (participantCount <= 16) return 16;
       if (participantCount <= 32) return 32;
       return 64;
     }
     return configured;
   }
+  if (participantCount <= 4) return 4;
+  if (participantCount <= 8) return 8;
   if (participantCount <= 16) return 16;
   if (participantCount <= 32) return 32;
   return 64;

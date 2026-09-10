@@ -31,6 +31,8 @@ import {
   UserPlus,
   UserMinus,
   ExternalLink,
+  Sliders,
+  Minus,
 } from 'lucide-react';
 import { AppState, Match, PopcornBong, Person, Tournament } from '../types';
 import {
@@ -225,6 +227,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   } | null>(null);
   const [isSyncingFirestore, setIsSyncingFirestore] = useState(false);
   const [firestoreSyncMessage, setFirestoreSyncMessage] = useState<string | null>(null);
+  const [simPlayerCount, setSimPlayerCount] = useState<number>(8);
 
   const setAdminTab = (tab: typeof initialTab) => {
     sessionStorage.setItem('lillesand_admin_section', tab);
@@ -621,17 +624,40 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleSimulate = (count: number) => {
+    const validCount = Math.min(Math.max(Math.floor(count || 8), 2), 64);
+    const bracketSize =
+      validCount <= 4 ? 4 : validCount <= 8 ? 8 : validCount <= 16 ? 16 : validCount <= 32 ? 32 : 64;
+    const walkovers = bracketSize - validCount;
+    const r1Matches = bracketSize / 2;
+    const playableR1 = r1Matches - walkovers;
+
+    const roundName =
+      bracketSize === 4
+        ? 'Semifinale'
+        : bracketSize === 8
+        ? 'Kvartfinale'
+        : bracketSize === 16
+        ? 'Åttedelsfinale'
+        : bracketSize === 32
+        ? 'Sekstendedelsfinale'
+        : 'Runde 1';
+
+    const walkoverInfo =
+      walkovers > 0
+        ? ` (${playableR1} ordinære kamper + ${walkovers} walkovers)`
+        : ` (${r1Matches} ordinære kamper uten walkovers)`;
+
     setConfirmDialog({
       isOpen: true,
-      title: `Simuler ${count} spillere`,
-      message: `Generere en test-turnering med ${count} fiktive spillere og starte cupen direkte?`,
-      confirmLabel: `Start ${count} spillere`,
+      title: `Simuler ${validCount} spillere`,
+      message: `Generere en test-turnering med ${validCount} fiktive spillere og starte cupen direkte?\n\nDette oppretter en ${bracketSize}-spillers brakett med start i ${roundName}${walkoverInfo}. Bord 1 og Bord 2 settes opp automatisk.`,
+      confirmLabel: `Start ${validCount} spillere`,
       variant: 'primary',
       onConfirm: async () => {
         try {
-          await simulateTournament(count);
+          await simulateTournament(validCount);
           onRefresh();
-          showToast(`Test-turnering med ${count} spillere generert og startet!`, 'success');
+          showToast(`Test-turnering med ${validCount} spillere generert og startet!`, 'success');
         } catch (err: any) {
           showToast(err.message || 'Kunne ikke generere test-turnering', 'error');
         }
@@ -2037,55 +2063,271 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           {/* Tournament Simulations */}
-          <div className="pt-4 border-t-2 border-zinc-800">
-            <h4 className="font-black text-white text-sm uppercase mb-3">
-              Kjappe simuleringer for turneringsledere:
-            </h4>
-            <p className="text-xs text-zinc-500 font-medium mb-4">
-              Testflyt: Velg cup-størrelse → gå til Bordtennis Kamper → tildel bord → registrer
-              resultater.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-between shadow-artistic-sm">
-                <div>
-                  <strong className="text-white text-sm font-black block">Simuler 16 spillere</strong>
-                  <span className="text-xs text-zinc-400 font-medium">8 kamper runde 1 · standard</span>
-                </div>
-                <button
-                  onClick={() => handleSimulate(16)}
-                  className="px-4 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm"
-                >
-                  Start 16
-                </button>
-              </div>
+          {(() => {
+            const simCustomBracket =
+              simPlayerCount <= 4
+                ? 4
+                : simPlayerCount <= 8
+                ? 8
+                : simPlayerCount <= 16
+                ? 16
+                : simPlayerCount <= 32
+                ? 32
+                : 64;
+            const simCustomWalkovers = simCustomBracket - simPlayerCount;
+            const simCustomR1Total = simCustomBracket / 2;
+            const simCustomR1Playable = simCustomR1Total - simCustomWalkovers;
+            const simCustomRounds = Math.log2(simCustomBracket);
+            const simCustomStartRound =
+              simCustomBracket === 4
+                ? 'Semifinale'
+                : simCustomBracket === 8
+                ? 'Kvartfinale'
+                : simCustomBracket === 16
+                ? 'Åttedelsfinale'
+                : simCustomBracket === 32
+                ? 'Sekstendedelsfinale'
+                : 'Runde 1';
 
-              <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-between shadow-artistic-sm">
+            return (
+              <div className="pt-6 border-t-2 border-zinc-800 space-y-6">
                 <div>
-                  <strong className="text-white text-sm font-black block">Simuler 32 spillere</strong>
-                  <span className="text-xs text-zinc-400 font-medium">16 kamper runde 1</span>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 bg-lime-400/10 border border-lime-400/30 px-2.5 py-0.5 rounded-full">
+                      Turneringsleder • Test & Simulering
+                    </span>
+                  </div>
+                  <h4 className="font-black text-white text-base sm:text-lg uppercase tracking-tight">
+                    Oppsett av test-turnering
+                  </h4>
+                  <p className="text-xs text-zinc-400 font-medium mt-1 max-w-2xl leading-relaxed">
+                    Opprett en fiktiv cup med realistiske spillernavn for å teste hele turneringsflyten:
+                    kampoppsett, bordtildeling (Bord 1 & 2), push-varsler, dommerpanel og premieutdeling.
+                  </p>
                 </div>
-                <button
-                  onClick={() => handleSimulate(32)}
-                  className="px-4 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm"
-                >
-                  Start 32
-                </button>
-              </div>
 
-              <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-lime-400/30 flex items-center justify-between shadow-artistic-sm">
+                {/* Progressive Hovedvalg: 8 og 16 spillere */}
                 <div>
-                  <strong className="text-white text-sm font-black block">Simuler 64 spillere</strong>
-                  <span className="text-xs text-zinc-400 font-medium">32 kamper runde 1 · maks</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block mb-2">
+                    Anbefalte hurtigvalg:
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 8 spillere */}
+                    <div className="p-5 rounded-3xl bg-zinc-950 border-2 border-emerald-500/30 hover:border-emerald-400/60 transition-all flex flex-col justify-between gap-4 shadow-artistic-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2.5 py-0.5 rounded-lg">
+                            ⚡ Raskeste test · 8 spillere
+                          </span>
+                          <span className="text-[11px] font-bold text-zinc-400">3 runder</span>
+                        </div>
+                        <strong className="text-white text-base font-black block tracking-tight">
+                          8 spillere (Kvartfinaler direkte)
+                        </strong>
+                        <p className="text-xs text-zinc-400 font-medium mt-1.5 leading-relaxed">
+                          4 kvartfinaler direkte uten walkovers. Den raskeste måten å teste hele cupflyten
+                          fra åpningskamp til finale og premieutdeling!
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleSimulate(8)}
+                        className="w-full py-3 px-4 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        Start 8 spillere
+                      </button>
+                    </div>
+
+                    {/* 16 spillere */}
+                    <div className="p-5 rounded-3xl bg-zinc-950 border-2 border-purple-500/30 hover:border-purple-400/60 transition-all flex flex-col justify-between gap-4 shadow-artistic-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 bg-purple-400/10 border border-purple-400/20 px-2.5 py-0.5 rounded-lg">
+                            🎯 Standard cup · 16 spillere
+                          </span>
+                          <span className="text-[11px] font-bold text-zinc-400">4 runder</span>
+                        </div>
+                        <strong className="text-white text-base font-black block tracking-tight">
+                          16 spillere (Åttedelsfinaler)
+                        </strong>
+                        <p className="text-xs text-zinc-400 font-medium mt-1.5 leading-relaxed">
+                          8 kamper i runde 1 · Standardstørrelsen for Lillesand United Bordtenniscup. Tester full
+                          ordinær turneringsavvikling med to aktive bord.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleSimulate(16)}
+                        className="w-full py-3 px-4 rounded-2xl bg-purple-500 hover:bg-purple-400 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        Start 16 spillere
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleSimulate(64)}
-                  className="px-4 py-2.5 rounded-xl bg-lime-400 hover:bg-lime-300 text-zinc-950 text-xs font-black uppercase tracking-wider shadow-artistic-sm"
-                >
-                  Start 64
-                </button>
+
+                {/* Større cup-størrelser */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-3">
+                    <div>
+                      <span className="text-xs text-white font-black block">32 spillere (Sekstendedelsfinale)</span>
+                      <span className="text-[11px] text-zinc-400 font-medium">16 kamper R1 · 5 runder totalt</span>
+                    </div>
+                    <button
+                      onClick={() => handleSimulate(32)}
+                      className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-black uppercase tracking-wider transition-colors"
+                    >
+                      Start 32
+                    </button>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-3">
+                    <div>
+                      <span className="text-xs text-white font-black block">64 spillere (Maksimal cup)</span>
+                      <span className="text-[11px] text-zinc-400 font-medium">32 kamper R1 · 6 runder totalt</span>
+                    </div>
+                    <button
+                      onClick={() => handleSimulate(64)}
+                      className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-black uppercase tracking-wider transition-colors"
+                    >
+                      Start 64
+                    </button>
+                  </div>
+                </div>
+
+                {/* Valgfritt antall spillere (opptil 64) */}
+                <div className="p-5 sm:p-6 rounded-3xl bg-zinc-950 border-2 border-zinc-800 shadow-artistic-sm space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-lime-400/10 text-lime-400 border border-lime-400/20">
+                        <Sliders className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h5 className="font-black text-white text-sm uppercase tracking-tight">
+                          Valgfritt antall spillere (2 til 64)
+                        </h5>
+                        <p className="text-[11px] text-zinc-400 font-medium">
+                          Velg nøyaktig antall deltakere for å simulere ufullstendige braketter eller spesifikke scenarier.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Preset Chips */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1 sm:pt-0">
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase mr-1">Snarveier:</span>
+                      {[8, 12, 16, 24, 32, 48, 64].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => setSimPlayerCount(preset)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all ${
+                            simPlayerCount === preset
+                              ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
+                              : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800'
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Slider og Tallkontroller */}
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center pt-2">
+                    <div className="sm:col-span-8 space-y-2">
+                      <div className="flex items-center justify-between text-xs text-zinc-400 font-bold">
+                        <span>2 spillere</span>
+                        <span className="text-lime-400 font-black text-sm">{simPlayerCount} spillere valgt</span>
+                        <span>64 spillere</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={2}
+                        max={64}
+                        value={simPlayerCount}
+                        onChange={(e) => setSimPlayerCount(Number(e.target.value))}
+                        className="w-full accent-lime-400 cursor-pointer h-2 bg-zinc-800 rounded-lg"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-4 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSimPlayerCount((c) => Math.max(2, c - 1))}
+                        disabled={simPlayerCount <= 2}
+                        className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 hover:border-zinc-500 disabled:opacity-40 text-zinc-300 hover:text-white transition-colors"
+                        title="Trekk fra 1"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+
+                      <input
+                        type="number"
+                        min={2}
+                        max={64}
+                        value={simPlayerCount}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          if (!isNaN(val)) {
+                            setSimPlayerCount(Math.min(64, Math.max(2, val)));
+                          }
+                        }}
+                        className="w-20 py-2 px-2 rounded-xl bg-zinc-900 border-2 border-zinc-700 text-center font-black text-white text-base focus:border-lime-400 focus:outline-none"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setSimPlayerCount((c) => Math.min(64, c + 1))}
+                        disabled={simPlayerCount >= 64}
+                        className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 hover:border-zinc-500 disabled:opacity-40 text-zinc-300 hover:text-white transition-colors"
+                        title="Legg til 1"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sanntidsinfo om beregnet oppsett */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div>
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase block">Brakett</span>
+                      <strong className="text-white font-black">{simCustomBracket} plasser</strong>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase block">Startrunde</span>
+                      <strong className="text-lime-400 font-black">{simCustomStartRound}</strong>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase block">Runde 1 kamper</span>
+                      <span className="text-zinc-300 font-bold">
+                        {simCustomR1Playable} spilles
+                        {simCustomWalkovers > 0 && (
+                          <span className="text-amber-400 font-semibold ml-1">
+                            (+{simCustomWalkovers} bye)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase block">Runder til finale</span>
+                      <strong className="text-zinc-300 font-black">{simCustomRounds} runder</strong>
+                    </div>
+                  </div>
+
+                  {/* Hoved startknapp */}
+                  <button
+                    type="button"
+                    onClick={() => handleSimulate(simPlayerCount)}
+                    className="w-full py-3.5 px-5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 font-black text-sm uppercase tracking-wider shadow-artistic-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                  >
+                    <Play className="w-4 h-4 fill-current" />
+                    Start test-turnering med {simPlayerCount} spillere
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
+            );
+          })()}
 
         </div>
       )}

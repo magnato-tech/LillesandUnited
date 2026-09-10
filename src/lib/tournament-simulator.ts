@@ -186,7 +186,7 @@ export function canRunSimulation(
       return {
         allowed: false,
         reason:
-          'Simulering er kun tillatt med testspillere. Bruk Test → Simuler 16/32/64 først.',
+          'Simulering er kun tillatt med testspillere. Start en test-turnering under Admin → Test først.',
       };
     }
   }

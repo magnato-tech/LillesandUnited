@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { Trophy, UserPlus, Zap, Clock, Users, ChevronRight, AlertCircle, CheckCircle, ShieldAlert } from 'lucide-react';
+import { Trophy, UserPlus, Zap, Clock, Users, ChevronRight, AlertCircle, CheckCircle, ShieldAlert, Bell, Sparkles } from 'lucide-react';
 import { AppState, Participant, Match, Person } from '../types';
 import { BracketView } from './BracketView';
 import { calculateTournamentStats } from '../lib/tournament';
+import {
+  calculatePlayerQueueStatus,
+  requestBrowserNotificationPermission,
+  sendBrowserPushNotification,
+  playNotificationChime,
+} from '../lib/tournament-notifications';
 
 interface TableTennisViewProps {
   state: AppState;
@@ -12,6 +18,7 @@ interface TableTennisViewProps {
   onGoToAdmin: () => void;
   activePersonId?: string | null;
   activePerson?: Person | null;
+  onTriggerTestPush?: () => void;
 }
 
 export const TableTennisView: React.FC<TableTennisViewProps> = ({
@@ -22,12 +29,16 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
   onGoToAdmin,
   activePersonId,
   activePerson: activePersonProp = null,
+  onTriggerTestPush,
 }) => {
   const activePerson = activePersonProp;
   const effectiveName = activePerson?.firstName || myPlayerName || '';
   const [nameInput, setNameInput] = useState(effectiveName);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [browserPushPermission, setBrowserPushPermission] = useState<NotificationPermission | null>(
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : null
+  );
 
   React.useEffect(() => {
     if (effectiveName) {
@@ -80,124 +91,18 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
     }
   };
 
-  // Determine user's current status if activePersonId or myPlayerName is set
-  const myCurrentStatus = () => {
-    if (!activePersonId && !myPlayerName) return null;
-    const nameLower = (myPlayerName || '').toLowerCase();
+  // Determine user's current status if activePersonId or effectiveName is set
+  const userStatus = calculatePlayerQueueStatus(tournament, activePersonId, effectiveName);
 
-    // Find participant object
-    const myParticipant = tournament.participants.find(
-      (p) =>
-        (activePersonId && p.personId === activePersonId) ||
-        (nameLower && p.firstName.toLowerCase() === nameLower)
-    );
-
-    if (!myParticipant) {
-      return {
-        status: 'not_registered',
-        title: 'Ikke funnet i deltakerlisten',
-        description: 'Registrer deg nedenfor for å bli med i cupen!',
-      };
+  const handleRequestPushPermission = async () => {
+    const perm = await requestBrowserNotificationPermission();
+    setBrowserPushPermission(perm);
+    if (perm === 'granted') {
+      sendBrowserPushNotification('Push-varsler aktivert! 🏓', {
+        body: 'Du vil motta varsel når det er 2 kamper igjen før du skal spille.',
+      });
     }
-
-    const myLabel = myParticipant.displayId || myParticipant.firstName;
-
-    if (tournament.status === 'registration') {
-      return {
-        status: 'registered_waiting',
-        title: `Du er påmeldt som "${myLabel}"!`,
-        description: `Trekningen skjer ved turneringsstart kl. 18:45. Gjør deg klar med racketen!`,
-      };
-    }
-
-    // Check if player won the entire tournament
-    if (
-      tournament.winner &&
-      ((activePersonId && tournament.winner.personId === activePersonId) ||
-        tournament.winner.id === myParticipant.id)
-    ) {
-      return {
-        status: 'champion',
-        title: `🏆 GRATULERER! DU VANT BORDTENNISCUPEN! 🏆`,
-        description: `Du spilte deg gjennom hele cupen og tok seieren i finalen!`,
-      };
-    }
-
-    // Find player's current active or upcoming match
-    const myMatches = tournament.matches.filter(
-      (m) =>
-        (m.playerA && ((activePersonId && m.playerA.personId === activePersonId) || m.playerA.id === myParticipant.id)) ||
-        (m.playerB && ((activePersonId && m.playerB.personId === activePersonId) || m.playerB.id === myParticipant.id))
-    );
-
-    const isMatchPlayerMe = (player: Participant | null) => {
-      if (!player) return false;
-      if (activePersonId && player.personId === activePersonId) return true;
-      return player.id === myParticipant.id;
-    };
-
-    // Look for in_progress match
-    const activeMatch = myMatches.find((m) => m.status === 'in_progress');
-    if (activeMatch) {
-      const opponent = isMatchPlayerMe(activeMatch.playerA)
-        ? activeMatch.playerB?.displayId || activeMatch.playerB?.firstName
-        : activeMatch.playerA?.displayId || activeMatch.playerA?.firstName;
-
-      return {
-        status: 'playing_now',
-        title: `🚨 DIN KAMP SPILLES NÅ!`,
-        description: `Gå til BORD ${activeMatch.tableNumber || 1}! Du spiller mot ${opponent || 'motstander'}!`,
-        table: activeMatch.tableNumber,
-      };
-    }
-
-    // Look for ready match on table
-    const readyOnTable = myMatches.find((m) => m.status === 'ready' && m.tableNumber);
-    if (readyOnTable) {
-      const opponent = isMatchPlayerMe(readyOnTable.playerA)
-        ? readyOnTable.playerB?.displayId || readyOnTable.playerB?.firstName
-        : readyOnTable.playerA?.displayId || readyOnTable.playerA?.firstName;
-
-      return {
-        status: 'ready_table',
-        title: `🔔 DU ER NESTE PÅ BORD ${readyOnTable.tableNumber}!`,
-        description: `Gjør deg klar ved Bord ${readyOnTable.tableNumber}. Motstander: ${opponent || 'motstander'}.`,
-        table: readyOnTable.tableNumber,
-      };
-    }
-
-    // Look for upcoming match waiting in queue
-    const waitingMatch = myMatches.find(
-      (m) => m.status === 'ready' || (m.status === 'not_ready' && !m.winnerId)
-    );
-    if (waitingMatch) {
-      const opponent = isMatchPlayerMe(waitingMatch.playerA)
-        ? waitingMatch.playerB?.displayId || waitingMatch.playerB?.firstName
-        : waitingMatch.playerA?.displayId || waitingMatch.playerA?.firstName;
-
-      return {
-        status: 'in_queue',
-        title: `Du er i ${waitingMatch.roundName}!`,
-        description: opponent
-          ? `Du skal møte ${opponent}. Venter på ledig bord.`
-          : 'Venter på at motstanderens forrige kamp blir ferdig.',
-      };
-    }
-
-    // Check if knocked out
-    const lostMatch = myMatches.find((m) => m.winnerId && m.winnerId !== myParticipant.id && m.status === 'completed');
-    if (lostMatch) {
-      return {
-        status: 'eliminated',
-        title: 'Takk for god innsats!',
-        description: `Du ble slått ut i ${lostMatch.roundName}. Nyt stemningen, hei på vennene dine og stikk innom Mario Kart loungen!`,
-      };
-    }
-
-    return null;
   };
-
-  const userStatus = myCurrentStatus();
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
@@ -244,36 +149,110 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
         <div
           id="user-status-card"
           className={`mb-6 p-5 sm:p-6 rounded-3xl border-2 transition-all shadow-artistic-md ${
-            userStatus.status === 'playing_now'
+            userStatus.stage === 'playing_now'
               ? 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-md -rotate-0.5'
-              : userStatus.status === 'ready_table'
+              : userStatus.stage === 'ready_table'
               ? 'bg-gradient-to-r from-orange-500/20 via-zinc-900 to-lime-400/20 border-lime-400 text-white'
-              : userStatus.status === 'champion'
+              : userStatus.stage === 'two_matches_away'
+              ? 'bg-gradient-to-r from-amber-500/25 via-zinc-900 to-amber-400/10 border-amber-400 text-white shadow-amber-400/10'
+              : userStatus.stage === 'one_match_away'
+              ? 'bg-gradient-to-r from-orange-500/25 via-zinc-900 to-orange-400/10 border-orange-500 text-white shadow-orange-500/10'
+              : userStatus.stage === 'champion'
               ? 'bg-gradient-to-r from-amber-400/30 to-yellow-500/30 border-amber-400 text-white'
               : 'bg-zinc-900 border-zinc-800 text-zinc-200'
           }`}
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-4 flex-1">
               <div
                 className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-2xl font-black shadow-artistic-sm ${
-                  userStatus.status === 'playing_now'
+                  userStatus.stage === 'playing_now'
                     ? 'bg-zinc-950 text-lime-400'
+                    : userStatus.stage === 'two_matches_away'
+                    ? 'bg-amber-400 text-zinc-950 ring-4 ring-amber-400/20'
+                    : userStatus.stage === 'one_match_away'
+                    ? 'bg-orange-500 text-zinc-950 ring-4 ring-orange-500/20'
                     : 'bg-zinc-950 text-lime-400 border-2 border-zinc-800'
                 }`}
               >
-                {userStatus.status === 'playing_now' ? '🏓' : <Zap className="w-7 h-7" />}
+                {userStatus.stage === 'playing_now' ? (
+                  '🏓'
+                ) : userStatus.stage === 'two_matches_away' ? (
+                  <Bell className="w-7 h-7 animate-bounce" />
+                ) : userStatus.stage === 'one_match_away' ? (
+                  <Zap className="w-7 h-7 animate-pulse" />
+                ) : userStatus.stage === 'champion' ? (
+                  '🏆'
+                ) : (
+                  <Clock className="w-7 h-7" />
+                )}
               </div>
-              <div>
-                <span className="text-xs font-black uppercase tracking-wider opacity-85 block">
-                  Din personlige kampstatus
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight uppercase">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-sm inline-flex items-center gap-1 ${
+                      userStatus.stage === 'playing_now'
+                        ? 'bg-zinc-950 text-lime-400'
+                        : userStatus.stage === 'two_matches_away'
+                        ? 'bg-amber-400 text-zinc-950'
+                        : userStatus.stage === 'one_match_away'
+                        ? 'bg-orange-500 text-zinc-950'
+                        : 'bg-zinc-800 text-zinc-300'
+                    }`}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    {userStatus.stage === 'two_matches_away'
+                      ? '⚡ 2 kamper igjen (Push-varsel aktivert)'
+                      : userStatus.stage === 'one_match_away'
+                      ? '🔔 Neste kamp i køen'
+                      : userStatus.stage === 'playing_now'
+                      ? '🚨 Spilles nå'
+                      : 'Din kampstatus'}
+                  </span>
+                  {userStatus.roundName && (
+                    <span className="text-[11px] font-bold opacity-80 uppercase tracking-tight">
+                      {userStatus.roundName}
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-lg sm:text-2xl font-black tracking-tight uppercase leading-snug">
                   {userStatus.title}
                 </h3>
-                <p className="text-xs sm:text-sm opacity-90 mt-0.5 font-medium">
+                <p className="text-xs sm:text-sm opacity-90 mt-1 font-medium leading-relaxed">
                   {userStatus.description}
                 </p>
+
+                {/* Quick actions row */}
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
+                  {onTriggerTestPush && (
+                    <button
+                      id="btn-test-push-status"
+                      type="button"
+                      onClick={onTriggerTestPush}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm ${
+                        userStatus.stage === 'playing_now'
+                          ? 'bg-zinc-950 text-lime-400 hover:bg-zinc-900'
+                          : 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700'
+                      }`}
+                      title="Test hvordan push-varsel for 2 kamper igjen ser ut og høres ut"
+                    >
+                      <Bell className="w-3.5 h-3.5" />
+                      <span>Test push-varsel</span>
+                    </button>
+                  )}
+
+                  {browserPushPermission === 'default' && (
+                    <button
+                      id="btn-enable-browser-push"
+                      type="button"
+                      onClick={handleRequestPushPermission}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700 transition-colors"
+                    >
+                      Få varsler på mobilen
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

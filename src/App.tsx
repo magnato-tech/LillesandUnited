@@ -10,9 +10,18 @@ import { DisplayScreen } from './components/DisplayScreen';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MyProfileView } from './components/MyProfileView';
 import { WelcomeBanner } from './components/WelcomeBanner';
+import { InAppNotificationBanner } from './components/InAppNotificationBanner';
 import { AppState, Person } from './types';
 import { INITIAL_STATE } from './lib/initial-data';
 import { fetchState, registerParticipant, createPerson } from './services/api';
+import {
+  calculatePlayerQueueStatus,
+  InAppPushAlert,
+  playNotificationChime,
+  triggerDeviceVibration,
+  sendBrowserPushNotification,
+  requestBrowserNotificationPermission,
+} from './lib/tournament-notifications';
 import {
   getActiveSession,
   saveActiveSession,
@@ -102,6 +111,115 @@ export default function App() {
   const currentUserName = effectiveActivePerson?.firstName || (hasActiveUser ? activeSession.firstName : null);
 
   const previousWinnerRef = useRef<string | null>(null);
+
+  // In-app push notification state & tracking
+  const [activePushAlert, setActivePushAlert] = useState<InAppPushAlert | null>(null);
+  const notifiedKeysRef = useRef<Set<string>>(new Set());
+  const [browserPushPermission, setBrowserPushPermission] = useState<NotificationPermission | null>(
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : null
+  );
+
+  // Monitor tournament queue and trigger push notification when 2 matches remain
+  useEffect(() => {
+    if (!state.tournament || state.tournament.status !== 'active') return;
+
+    const queueStatus = calculatePlayerQueueStatus(
+      state.tournament,
+      activePersonId,
+      currentUserName
+    );
+
+    if (!queueStatus || !queueStatus.isRegistered || !queueStatus.myMatch) return;
+
+    const matchId = queueStatus.myMatch.id;
+    const stage = queueStatus.stage;
+
+    // Trigger notification at key milestones: 2 matches away, 1 match away, ready on table, or playing now
+    if (
+      stage === 'two_matches_away' ||
+      stage === 'one_match_away' ||
+      stage === 'ready_table' ||
+      stage === 'playing_now'
+    ) {
+      const dedupeKey = `${matchId}_${stage}_${queueStatus.tableNumber || 0}`;
+      if (!notifiedKeysRef.current.has(dedupeKey)) {
+        notifiedKeysRef.current.add(dedupeKey);
+
+        const isTwo = stage === 'two_matches_away';
+        const isOne = stage === 'one_match_away';
+        const isPlaying = stage === 'playing_now';
+
+        const alertTitle = isTwo
+          ? `Gjør deg klar, ${currentUserName || queueStatus.participant?.firstName || 'spiller'}! 2 kamper igjen!`
+          : isOne
+          ? `Gjør deg klar! Du er neste i køen!`
+          : isPlaying
+          ? `Din kamp spilles nå på Bord ${queueStatus.tableNumber || 1}!`
+          : `Bord ${queueStatus.tableNumber || 1} er klart for din kamp!`;
+
+        const alertMessage = isTwo
+          ? `Det er nå 2 kamper igjen før din kamp i ${queueStatus.roundName} mot ${queueStatus.opponentName}. Finn racketen og gjør deg klar!`
+          : isOne
+          ? `Du skal spille neste gang et bord blir ledig. Motstander: ${queueStatus.opponentName}. Still deg opp ved bordene!`
+          : `Gå til Bord ${queueStatus.tableNumber || 1}! Du spiller mot ${queueStatus.opponentName}.`;
+
+        const pushAlert: InAppPushAlert = {
+          id: `alert_${Date.now()}`,
+          matchId,
+          stage,
+          title: alertTitle,
+          message: alertMessage,
+          roundName: queueStatus.roundName,
+          tableNumber: queueStatus.tableNumber,
+          opponentName: queueStatus.opponentName,
+          createdAt: Date.now(),
+        };
+
+        setActivePushAlert(pushAlert);
+        playNotificationChime(isPlaying ? 'playing_now' : isOne ? 'one_match' : 'two_matches');
+        triggerDeviceVibration([200, 100, 200]);
+        sendBrowserPushNotification(alertTitle, { body: alertMessage });
+      }
+    }
+  }, [state.tournament, activePersonId, currentUserName]);
+
+  const handleTriggerTestPush = () => {
+    const queueStatus = calculatePlayerQueueStatus(
+      state.tournament,
+      activePersonId,
+      currentUserName
+    );
+    const roundName = queueStatus?.roundName || 'Åttedelsfinale';
+    const opponent = queueStatus?.opponentName || 'Ola Nordmann';
+
+    const testAlert: InAppPushAlert = {
+      id: `test_${Date.now()}`,
+      matchId: queueStatus?.myMatch?.id || 'test_preview_match',
+      stage: 'two_matches_away',
+      title: `Gjør deg klar, ${currentUserName || 'spiller'}! 2 kamper igjen!`,
+      message: `Dette er et testvarsel: Det er nå 2 kamper igjen før din kamp i ${roundName} mot ${opponent}. Finn racketen og varm opp!`,
+      roundName,
+      tableNumber: null,
+      opponentName: opponent,
+      createdAt: Date.now(),
+    };
+    setActivePushAlert(testAlert);
+    playNotificationChime('two_matches');
+    triggerDeviceVibration([200, 100, 200]);
+    sendBrowserPushNotification('Testvarsel: 2 kamper igjen!', {
+      body: `Det er nå 2 kamper igjen før din kamp mot ${opponent}.`,
+    });
+  };
+
+  const handleEnableBrowserPush = async () => {
+    const perm = await requestBrowserNotificationPermission();
+    setBrowserPushPermission(perm);
+    if (perm === 'granted') {
+      sendBrowserPushNotification('Push-varsler aktivert! 🏓', {
+        body: 'Du vil motta varsel når det er 2 kamper igjen før du skal spille.',
+      });
+    }
+  };
 
   // Load state and poll periodically to keep all devices in sync
   const loadLatestState = async () => {
@@ -269,6 +387,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-lime-400 selection:text-zinc-950 artistic-pattern">
+      {/* Floating In-App Push Notification Banner */}
+      <InAppNotificationBanner
+        alert={activePushAlert}
+        onDismiss={() => setActivePushAlert(null)}
+        onGoToTournament={() => {
+          handleNavigate('tabletennis');
+        }}
+        onEnableBrowserPush={handleEnableBrowserPush}
+        browserPushState={browserPushPermission}
+      />
+
       <div>
         {/* Navigation Header */}
         <Header
@@ -328,6 +457,7 @@ export default function App() {
               }}
               activePersonId={activePersonId}
               activePerson={effectiveActivePerson}
+              onTriggerTestPush={handleTriggerTestPush}
             />
           )}
 
@@ -379,7 +509,7 @@ export default function App() {
               <strong className="text-zinc-100 block font-black uppercase tracking-wider text-sm">
                 Lillesand United 2026
               </strong>
-              <span className="text-zinc-400">Møglestuhallen, Lillesand • 17:00 – 22:45</span>
+              <span className="text-zinc-400">Møglestuhallen, Lillesand • 17:00 – 22:00</span>
             </div>
           </div>
 

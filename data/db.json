@@ -1,8 +1,2028 @@
 {
+  "popcorn": {
+    "totalCapacity": 100,
+    "bongs": [
+      {
+        "userName": null,
+        "clientToken": null,
+        "number": 1,
+        "status": "blank"
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "userName": null,
+        "number": 2
+      },
+      {
+        "number": 3,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "userName": null,
+        "number": 4
+      },
+      {
+        "number": 5,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "number": 6,
+        "userName": null,
+        "status": "blank"
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "number": 7,
+        "status": "blank"
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "status": "blank",
+        "number": 8
+      },
+      {
+        "number": 9,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "number": 10,
+        "userName": null
+      },
+      {
+        "number": 11,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "number": 12,
+        "userName": null,
+        "status": "blank",
+        "clientToken": null
+      },
+      {
+        "userName": null,
+        "clientToken": null,
+        "number": 13,
+        "status": "blank"
+      },
+      {
+        "number": 14,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "status": "blank",
+        "number": 15,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "number": 16,
+        "userName": null,
+        "clientToken": null,
+        "status": "blank"
+      },
+      {
+        "status": "blank",
+        "number": 17,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "clientToken": null,
+        "status": "blank",
+        "number": 18
+      },
+      {
+        "status": "blank",
+        "userName": null,
+        "number": 19,
+        "clientToken": null
+      },
+      {
+        "userName": null,
+        "clientToken": null,
+        "status": "blank",
+        "number": 20
+      },
+      {
+        "number": 21,
+        "userName": null,
+        "status": "blank",
+        "clientToken": null
+      },
+      {
+        "clientToken": null,
+        "number": 22,
+        "status": "blank",
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "number": 23,
+        "userName": null,
+        "status": "blank"
+      },
+      {
+        "number": 24,
+        "userName": null,
+        "clientToken": null,
+        "status": "blank"
+      },
+      {
+        "clientToken": null,
+        "number": 25,
+        "userName": null,
+        "status": "blank"
+      },
+      {
+        "number": 26,
+        "clientToken": null,
+        "status": "blank",
+        "userName": null
+      },
+      {
+        "number": 27,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "number": 28,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "number": 29,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "number": 30,
+        "clientToken": null,
+        "status": "blank",
+        "userName": null
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 31
+      },
+      {
+        "userName": null,
+        "number": 32,
+        "status": "blank",
+        "clientToken": null
+      },
+      {
+        "number": 33,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "number": 34,
+        "clientToken": null,
+        "userName": null,
+        "status": "blank"
+      },
+      {
+        "number": 35,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "status": "blank",
+        "number": 36,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "number": 37,
+        "clientToken": null,
+        "status": "blank"
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "number": 38,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "number": 39,
+        "status": "blank"
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 40
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 41
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 42
+      },
+      {
+        "number": 43,
+        "clientToken": null,
+        "status": "blank",
+        "userName": null
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "number": 44,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "number": 45,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "number": 46,
+        "clientToken": null
+      },
+      {
+        "status": "blank",
+        "number": 47,
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "status": "blank",
+        "number": 48,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "status": "blank",
+        "number": 49
+      },
+      {
+        "clientToken": null,
+        "number": 50,
+        "status": "blank",
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "number": 51,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "number": 52,
+        "status": "blank"
+      },
+      {
+        "status": "blank",
+        "userName": null,
+        "clientToken": null,
+        "number": 53
+      },
+      {
+        "status": "blank",
+        "number": 54,
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "clientToken": null,
+        "number": 55,
+        "userName": null,
+        "status": "blank"
+      },
+      {
+        "status": "blank",
+        "number": 56,
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "number": 57,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "clientToken": null,
+        "status": "blank",
+        "number": 58
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "number": 59,
+        "userName": null
+      },
+      {
+        "number": 60,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 61
+      },
+      {
+        "status": "blank",
+        "number": 62,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "number": 63,
+        "status": "blank"
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "userName": null,
+        "number": 64
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 65
+      },
+      {
+        "userName": null,
+        "number": 66,
+        "clientToken": null,
+        "status": "blank"
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "number": 67,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "clientToken": null,
+        "status": "blank",
+        "number": 68
+      },
+      {
+        "status": "blank",
+        "number": 69,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "number": 70,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "number": 71,
+        "clientToken": null,
+        "status": "blank"
+      },
+      {
+        "number": 72,
+        "status": "blank",
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "number": 73,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "number": 74,
+        "status": "blank"
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 75
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "userName": null,
+        "number": 76
+      },
+      {
+        "number": 77,
+        "userName": null,
+        "status": "blank",
+        "clientToken": null
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "number": 78,
+        "clientToken": null
+      },
+      {
+        "number": 79,
+        "status": "blank",
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "userName": null,
+        "number": 80,
+        "status": "blank",
+        "clientToken": null
+      },
+      {
+        "number": 81,
+        "clientToken": null,
+        "status": "blank",
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "number": 82,
+        "status": "blank"
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "number": 83,
+        "userName": null
+      },
+      {
+        "status": "blank",
+        "number": 84,
+        "userName": null,
+        "clientToken": null
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "number": 85,
+        "clientToken": null
+      },
+      {
+        "clientToken": null,
+        "status": "blank",
+        "number": 86,
+        "userName": null
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "number": 87,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "number": 88,
+        "clientToken": null
+      },
+      {
+        "status": "blank",
+        "number": 89,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "status": "blank",
+        "clientToken": null,
+        "number": 90,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "number": 91,
+        "userName": null,
+        "status": "blank"
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 92
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "status": "blank",
+        "number": 93
+      },
+      {
+        "clientToken": null,
+        "number": 94,
+        "userName": null,
+        "status": "blank"
+      },
+      {
+        "number": 95,
+        "userName": null,
+        "status": "blank",
+        "clientToken": null
+      },
+      {
+        "status": "blank",
+        "userName": null,
+        "number": 96,
+        "clientToken": null
+      },
+      {
+        "status": "blank",
+        "number": 97,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "clientToken": null,
+        "userName": null,
+        "status": "blank",
+        "number": 98
+      },
+      {
+        "status": "blank",
+        "number": 99,
+        "clientToken": null,
+        "userName": null
+      },
+      {
+        "userName": null,
+        "status": "blank",
+        "clientToken": null,
+        "number": 100
+      }
+    ]
+  },
+  "alphaInterests": [],
+  "updatedAt": "2026-09-10T09:06:59.670Z",
+  "persons": [
+    {
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T13:28:48.456Z",
+      "createdAt": "2026-09-09T13:28:48.456Z",
+      "firstName": "Oliver",
+      "displayId": "Oliver_1",
+      "nameNumber": 1,
+      "id": "3a9c0148-8d98-4cbb-b156-e51efd2f4474",
+      "anonymousToken": "tok_sim_cb2d08569f92"
+    },
+    {
+      "displayId": "Emma_1",
+      "firstName": "Emma",
+      "createdAt": "2026-09-09T13:29:48.456Z",
+      "updatedAt": "2026-09-09T13:29:48.456Z",
+      "anonymousToken": "tok_sim_94ce042f60ee",
+      "nameNumber": 1,
+      "isSimulated": true,
+      "id": "107a8ce2-25f3-4c47-a253-c268ab4201d8"
+    },
+    {
+      "updatedAt": "2026-09-09T13:30:48.456Z",
+      "id": "5adb89c9-d682-4728-9c1d-5bac7beb489f",
+      "firstName": "Sander",
+      "createdAt": "2026-09-09T13:30:48.456Z",
+      "displayId": "Sander_1",
+      "anonymousToken": "tok_sim_771393422131",
+      "isSimulated": true,
+      "nameNumber": 1
+    },
+    {
+      "updatedAt": "2026-09-09T13:31:48.456Z",
+      "createdAt": "2026-09-09T13:31:48.456Z",
+      "firstName": "Thea",
+      "displayId": "Thea_1",
+      "isSimulated": true,
+      "id": "b41b91db-c897-4bdd-ac39-2a5119d66a41",
+      "anonymousToken": "tok_sim_12be2cf921f6",
+      "nameNumber": 1
+    },
+    {
+      "anonymousToken": "tok_sim_feb250f0e413",
+      "id": "a1f8d2be-fdc0-4d21-ab61-30002431ca00",
+      "nameNumber": 1,
+      "displayId": "Lukas_1",
+      "createdAt": "2026-09-09T13:32:48.456Z",
+      "firstName": "Lukas",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T13:32:48.456Z"
+    },
+    {
+      "firstName": "Mathias",
+      "createdAt": "2026-09-09T13:33:48.456Z",
+      "anonymousToken": "tok_sim_bf111acd2643",
+      "updatedAt": "2026-09-09T13:33:48.456Z",
+      "nameNumber": 1,
+      "displayId": "Mathias_1",
+      "id": "0bc2a077-503f-4abc-b0f7-b363d9d6ad4b",
+      "isSimulated": true
+    },
+    {
+      "anonymousToken": "tok_sim_7bbcffaa7c31",
+      "firstName": "Nora",
+      "createdAt": "2026-09-09T13:34:48.456Z",
+      "updatedAt": "2026-09-09T13:34:48.456Z",
+      "id": "a5e337e1-9040-44a3-9e01-ccde4d616c93",
+      "displayId": "Nora_1",
+      "isSimulated": true,
+      "nameNumber": 1
+    },
+    {
+      "displayId": "Jakob_1",
+      "updatedAt": "2026-09-09T13:35:48.456Z",
+      "nameNumber": 1,
+      "id": "a4a4e296-cce4-4b42-9eed-5a32f6eb6ef4",
+      "anonymousToken": "tok_sim_ff6472759f2c",
+      "firstName": "Jakob",
+      "createdAt": "2026-09-09T13:35:48.456Z",
+      "isSimulated": true
+    },
+    {
+      "id": "92be6d92-81b3-44bd-9892-af72a9a1fdd4",
+      "displayId": "Leah_1",
+      "nameNumber": 1,
+      "anonymousToken": "tok_sim_c18124adcf51",
+      "firstName": "Leah",
+      "createdAt": "2026-09-09T13:36:48.456Z",
+      "updatedAt": "2026-09-09T13:36:48.456Z",
+      "isSimulated": true
+    },
+    {
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_db17df959feb",
+      "nameNumber": 1,
+      "displayId": "William_1",
+      "createdAt": "2026-09-09T13:37:48.456Z",
+      "firstName": "William",
+      "id": "652b21cc-05ec-4f07-a3cd-0b782ebfd34d",
+      "updatedAt": "2026-09-09T13:37:48.456Z"
+    },
+    {
+      "displayId": "Sara_1",
+      "id": "141995dd-2bea-444e-92ea-6d8c08924d59",
+      "firstName": "Sara",
+      "createdAt": "2026-09-09T13:38:48.456Z",
+      "nameNumber": 1,
+      "updatedAt": "2026-09-09T13:38:48.456Z",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_df742f59d8ac"
+    },
+    {
+      "id": "68985822-fa04-4cea-af51-f341242b1390",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T13:39:48.456Z",
+      "firstName": "Filip",
+      "anonymousToken": "tok_sim_416d3da6b781",
+      "updatedAt": "2026-09-09T13:39:48.456Z",
+      "nameNumber": 1,
+      "displayId": "Filip_1"
+    },
+    {
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_bd0a4e718fa7",
+      "updatedAt": "2026-09-09T13:40:48.456Z",
+      "createdAt": "2026-09-09T13:40:48.456Z",
+      "nameNumber": 1,
+      "id": "674d42a6-3180-4eb3-8923-18214a3d2a60",
+      "firstName": "Emilie",
+      "displayId": "Emilie_1"
+    },
+    {
+      "id": "a585f2b8-2571-4d17-baa8-5e18456936f0",
+      "isSimulated": true,
+      "nameNumber": 1,
+      "updatedAt": "2026-09-09T13:41:48.456Z",
+      "createdAt": "2026-09-09T13:41:48.456Z",
+      "firstName": "Henrik",
+      "displayId": "Henrik_1",
+      "anonymousToken": "tok_sim_ea75b1ef8711"
+    },
+    {
+      "anonymousToken": "tok_sim_ca03ec52c317",
+      "id": "584262a3-9580-49ca-a0dc-997b977c2424",
+      "isSimulated": true,
+      "nameNumber": 1,
+      "displayId": "Maja_1",
+      "firstName": "Maja",
+      "createdAt": "2026-09-09T13:42:48.456Z",
+      "updatedAt": "2026-09-09T13:42:48.456Z"
+    },
+    {
+      "updatedAt": "2026-09-09T13:43:48.456Z",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T13:43:48.456Z",
+      "firstName": "Aksel",
+      "id": "8aff1f4e-1bfa-4a0f-a428-a91d58fa49ab",
+      "anonymousToken": "tok_sim_48175a1530d5",
+      "displayId": "Aksel_1",
+      "nameNumber": 1
+    },
+    {
+      "anonymousToken": "tok_sim_3377b3c891aa",
+      "id": "ba779610-18eb-4f21-8816-bd67f395a478",
+      "displayId": "Oliver_2",
+      "nameNumber": 2,
+      "firstName": "Oliver",
+      "createdAt": "2026-09-09T13:35:42.416Z",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T13:35:42.416Z"
+    },
+    {
+      "updatedAt": "2026-09-09T13:36:42.416Z",
+      "firstName": "Emma",
+      "createdAt": "2026-09-09T13:36:42.416Z",
+      "displayId": "Emma_2",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_ad26482e9afb",
+      "id": "abaa2e98-8bdf-49b1-9058-23c5089bbfbe",
+      "nameNumber": 2
+    },
+    {
+      "updatedAt": "2026-09-09T13:37:42.416Z",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T13:37:42.416Z",
+      "firstName": "Sander",
+      "displayId": "Sander_2",
+      "nameNumber": 2,
+      "anonymousToken": "tok_sim_51dbd95a79e9",
+      "id": "3fa39b5b-9070-4b24-9e05-785f4362b898"
+    },
+    {
+      "updatedAt": "2026-09-09T13:38:42.416Z",
+      "firstName": "Thea",
+      "createdAt": "2026-09-09T13:38:42.416Z",
+      "id": "a168dae7-9354-441d-80e3-0046bcb84104",
+      "displayId": "Thea_2",
+      "nameNumber": 2,
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_054d1ad6277d"
+    },
+    {
+      "displayId": "Lukas_2",
+      "anonymousToken": "tok_sim_74a63631447d",
+      "nameNumber": 2,
+      "updatedAt": "2026-09-09T13:39:42.416Z",
+      "id": "88189360-6fd9-4ebe-9f35-ae87f31a9c0f",
+      "createdAt": "2026-09-09T13:39:42.416Z",
+      "firstName": "Lukas",
+      "isSimulated": true
+    },
+    {
+      "firstName": "Mathias",
+      "createdAt": "2026-09-09T13:40:42.416Z",
+      "updatedAt": "2026-09-09T13:40:42.416Z",
+      "id": "131fbe82-f73f-425b-b6e6-9fb833a6e96a",
+      "displayId": "Mathias_2",
+      "anonymousToken": "tok_sim_23535b4dc74e",
+      "nameNumber": 2,
+      "isSimulated": true
+    },
+    {
+      "displayId": "Nora_2",
+      "anonymousToken": "tok_sim_fb5c4bd091d6",
+      "createdAt": "2026-09-09T13:41:42.416Z",
+      "firstName": "Nora",
+      "updatedAt": "2026-09-09T13:41:42.416Z",
+      "id": "37e68d9c-609f-408c-a57f-b68cb09a8aa0",
+      "isSimulated": true,
+      "nameNumber": 2
+    },
+    {
+      "nameNumber": 2,
+      "isSimulated": true,
+      "id": "917e0864-3d85-406d-a999-d964959ad6da",
+      "updatedAt": "2026-09-09T13:42:42.416Z",
+      "firstName": "Jakob",
+      "createdAt": "2026-09-09T13:42:42.416Z",
+      "displayId": "Jakob_2",
+      "anonymousToken": "tok_sim_9779cdc4f059"
+    },
+    {
+      "anonymousToken": "tok_sim_4d7dc5084ad6",
+      "id": "f8d5d63e-bcaf-4d70-8595-e437fce09995",
+      "nameNumber": 2,
+      "isSimulated": true,
+      "createdAt": "2026-09-09T13:43:42.416Z",
+      "firstName": "Leah",
+      "updatedAt": "2026-09-09T13:43:42.416Z",
+      "displayId": "Leah_2"
+    },
+    {
+      "anonymousToken": "tok_sim_ec8056fa118f",
+      "displayId": "William_2",
+      "nameNumber": 2,
+      "id": "2fb0b447-3597-4196-a409-46d676a7616b",
+      "updatedAt": "2026-09-09T13:44:42.416Z",
+      "createdAt": "2026-09-09T13:44:42.416Z",
+      "firstName": "William",
+      "isSimulated": true
+    },
+    {
+      "createdAt": "2026-09-09T13:45:42.416Z",
+      "isSimulated": true,
+      "firstName": "Sara",
+      "updatedAt": "2026-09-09T13:45:42.416Z",
+      "displayId": "Sara_2",
+      "nameNumber": 2,
+      "anonymousToken": "tok_sim_6c37215216c5",
+      "id": "b2957b60-54ff-4ac3-a84f-76c9a97428c9"
+    },
+    {
+      "createdAt": "2026-09-09T13:46:42.416Z",
+      "firstName": "Filip",
+      "updatedAt": "2026-09-09T13:46:42.416Z",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_2bb955bad8dc",
+      "displayId": "Filip_2",
+      "id": "09a44647-40c0-4548-a514-4032dddd8613",
+      "nameNumber": 2
+    },
+    {
+      "firstName": "Emilie",
+      "id": "e4ab784b-06b1-4dc4-a5cb-8bd40f35f7cc",
+      "createdAt": "2026-09-09T13:47:42.416Z",
+      "updatedAt": "2026-09-09T13:47:42.416Z",
+      "anonymousToken": "tok_sim_c1b7a5616d7a",
+      "displayId": "Emilie_2",
+      "isSimulated": true,
+      "nameNumber": 2
+    },
+    {
+      "updatedAt": "2026-09-09T13:48:42.416Z",
+      "nameNumber": 2,
+      "firstName": "Henrik",
+      "createdAt": "2026-09-09T13:48:42.416Z",
+      "anonymousToken": "tok_sim_47057cc17f44",
+      "displayId": "Henrik_2",
+      "isSimulated": true,
+      "id": "2f76e638-6a0e-4952-b33c-b2b7669bfe59"
+    },
+    {
+      "updatedAt": "2026-09-09T13:49:42.416Z",
+      "firstName": "Maja",
+      "createdAt": "2026-09-09T13:49:42.416Z",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_712bd09a49a0",
+      "displayId": "Maja_2",
+      "nameNumber": 2,
+      "id": "1cd93818-edb8-4621-8768-857355bf9a0e"
+    },
+    {
+      "displayId": "Aksel_2",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_c50f9eda0af7",
+      "id": "871a3e30-7642-4377-9aff-14b8ae620e79",
+      "updatedAt": "2026-09-09T13:50:42.416Z",
+      "createdAt": "2026-09-09T13:50:42.416Z",
+      "firstName": "Aksel",
+      "nameNumber": 2
+    },
+    {
+      "nameNumber": 3,
+      "id": "fe00068d-67a2-4644-b499-bfeeb368b273",
+      "firstName": "Oliver",
+      "createdAt": "2026-09-09T15:07:42.508Z",
+      "anonymousToken": "tok_sim_7cfe458240ce",
+      "updatedAt": "2026-09-09T15:07:42.508Z",
+      "isSimulated": true,
+      "displayId": "Oliver_3"
+    },
+    {
+      "firstName": "Emma",
+      "createdAt": "2026-09-09T15:08:42.508Z",
+      "anonymousToken": "tok_sim_1c71c8fe9376",
+      "updatedAt": "2026-09-09T15:08:42.508Z",
+      "isSimulated": true,
+      "displayId": "Emma_3",
+      "nameNumber": 3,
+      "id": "5c7312bc-37c5-4bee-8cdb-39e53308713e"
+    },
+    {
+      "anonymousToken": "tok_sim_ff04d46c970c",
+      "isSimulated": true,
+      "nameNumber": 3,
+      "id": "5af0e453-219a-45da-8fab-d59f3cdfc265",
+      "createdAt": "2026-09-09T15:09:42.508Z",
+      "firstName": "Sander",
+      "updatedAt": "2026-09-09T15:09:42.508Z",
+      "displayId": "Sander_3"
+    },
+    {
+      "firstName": "Thea",
+      "createdAt": "2026-09-09T15:10:42.508Z",
+      "updatedAt": "2026-09-09T15:10:42.508Z",
+      "anonymousToken": "tok_sim_996d63a45289",
+      "isSimulated": true,
+      "displayId": "Thea_3",
+      "nameNumber": 3,
+      "id": "bcd44338-6ddd-4466-82ea-309820fccdf2"
+    },
+    {
+      "displayId": "Lukas_3",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:11:42.508Z",
+      "nameNumber": 3,
+      "createdAt": "2026-09-09T15:11:42.508Z",
+      "firstName": "Lukas",
+      "id": "e0f17eee-60c5-42b4-a9b4-874314fb7205",
+      "anonymousToken": "tok_sim_42a4447962e4"
+    },
+    {
+      "updatedAt": "2026-09-09T15:12:42.508Z",
+      "firstName": "Mathias",
+      "createdAt": "2026-09-09T15:12:42.508Z",
+      "anonymousToken": "tok_sim_fc065e14910a",
+      "displayId": "Mathias_3",
+      "id": "d77f7686-1aa9-474e-bc7a-72e4877119bc",
+      "isSimulated": true,
+      "nameNumber": 3
+    },
+    {
+      "isSimulated": true,
+      "displayId": "Nora_3",
+      "updatedAt": "2026-09-09T15:13:42.508Z",
+      "firstName": "Nora",
+      "createdAt": "2026-09-09T15:13:42.508Z",
+      "anonymousToken": "tok_sim_d93c3b86bc0e",
+      "id": "0a84765a-c64a-4804-b48e-60ce74a2d70f",
+      "nameNumber": 3
+    },
+    {
+      "isSimulated": true,
+      "displayId": "Jakob_3",
+      "updatedAt": "2026-09-09T15:14:42.508Z",
+      "anonymousToken": "tok_sim_401232deb697",
+      "nameNumber": 3,
+      "createdAt": "2026-09-09T15:14:42.508Z",
+      "firstName": "Jakob",
+      "id": "6b077345-1238-4798-9c85-935716fc489b"
+    },
+    {
+      "id": "64a594d0-3511-4322-8a7a-4399549c417a",
+      "displayId": "Leah_3",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:15:42.508Z",
+      "firstName": "Leah",
+      "updatedAt": "2026-09-09T15:15:42.508Z",
+      "nameNumber": 3,
+      "anonymousToken": "tok_sim_e1d6639df086"
+    },
+    {
+      "nameNumber": 3,
+      "id": "278aee46-09ee-4100-a610-0c4f03077e5d",
+      "displayId": "William_3",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_5c11c9200276",
+      "updatedAt": "2026-09-09T15:16:42.508Z",
+      "firstName": "William",
+      "createdAt": "2026-09-09T15:16:42.508Z"
+    },
+    {
+      "updatedAt": "2026-09-09T15:17:42.508Z",
+      "createdAt": "2026-09-09T15:17:42.508Z",
+      "firstName": "Sara",
+      "displayId": "Sara_3",
+      "anonymousToken": "tok_sim_b06caf2ba916",
+      "nameNumber": 3,
+      "id": "15641b9f-7233-4316-86ea-38803cc2aa4b",
+      "isSimulated": true
+    },
+    {
+      "anonymousToken": "tok_sim_ce8dac19cf59",
+      "id": "b1c0ad9f-6a2f-42da-af81-463f5021571c",
+      "displayId": "Filip_3",
+      "nameNumber": 3,
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:18:42.508Z",
+      "createdAt": "2026-09-09T15:18:42.508Z",
+      "firstName": "Filip"
+    },
+    {
+      "anonymousToken": "tok_sim_e037a6819856",
+      "updatedAt": "2026-09-09T15:19:42.508Z",
+      "id": "b720434d-a823-4ef1-8356-371dfc173cfa",
+      "createdAt": "2026-09-09T15:19:42.508Z",
+      "firstName": "Emilie",
+      "displayId": "Emilie_3",
+      "nameNumber": 3,
+      "isSimulated": true
+    },
+    {
+      "anonymousToken": "tok_sim_cbac4c0ef374",
+      "displayId": "Henrik_3",
+      "createdAt": "2026-09-09T15:20:42.508Z",
+      "firstName": "Henrik",
+      "updatedAt": "2026-09-09T15:20:42.508Z",
+      "id": "a3832e96-030a-4863-aa0e-4389739d07dd",
+      "nameNumber": 3,
+      "isSimulated": true
+    },
+    {
+      "updatedAt": "2026-09-09T15:21:42.508Z",
+      "createdAt": "2026-09-09T15:21:42.508Z",
+      "firstName": "Maja",
+      "id": "08533217-5a99-46ed-a1e4-602e80dc4742",
+      "displayId": "Maja_3",
+      "anonymousToken": "tok_sim_3d175253e7fc",
+      "isSimulated": true,
+      "nameNumber": 3
+    },
+    {
+      "anonymousToken": "tok_sim_bf101b310f2e",
+      "displayId": "Aksel_3",
+      "createdAt": "2026-09-09T15:22:42.508Z",
+      "firstName": "Aksel",
+      "updatedAt": "2026-09-09T15:22:42.508Z",
+      "isSimulated": true,
+      "nameNumber": 3,
+      "id": "2dd0bb38-fa12-446a-ad5c-faf857bcd7a1"
+    },
+    {
+      "nameNumber": 4,
+      "updatedAt": "2026-09-09T15:08:49.891Z",
+      "createdAt": "2026-09-09T15:08:49.891Z",
+      "firstName": "Oliver",
+      "anonymousToken": "tok_sim_edbcf63b4dfa",
+      "isSimulated": true,
+      "displayId": "Oliver_4",
+      "id": "3ea2d080-0340-4b95-88d9-4ef4e5c9e70f"
+    },
+    {
+      "updatedAt": "2026-09-09T15:09:49.891Z",
+      "isSimulated": true,
+      "firstName": "Emma",
+      "createdAt": "2026-09-09T15:09:49.891Z",
+      "anonymousToken": "tok_sim_6e0d84e8ea76",
+      "displayId": "Emma_4",
+      "nameNumber": 4,
+      "id": "e2dd363f-3f2a-4bce-b637-87dc7b3b4b44"
+    },
+    {
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_8580c3885e19",
+      "displayId": "Sander_4",
+      "nameNumber": 4,
+      "id": "06d9223b-6d7d-42a3-9455-f9f61f294845",
+      "updatedAt": "2026-09-09T15:10:49.891Z",
+      "firstName": "Sander",
+      "createdAt": "2026-09-09T15:10:49.891Z"
+    },
+    {
+      "id": "1c04d477-6f49-4178-9049-52cc9eee8e80",
+      "displayId": "Thea_4",
+      "createdAt": "2026-09-09T15:11:49.891Z",
+      "firstName": "Thea",
+      "anonymousToken": "tok_sim_aaf5024f477c",
+      "updatedAt": "2026-09-09T15:11:49.891Z",
+      "nameNumber": 4,
+      "isSimulated": true
+    },
+    {
+      "id": "89b7bca5-f438-4138-8c9d-17bffa2a2e29",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:12:49.891Z",
+      "anonymousToken": "tok_sim_b41bf6ff358f",
+      "firstName": "Lukas",
+      "updatedAt": "2026-09-09T15:12:49.891Z",
+      "nameNumber": 4,
+      "displayId": "Lukas_4"
+    },
+    {
+      "id": "0b948627-2332-4aa7-8a22-71b48780b7ec",
+      "updatedAt": "2026-09-09T15:13:49.891Z",
+      "firstName": "Mathias",
+      "createdAt": "2026-09-09T15:13:49.891Z",
+      "displayId": "Mathias_4",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_1a50421ecbab",
+      "nameNumber": 4
+    },
+    {
+      "id": "1fc77e82-5fa3-4da4-8765-dc8244fcaa8a",
+      "anonymousToken": "tok_sim_d23201f1fa0f",
+      "updatedAt": "2026-09-09T15:14:49.891Z",
+      "firstName": "Nora",
+      "createdAt": "2026-09-09T15:14:49.891Z",
+      "nameNumber": 4,
+      "displayId": "Nora_4",
+      "isSimulated": true
+    },
+    {
+      "nameNumber": 4,
+      "anonymousToken": "tok_sim_e5534676d547",
+      "createdAt": "2026-09-09T15:15:49.891Z",
+      "id": "38a34bf3-c8fb-4fa3-afeb-1f66bc19f237",
+      "firstName": "Jakob",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:15:49.891Z",
+      "displayId": "Jakob_4"
+    },
+    {
+      "anonymousToken": "tok_sim_080234cc4ba2",
+      "id": "ee75b51c-37c1-474f-bbe1-ae5b345d36a4",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:16:49.891Z",
+      "firstName": "Leah",
+      "updatedAt": "2026-09-09T15:16:49.891Z",
+      "nameNumber": 4,
+      "displayId": "Leah_4"
+    },
+    {
+      "anonymousToken": "tok_sim_6f11864c81ea",
+      "id": "08aa8142-f7ab-4c11-993b-9154c4dc0e22",
+      "nameNumber": 4,
+      "createdAt": "2026-09-09T15:17:49.891Z",
+      "firstName": "William",
+      "updatedAt": "2026-09-09T15:17:49.891Z",
+      "isSimulated": true,
+      "displayId": "William_4"
+    },
+    {
+      "nameNumber": 4,
+      "anonymousToken": "tok_sim_d2d30fec928e",
+      "isSimulated": true,
+      "displayId": "Sara_4",
+      "id": "394455c8-2933-4d95-bcec-e01591debb7c",
+      "firstName": "Sara",
+      "createdAt": "2026-09-09T15:18:49.891Z",
+      "updatedAt": "2026-09-09T15:18:49.891Z"
+    },
+    {
+      "anonymousToken": "tok_sim_58d39365d1da",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:19:49.891Z",
+      "firstName": "Filip",
+      "createdAt": "2026-09-09T15:19:49.891Z",
+      "nameNumber": 4,
+      "id": "1b1e089e-3ccd-4ba4-9705-b53dd901fcea",
+      "displayId": "Filip_4"
+    },
+    {
+      "id": "27a4d86b-f70b-4235-81de-e88e69a2bc4d",
+      "anonymousToken": "tok_sim_0b2561691be9",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:20:49.891Z",
+      "firstName": "Emilie",
+      "createdAt": "2026-09-09T15:20:49.891Z",
+      "nameNumber": 4,
+      "displayId": "Emilie_4"
+    },
+    {
+      "firstName": "Henrik",
+      "createdAt": "2026-09-09T15:21:49.891Z",
+      "id": "0b9be03c-7d54-4c19-950d-abb50f139725",
+      "updatedAt": "2026-09-09T15:21:49.891Z",
+      "isSimulated": true,
+      "displayId": "Henrik_4",
+      "anonymousToken": "tok_sim_dc6e44407d07",
+      "nameNumber": 4
+    },
+    {
+      "firstName": "Maja",
+      "createdAt": "2026-09-09T15:22:49.891Z",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_57b4a6195f6d",
+      "updatedAt": "2026-09-09T15:22:49.891Z",
+      "displayId": "Maja_4",
+      "id": "ec0c798d-cdbc-493e-b1a9-46cefdbd3941",
+      "nameNumber": 4
+    },
+    {
+      "firstName": "Aksel",
+      "createdAt": "2026-09-09T15:23:49.891Z",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:23:49.891Z",
+      "id": "0868ffcd-22ae-4034-b6b7-94418ffac2dc",
+      "nameNumber": 4,
+      "displayId": "Aksel_4",
+      "anonymousToken": "tok_sim_04a74f3a23a5"
+    },
+    {
+      "id": "f23ae8f0-e842-4a31-bbbe-9f211dabae38",
+      "nameNumber": 5,
+      "firstName": "Oliver",
+      "createdAt": "2026-09-09T15:11:38.125Z",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:11:38.125Z",
+      "anonymousToken": "tok_sim_94d0968fe90f",
+      "displayId": "Oliver_5"
+    },
+    {
+      "firstName": "Emma",
+      "createdAt": "2026-09-09T15:12:38.125Z",
+      "updatedAt": "2026-09-09T15:12:38.125Z",
+      "displayId": "Emma_5",
+      "isSimulated": true,
+      "id": "b56389d0-b56b-4d2e-8b14-281fc8948b47",
+      "anonymousToken": "tok_sim_30a4c38f1002",
+      "nameNumber": 5
+    },
+    {
+      "isSimulated": true,
+      "id": "beb23f88-ca84-4cae-946b-c4ac77f37729",
+      "nameNumber": 5,
+      "displayId": "Sander_5",
+      "firstName": "Sander",
+      "createdAt": "2026-09-09T15:13:38.125Z",
+      "anonymousToken": "tok_sim_b28e4afd7f97",
+      "updatedAt": "2026-09-09T15:13:38.125Z"
+    },
+    {
+      "isSimulated": true,
+      "nameNumber": 5,
+      "id": "efad98e3-d41f-4672-9874-09b73f58704d",
+      "displayId": "Thea_5",
+      "createdAt": "2026-09-09T15:14:38.125Z",
+      "firstName": "Thea",
+      "updatedAt": "2026-09-09T15:14:38.125Z",
+      "anonymousToken": "tok_sim_ec6223d90ef7"
+    },
+    {
+      "updatedAt": "2026-09-09T15:15:38.125Z",
+      "firstName": "Lukas",
+      "nameNumber": 5,
+      "createdAt": "2026-09-09T15:15:38.125Z",
+      "displayId": "Lukas_5",
+      "isSimulated": true,
+      "id": "ffe1e4b3-bb9e-44b2-bc86-920ffce7cc82",
+      "anonymousToken": "tok_sim_61cb65598deb"
+    },
+    {
+      "firstName": "Mathias",
+      "createdAt": "2026-09-09T15:16:38.125Z",
+      "updatedAt": "2026-09-09T15:16:38.125Z",
+      "displayId": "Mathias_5",
+      "id": "7ab6f671-5346-4370-8b54-2e657c0bb4b7",
+      "anonymousToken": "tok_sim_63ee31c01e60",
+      "isSimulated": true,
+      "nameNumber": 5
+    },
+    {
+      "id": "d995291c-b179-432d-997b-d64d38f985f9",
+      "anonymousToken": "tok_sim_34ac354e7875",
+      "displayId": "Nora_5",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:17:38.125Z",
+      "nameNumber": 5,
+      "createdAt": "2026-09-09T15:17:38.125Z",
+      "firstName": "Nora"
+    },
+    {
+      "displayId": "Jakob_5",
+      "updatedAt": "2026-09-09T15:18:38.125Z",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:18:38.125Z",
+      "firstName": "Jakob",
+      "anonymousToken": "tok_sim_a7467310c902",
+      "nameNumber": 5,
+      "id": "d37bdab6-01ee-4e21-8ff6-167dc00657c4"
+    },
+    {
+      "nameNumber": 5,
+      "anonymousToken": "tok_sim_6e62c4f929f1",
+      "displayId": "Leah_5",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:19:38.125Z",
+      "id": "3246a667-b926-4598-b7a1-b14b2feb28d1",
+      "firstName": "Leah",
+      "createdAt": "2026-09-09T15:19:38.125Z"
+    },
+    {
+      "displayId": "William_5",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:20:38.125Z",
+      "firstName": "William",
+      "createdAt": "2026-09-09T15:20:38.125Z",
+      "id": "3e3fee38-f897-45eb-a00c-ad9ff686a745",
+      "anonymousToken": "tok_sim_a15da79f741b",
+      "nameNumber": 5
+    },
+    {
+      "createdAt": "2026-09-09T15:21:38.125Z",
+      "firstName": "Sara",
+      "updatedAt": "2026-09-09T15:21:38.125Z",
+      "nameNumber": 5,
+      "displayId": "Sara_5",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_ded499be43b2",
+      "id": "8e5b0bd7-b854-4e14-8bfb-98c5925803f0"
+    },
+    {
+      "id": "f80c03d1-151a-4a3e-af7f-b8471c1c1c82",
+      "anonymousToken": "tok_sim_0455c1b0b962",
+      "updatedAt": "2026-09-09T15:22:38.125Z",
+      "firstName": "Filip",
+      "createdAt": "2026-09-09T15:22:38.125Z",
+      "nameNumber": 5,
+      "displayId": "Filip_5",
+      "isSimulated": true
+    },
+    {
+      "firstName": "Emilie",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:23:38.125Z",
+      "updatedAt": "2026-09-09T15:23:38.125Z",
+      "displayId": "Emilie_5",
+      "nameNumber": 5,
+      "id": "5f41a1f4-1330-48a0-b6e7-6843bef7c038",
+      "anonymousToken": "tok_sim_bb2f4e87c1c4"
+    },
+    {
+      "anonymousToken": "tok_sim_4784646fb2c7",
+      "nameNumber": 5,
+      "displayId": "Henrik_5",
+      "firstName": "Henrik",
+      "createdAt": "2026-09-09T15:24:38.125Z",
+      "id": "5ce752ac-9a67-445d-91a1-47fe688a225c",
+      "updatedAt": "2026-09-09T15:24:38.125Z",
+      "isSimulated": true
+    },
+    {
+      "nameNumber": 5,
+      "id": "c7d12d33-9b96-4762-9307-97b6ad6c46a1",
+      "isSimulated": true,
+      "displayId": "Maja_5",
+      "anonymousToken": "tok_sim_1a74946b68a0",
+      "createdAt": "2026-09-09T15:25:38.125Z",
+      "firstName": "Maja",
+      "updatedAt": "2026-09-09T15:25:38.125Z"
+    },
+    {
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:26:38.125Z",
+      "firstName": "Aksel",
+      "createdAt": "2026-09-09T15:26:38.125Z",
+      "id": "1c56ece6-8f95-4bf3-a1b2-3ef56ed44e6e",
+      "displayId": "Aksel_5",
+      "nameNumber": 5,
+      "anonymousToken": "tok_sim_3826fc3fed40"
+    },
+    {
+      "isSimulated": true,
+      "displayId": "Oliver_6",
+      "nameNumber": 6,
+      "createdAt": "2026-09-09T15:27:01.101Z",
+      "firstName": "Oliver",
+      "updatedAt": "2026-09-09T15:27:01.101Z",
+      "anonymousToken": "tok_sim_03490ae02c56",
+      "id": "b4a6274a-1f43-4d1c-be7c-0f5403f60ac8"
+    },
+    {
+      "id": "1abac11e-b233-4d98-9aa1-6dc2a814bcdb",
+      "anonymousToken": "tok_sim_c1d4895c523c",
+      "nameNumber": 6,
+      "displayId": "Emma_6",
+      "updatedAt": "2026-09-09T15:28:01.101Z",
+      "firstName": "Emma",
+      "createdAt": "2026-09-09T15:28:01.101Z",
+      "isSimulated": true
+    },
+    {
+      "isSimulated": true,
+      "id": "7c6133f2-7f14-4ef0-aa54-975caac9570a",
+      "displayId": "Sander_6",
+      "anonymousToken": "tok_sim_fc7b79370279",
+      "nameNumber": 6,
+      "updatedAt": "2026-09-09T15:29:01.101Z",
+      "createdAt": "2026-09-09T15:29:01.101Z",
+      "firstName": "Sander"
+    },
+    {
+      "id": "8aa4c953-927d-468e-b441-04befa37cbb7",
+      "nameNumber": 6,
+      "anonymousToken": "tok_sim_8cb3b7b43304",
+      "displayId": "Thea_6",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:30:01.101Z",
+      "firstName": "Thea",
+      "updatedAt": "2026-09-09T15:30:01.101Z"
+    },
+    {
+      "nameNumber": 6,
+      "id": "a29963cc-7862-4c8b-bfe1-61465d644851",
+      "anonymousToken": "tok_sim_cf8de6d84d6a",
+      "updatedAt": "2026-09-09T15:31:01.101Z",
+      "createdAt": "2026-09-09T15:31:01.101Z",
+      "firstName": "Lukas",
+      "displayId": "Lukas_6",
+      "isSimulated": true
+    },
+    {
+      "isSimulated": true,
+      "nameNumber": 6,
+      "anonymousToken": "tok_sim_a0db3d1a878c",
+      "displayId": "Mathias_6",
+      "id": "ff60e190-141f-4c3c-be1b-481bb75089a8",
+      "updatedAt": "2026-09-09T15:32:01.101Z",
+      "createdAt": "2026-09-09T15:32:01.101Z",
+      "firstName": "Mathias"
+    },
+    {
+      "createdAt": "2026-09-09T15:33:01.101Z",
+      "firstName": "Nora",
+      "updatedAt": "2026-09-09T15:33:01.101Z",
+      "id": "5df614f9-2fe8-4293-9c7a-6e671b0e04bf",
+      "isSimulated": true,
+      "displayId": "Nora_6",
+      "anonymousToken": "tok_sim_3ead1e26e070",
+      "nameNumber": 6
+    },
+    {
+      "nameNumber": 6,
+      "createdAt": "2026-09-09T15:34:01.101Z",
+      "firstName": "Jakob",
+      "id": "a045b8a7-630c-4188-8982-54914385bad0",
+      "updatedAt": "2026-09-09T15:34:01.101Z",
+      "isSimulated": true,
+      "displayId": "Jakob_6",
+      "anonymousToken": "tok_sim_24bbeeb48506"
+    },
+    {
+      "updatedAt": "2026-09-09T15:35:01.101Z",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:35:01.101Z",
+      "firstName": "Leah",
+      "displayId": "Leah_6",
+      "anonymousToken": "tok_sim_9e26d2b2457a",
+      "id": "48551696-cda7-4845-b0d8-e993e8aba094",
+      "nameNumber": 6
+    },
+    {
+      "id": "9b0f9387-eab4-48b1-ae66-fd7605e98f22",
+      "displayId": "William_6",
+      "firstName": "William",
+      "createdAt": "2026-09-09T15:36:01.101Z",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:36:01.101Z",
+      "nameNumber": 6,
+      "anonymousToken": "tok_sim_b2e430e3c692"
+    },
+    {
+      "anonymousToken": "tok_sim_58b8cf1fdc0e",
+      "displayId": "Sara_6",
+      "updatedAt": "2026-09-09T15:37:01.101Z",
+      "isSimulated": true,
+      "createdAt": "2026-09-09T15:37:01.101Z",
+      "firstName": "Sara",
+      "id": "8ed60c50-7e68-4779-bed2-f7408f76f548",
+      "nameNumber": 6
+    },
+    {
+      "firstName": "Filip",
+      "createdAt": "2026-09-09T15:38:01.101Z",
+      "updatedAt": "2026-09-09T15:38:01.101Z",
+      "isSimulated": true,
+      "displayId": "Filip_6",
+      "id": "950f1012-ed94-4652-8fc7-4e5a858a46e0",
+      "anonymousToken": "tok_sim_e1529b5d6454",
+      "nameNumber": 6
+    },
+    {
+      "displayId": "Emilie_6",
+      "anonymousToken": "tok_sim_6286c1638640",
+      "createdAt": "2026-09-09T15:39:01.101Z",
+      "firstName": "Emilie",
+      "updatedAt": "2026-09-09T15:39:01.101Z",
+      "isSimulated": true,
+      "id": "cc59247d-7767-42aa-93f2-d0b1edf49fd4",
+      "nameNumber": 6
+    },
+    {
+      "displayId": "Henrik_6",
+      "firstName": "Henrik",
+      "createdAt": "2026-09-09T15:40:01.101Z",
+      "anonymousToken": "tok_sim_a7ad6d2941e3",
+      "updatedAt": "2026-09-09T15:40:01.101Z",
+      "id": "6cc5a9a6-e9bb-4e8b-b35c-0cfd21aa0a53",
+      "nameNumber": 6,
+      "isSimulated": true
+    },
+    {
+      "isSimulated": true,
+      "firstName": "Maja",
+      "createdAt": "2026-09-09T15:41:01.101Z",
+      "anonymousToken": "tok_sim_2de0d87da3e4",
+      "updatedAt": "2026-09-09T15:41:01.101Z",
+      "id": "4c7b84d3-f719-472d-bb83-c71727c409e2",
+      "nameNumber": 6,
+      "displayId": "Maja_6"
+    },
+    {
+      "anonymousToken": "tok_sim_e8ead84ba217",
+      "displayId": "Aksel_6",
+      "createdAt": "2026-09-09T15:42:01.101Z",
+      "firstName": "Aksel",
+      "nameNumber": 6,
+      "updatedAt": "2026-09-09T15:42:01.101Z",
+      "isSimulated": true,
+      "id": "a2445b98-344a-4af6-8a36-88bc84a20dc3"
+    },
+    {
+      "displayId": "Oliver_7",
+      "firstName": "Oliver",
+      "createdAt": "2026-09-09T15:46:25.564Z",
+      "nameNumber": 7,
+      "id": "444a5bef-a9c1-456e-859c-174d4a2552e0",
+      "updatedAt": "2026-09-09T15:46:25.564Z",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_d19f43a59080"
+    },
+    {
+      "nameNumber": 7,
+      "isSimulated": true,
+      "id": "2eb3d587-98bd-416a-ab38-beb32205c640",
+      "anonymousToken": "tok_sim_f6592dadd9c2",
+      "displayId": "Emma_7",
+      "updatedAt": "2026-09-09T15:47:25.564Z",
+      "createdAt": "2026-09-09T15:47:25.564Z",
+      "firstName": "Emma"
+    },
+    {
+      "isSimulated": true,
+      "firstName": "Sander",
+      "createdAt": "2026-09-09T15:48:25.564Z",
+      "updatedAt": "2026-09-09T15:48:25.564Z",
+      "displayId": "Sander_7",
+      "nameNumber": 7,
+      "id": "13997769-d61b-48f6-8ee6-88e899e8b6b0",
+      "anonymousToken": "tok_sim_0909f162dfa1"
+    },
+    {
+      "id": "744544d9-7b46-4247-8927-30ca8967d6f4",
+      "createdAt": "2026-09-09T15:49:25.564Z",
+      "firstName": "Thea",
+      "updatedAt": "2026-09-09T15:49:25.564Z",
+      "isSimulated": true,
+      "displayId": "Thea_7",
+      "anonymousToken": "tok_sim_9d55c8fecf0a",
+      "nameNumber": 7
+    },
+    {
+      "id": "c59b6b39-6b6b-4930-aa18-14273bd2714b",
+      "nameNumber": 7,
+      "displayId": "Lukas_7",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_ff3332333812",
+      "updatedAt": "2026-09-09T15:50:25.564Z",
+      "createdAt": "2026-09-09T15:50:25.564Z",
+      "firstName": "Lukas"
+    },
+    {
+      "nameNumber": 7,
+      "id": "1ed3d585-68df-41cd-8084-a9d589cf311c",
+      "displayId": "Mathias_7",
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_99471c25a39c",
+      "updatedAt": "2026-09-09T15:51:25.564Z",
+      "firstName": "Mathias",
+      "createdAt": "2026-09-09T15:51:25.564Z"
+    },
+    {
+      "anonymousToken": "tok_sim_e793a654732f",
+      "nameNumber": 7,
+      "displayId": "Nora_7",
+      "id": "fcb888f8-2c29-4ed0-af87-7adf7a69560f",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:52:25.564Z",
+      "createdAt": "2026-09-09T15:52:25.564Z",
+      "firstName": "Nora"
+    },
+    {
+      "nameNumber": 7,
+      "anonymousToken": "tok_sim_406bb72bc189",
+      "firstName": "Jakob",
+      "createdAt": "2026-09-09T15:53:25.564Z",
+      "id": "032af845-66a2-42f6-aec5-01fc55b260b4",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:53:25.564Z",
+      "displayId": "Jakob_7"
+    },
+    {
+      "nameNumber": 7,
+      "isSimulated": true,
+      "id": "0c2c88ba-ad26-4930-8adf-272f07df00fc",
+      "anonymousToken": "tok_sim_a4e9e1b9d04c",
+      "firstName": "Leah",
+      "createdAt": "2026-09-09T15:54:25.564Z",
+      "updatedAt": "2026-09-09T15:54:25.564Z",
+      "displayId": "Leah_7"
+    },
+    {
+      "displayId": "William_7",
+      "nameNumber": 7,
+      "anonymousToken": "tok_sim_04e3033aa02c",
+      "updatedAt": "2026-09-09T15:55:25.564Z",
+      "createdAt": "2026-09-09T15:55:25.564Z",
+      "firstName": "William",
+      "id": "bfa715bd-de6f-4fe4-8061-84bf3700602e",
+      "isSimulated": true
+    },
+    {
+      "id": "dc8f552c-1d5a-437a-bd18-e7293e70b225",
+      "nameNumber": 7,
+      "anonymousToken": "tok_sim_904d7b003a75",
+      "displayId": "Sara_7",
+      "isSimulated": true,
+      "updatedAt": "2026-09-09T15:56:25.564Z",
+      "firstName": "Sara",
+      "createdAt": "2026-09-09T15:56:25.564Z"
+    },
+    {
+      "anonymousToken": "tok_sim_f4ea96627b78",
+      "createdAt": "2026-09-09T15:57:25.564Z",
+      "firstName": "Filip",
+      "id": "5a9e9ce0-2a1e-4d75-9d15-2ed23c1153a6",
+      "nameNumber": 7,
+      "updatedAt": "2026-09-09T15:57:25.564Z",
+      "isSimulated": true,
+      "displayId": "Filip_7"
+    },
+    {
+      "nameNumber": 7,
+      "updatedAt": "2026-09-09T15:58:25.564Z",
+      "createdAt": "2026-09-09T15:58:25.564Z",
+      "isSimulated": true,
+      "firstName": "Emilie",
+      "id": "f9bc5a38-1eea-403e-9711-5b3f373b570a",
+      "displayId": "Emilie_7",
+      "anonymousToken": "tok_sim_3a184810cfcd"
+    },
+    {
+      "nameNumber": 7,
+      "id": "e590ef8c-8510-4e5c-9502-bacfe8918990",
+      "updatedAt": "2026-09-09T15:59:25.564Z",
+      "createdAt": "2026-09-09T15:59:25.564Z",
+      "firstName": "Henrik",
+      "isSimulated": true,
+      "displayId": "Henrik_7",
+      "anonymousToken": "tok_sim_fd8f4de6db63"
+    },
+    {
+      "anonymousToken": "tok_sim_3ef783c9d6f1",
+      "id": "1288363b-3cd1-46fe-9c7f-c198b7ea57d6",
+      "updatedAt": "2026-09-09T16:00:25.564Z",
+      "createdAt": "2026-09-09T16:00:25.564Z",
+      "firstName": "Maja",
+      "nameNumber": 7,
+      "displayId": "Maja_7",
+      "isSimulated": true
+    },
+    {
+      "isSimulated": true,
+      "anonymousToken": "tok_sim_015038f1030f",
+      "firstName": "Aksel",
+      "createdAt": "2026-09-09T16:01:25.564Z",
+      "updatedAt": "2026-09-09T16:01:25.564Z",
+      "nameNumber": 7,
+      "id": "ce7b438a-e82c-4e0b-82e3-e57e5f5fc2c2",
+      "displayId": "Aksel_7"
+    },
+    {
+      "createdAt": "2026-09-10T09:06:59.618Z",
+      "firstName": "Magnar",
+      "updatedAt": "2026-09-10T09:06:59.618Z",
+      "nameNumber": 1,
+      "displayId": "Magnar_1",
+      "isSimulated": false,
+      "anonymousToken": "tok_6a66bfad48474041",
+      "id": "198df3a9-645e-463b-a4bf-5b2da570faaa"
+    },
+    {
+      "id": "94be9210-3a9b-43c9-acdc-ac13b151cb13",
+      "firstName": "Oliver",
+      "nameNumber": 8,
+      "displayId": "Oliver_8",
+      "anonymousToken": "tok_sim_94aab552cee2",
+      "createdAt": "2026-09-10T09:02:27.814Z",
+      "updatedAt": "2026-09-10T09:02:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "c0c3216e-7da4-41d9-ac5b-209e2bff9029",
+      "firstName": "Emma",
+      "nameNumber": 8,
+      "displayId": "Emma_8",
+      "anonymousToken": "tok_sim_ff44d6d044d7",
+      "createdAt": "2026-09-10T09:03:27.814Z",
+      "updatedAt": "2026-09-10T09:03:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "a9325193-4e80-4c62-9503-08483fc78396",
+      "firstName": "Sander",
+      "nameNumber": 8,
+      "displayId": "Sander_8",
+      "anonymousToken": "tok_sim_25c8ad0d3819",
+      "createdAt": "2026-09-10T09:04:27.814Z",
+      "updatedAt": "2026-09-10T09:04:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "01a14ecd-eb43-4484-9c18-502e09ce55ad",
+      "firstName": "Thea",
+      "nameNumber": 8,
+      "displayId": "Thea_8",
+      "anonymousToken": "tok_sim_7be9ebe08e63",
+      "createdAt": "2026-09-10T09:05:27.814Z",
+      "updatedAt": "2026-09-10T09:05:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "c061a6aa-aee0-4c06-9b23-aaca546b8088",
+      "firstName": "Lukas",
+      "nameNumber": 8,
+      "displayId": "Lukas_8",
+      "anonymousToken": "tok_sim_342204d8620e",
+      "createdAt": "2026-09-10T09:06:27.814Z",
+      "updatedAt": "2026-09-10T09:06:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "efed5899-e2aa-4360-ba06-4bfc04e8e036",
+      "firstName": "Mathias",
+      "nameNumber": 8,
+      "displayId": "Mathias_8",
+      "anonymousToken": "tok_sim_83b14db800d4",
+      "createdAt": "2026-09-10T09:07:27.814Z",
+      "updatedAt": "2026-09-10T09:07:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "9d879594-71f8-46e6-8c42-5679b09c56c8",
+      "firstName": "Nora",
+      "nameNumber": 8,
+      "displayId": "Nora_8",
+      "anonymousToken": "tok_sim_14be477f612e",
+      "createdAt": "2026-09-10T09:08:27.814Z",
+      "updatedAt": "2026-09-10T09:08:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "74579300-fa06-467e-8655-3b8f2e5f5fcb",
+      "firstName": "Jakob",
+      "nameNumber": 8,
+      "displayId": "Jakob_8",
+      "anonymousToken": "tok_sim_3cf046a72aee",
+      "createdAt": "2026-09-10T09:09:27.814Z",
+      "updatedAt": "2026-09-10T09:09:27.814Z",
+      "isSimulated": true
+    },
+    {
+      "id": "db4c369e-4ec2-433f-bd60-9afea5cb41d5",
+      "firstName": "Oliver",
+      "nameNumber": 9,
+      "displayId": "Oliver_9",
+      "anonymousToken": "tok_sim_3e2df456c8d5",
+      "createdAt": "2026-09-10T08:58:40.302Z",
+      "updatedAt": "2026-09-10T08:58:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "6a4eb8f5-7bbe-41ee-9ed7-e7eae314b7d6",
+      "firstName": "Emma",
+      "nameNumber": 9,
+      "displayId": "Emma_9",
+      "anonymousToken": "tok_sim_be6df53e5210",
+      "createdAt": "2026-09-10T08:59:40.302Z",
+      "updatedAt": "2026-09-10T08:59:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "49230a00-55ae-476d-a153-2c0601a6174b",
+      "firstName": "Sander",
+      "nameNumber": 9,
+      "displayId": "Sander_9",
+      "anonymousToken": "tok_sim_0765c82c0d54",
+      "createdAt": "2026-09-10T09:00:40.302Z",
+      "updatedAt": "2026-09-10T09:00:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "75045adc-683d-45c6-b695-2b4bf910ea21",
+      "firstName": "Thea",
+      "nameNumber": 9,
+      "displayId": "Thea_9",
+      "anonymousToken": "tok_sim_91b41fa4fb5d",
+      "createdAt": "2026-09-10T09:01:40.302Z",
+      "updatedAt": "2026-09-10T09:01:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "63cc0b5c-1329-4e5f-8347-9b6920d74b2a",
+      "firstName": "Lukas",
+      "nameNumber": 9,
+      "displayId": "Lukas_9",
+      "anonymousToken": "tok_sim_71057895487b",
+      "createdAt": "2026-09-10T09:02:40.302Z",
+      "updatedAt": "2026-09-10T09:02:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "46517eda-9ec6-401f-91cf-cab333ab3369",
+      "firstName": "Mathias",
+      "nameNumber": 9,
+      "displayId": "Mathias_9",
+      "anonymousToken": "tok_sim_3957dbec4b58",
+      "createdAt": "2026-09-10T09:03:40.302Z",
+      "updatedAt": "2026-09-10T09:03:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "b521f424-4716-4e5f-9120-e01f7e51f902",
+      "firstName": "Nora",
+      "nameNumber": 9,
+      "displayId": "Nora_9",
+      "anonymousToken": "tok_sim_8fa9fcb40220",
+      "createdAt": "2026-09-10T09:04:40.302Z",
+      "updatedAt": "2026-09-10T09:04:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "f2ea9bf0-43a5-47a7-ad07-c62b101bd3cf",
+      "firstName": "Jakob",
+      "nameNumber": 9,
+      "displayId": "Jakob_9",
+      "anonymousToken": "tok_sim_eb46b65b444e",
+      "createdAt": "2026-09-10T09:05:40.302Z",
+      "updatedAt": "2026-09-10T09:05:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "5021e46a-8a0c-4639-be5d-346428ef4305",
+      "firstName": "Leah",
+      "nameNumber": 8,
+      "displayId": "Leah_8",
+      "anonymousToken": "tok_sim_d4296714d0d5",
+      "createdAt": "2026-09-10T09:06:40.302Z",
+      "updatedAt": "2026-09-10T09:06:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "1ec304b4-5a6b-4a46-932e-2de492fd6cf1",
+      "firstName": "William",
+      "nameNumber": 8,
+      "displayId": "William_8",
+      "anonymousToken": "tok_sim_125c63502e56",
+      "createdAt": "2026-09-10T09:07:40.302Z",
+      "updatedAt": "2026-09-10T09:07:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "2d122b8d-94d0-494d-b17c-f43e6aa58021",
+      "firstName": "Sara",
+      "nameNumber": 8,
+      "displayId": "Sara_8",
+      "anonymousToken": "tok_sim_d2343c623dc7",
+      "createdAt": "2026-09-10T09:08:40.302Z",
+      "updatedAt": "2026-09-10T09:08:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "e34df74d-00c0-4ac4-a3b5-6f9344d73b7b",
+      "firstName": "Filip",
+      "nameNumber": 8,
+      "displayId": "Filip_8",
+      "anonymousToken": "tok_sim_176709e609e7",
+      "createdAt": "2026-09-10T09:09:40.302Z",
+      "updatedAt": "2026-09-10T09:09:40.302Z",
+      "isSimulated": true
+    },
+    {
+      "id": "dd184ef6-6e37-494d-9c58-1bf8d293f30b",
+      "firstName": "Oliver",
+      "nameNumber": 10,
+      "displayId": "Oliver_10",
+      "anonymousToken": "tok_sim_eeb846d52ab9",
+      "createdAt": "2026-09-10T09:02:46.596Z",
+      "updatedAt": "2026-09-10T09:02:46.596Z",
+      "isSimulated": true
+    },
+    {
+      "id": "6072d552-e2f2-4532-8a8c-110850b95d3a",
+      "firstName": "Emma",
+      "nameNumber": 10,
+      "displayId": "Emma_10",
+      "anonymousToken": "tok_sim_a9b213dab278",
+      "createdAt": "2026-09-10T09:03:46.596Z",
+      "updatedAt": "2026-09-10T09:03:46.596Z",
+      "isSimulated": true
+    },
+    {
+      "id": "43adbc70-6310-42e0-8357-8ef5bf23cb4c",
+      "firstName": "Sander",
+      "nameNumber": 10,
+      "displayId": "Sander_10",
+      "anonymousToken": "tok_sim_5e04ee1da4cc",
+      "createdAt": "2026-09-10T09:04:46.596Z",
+      "updatedAt": "2026-09-10T09:04:46.596Z",
+      "isSimulated": true
+    },
+    {
+      "id": "4eb19f67-2918-4155-99b0-e584913fe481",
+      "firstName": "Thea",
+      "nameNumber": 10,
+      "displayId": "Thea_10",
+      "anonymousToken": "tok_sim_3f594522d006",
+      "createdAt": "2026-09-10T09:05:46.596Z",
+      "updatedAt": "2026-09-10T09:05:46.596Z",
+      "isSimulated": true
+    },
+    {
+      "id": "7d911fe2-50d7-4cd7-aca8-9b5a9289fe9d",
+      "firstName": "Lukas",
+      "nameNumber": 10,
+      "displayId": "Lukas_10",
+      "anonymousToken": "tok_sim_18b16e975001",
+      "createdAt": "2026-09-10T09:06:46.596Z",
+      "updatedAt": "2026-09-10T09:06:46.596Z",
+      "isSimulated": true
+    },
+    {
+      "id": "a130bb8a-88e9-4501-8dae-e04b87c827f0",
+      "firstName": "Mathias",
+      "nameNumber": 10,
+      "displayId": "Mathias_10",
+      "anonymousToken": "tok_sim_8b8abc8f051a",
+      "createdAt": "2026-09-10T09:07:46.596Z",
+      "updatedAt": "2026-09-10T09:07:46.596Z",
+      "isSimulated": true
+    },
+    {
+      "id": "d73b9ed4-e72a-497e-a886-794d97dda1c5",
+      "firstName": "Nora",
+      "nameNumber": 10,
+      "displayId": "Nora_10",
+      "anonymousToken": "tok_sim_a138c75fad94",
+      "createdAt": "2026-09-10T09:08:46.596Z",
+      "updatedAt": "2026-09-10T09:08:46.596Z",
+      "isSimulated": true
+    },
+    {
+      "id": "dd3e49af-a4a9-45cb-b07e-06c4242784d9",
+      "firstName": "Jakob",
+      "nameNumber": 10,
+      "displayId": "Jakob_10",
+      "anonymousToken": "tok_sim_37937d6e2231",
+      "createdAt": "2026-09-10T09:09:46.596Z",
+      "updatedAt": "2026-09-10T09:09:46.596Z",
+      "isSimulated": true
+    }
+  ],
   "event": {
     "name": "Lillesand United",
-    "date": "Fredag 18. september 2026",
+    "popcornClaimedCount": 0,
     "time": "17:00 – 22:45 (Aktiviteter fra 18:45)",
+    "date": "Fredag 18. september 2026",
     "location": "Møglestuhallen, Lillesand",
     "organizers": [
       "KRIK",
@@ -11,995 +2031,391 @@
       "Misjonskirken",
       "Baptistkirken"
     ],
-    "freePopcornLimit": 100,
-    "popcornClaimedCount": 0
+    "freePopcornLimit": 100
   },
-  "popcorn": {
-    "totalCapacity": 100,
-    "bongs": [
-      {
-        "number": 1,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 2,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 3,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 4,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 5,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 6,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 7,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 8,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 9,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 10,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 11,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 12,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 13,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 14,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 15,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 16,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 17,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 18,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 19,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 20,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 21,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 22,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 23,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 24,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 25,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 26,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 27,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 28,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 29,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 30,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 31,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 32,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 33,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 34,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 35,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 36,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 37,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 38,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 39,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 40,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 41,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 42,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 43,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 44,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 45,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 46,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 47,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 48,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 49,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 50,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 51,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 52,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 53,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 54,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 55,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 56,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 57,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 58,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 59,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 60,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 61,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 62,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 63,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 64,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 65,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 66,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 67,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 68,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 69,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 70,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 71,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 72,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 73,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 74,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 75,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 76,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 77,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 78,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 79,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 80,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 81,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 82,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 83,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 84,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 85,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 86,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 87,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 88,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 89,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 90,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 91,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 92,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 93,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 94,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 95,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 96,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 97,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 98,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 99,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
-      },
-      {
-        "number": 100,
-        "status": "blank",
-        "userName": null,
-        "clientToken": null,
-        "personId": null
+  "tournament": {
+    "matches": [
+      {
+        "id": "match_r1_p0",
+        "round": 1,
+        "roundName": "Kvartfinale",
+        "stage": "regular",
+        "format": {
+          "sets": 1,
+          "targetPoints": 11,
+          "winMargin": 1
+        },
+        "position": 0,
+        "playerA": {
+          "id": "sim_4_8ekw",
+          "personId": "4eb19f67-2918-4155-99b0-e584913fe481",
+          "displayId": "Thea_10",
+          "firstName": "Thea",
+          "registeredAt": "2026-09-10T09:05:46.596Z"
+        },
+        "playerB": {
+          "id": "sim_6_iaw0",
+          "personId": "a130bb8a-88e9-4501-8dae-e04b87c827f0",
+          "displayId": "Mathias_10",
+          "firstName": "Mathias",
+          "registeredAt": "2026-09-10T09:07:46.596Z"
+        },
+        "winnerId": null,
+        "scoreA": null,
+        "scoreB": null,
+        "sets": [],
+        "setsWonA": null,
+        "setsWonB": null,
+        "tableNumber": 1,
+        "status": "ready",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p0",
+        "nextMatchSlot": "A"
+      },
+      {
+        "id": "match_r1_p1",
+        "round": 1,
+        "roundName": "Kvartfinale",
+        "stage": "regular",
+        "format": {
+          "sets": 1,
+          "targetPoints": 11,
+          "winMargin": 1
+        },
+        "position": 1,
+        "playerA": {
+          "id": "sim_1_ncuf",
+          "personId": "dd184ef6-6e37-494d-9c58-1bf8d293f30b",
+          "displayId": "Oliver_10",
+          "firstName": "Oliver",
+          "registeredAt": "2026-09-10T09:02:46.596Z"
+        },
+        "playerB": {
+          "id": "sim_2_j6po",
+          "personId": "6072d552-e2f2-4532-8a8c-110850b95d3a",
+          "displayId": "Emma_10",
+          "firstName": "Emma",
+          "registeredAt": "2026-09-10T09:03:46.596Z"
+        },
+        "winnerId": null,
+        "scoreA": null,
+        "scoreB": null,
+        "sets": [],
+        "setsWonA": null,
+        "setsWonB": null,
+        "tableNumber": 2,
+        "status": "ready",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p0",
+        "nextMatchSlot": "B"
+      },
+      {
+        "id": "match_r1_p2",
+        "round": 1,
+        "roundName": "Kvartfinale",
+        "stage": "regular",
+        "format": {
+          "sets": 1,
+          "targetPoints": 11,
+          "winMargin": 1
+        },
+        "position": 2,
+        "playerA": {
+          "id": "sim_8_54c4",
+          "personId": "dd3e49af-a4a9-45cb-b07e-06c4242784d9",
+          "displayId": "Jakob_10",
+          "firstName": "Jakob",
+          "registeredAt": "2026-09-10T09:09:46.596Z"
+        },
+        "playerB": {
+          "id": "sim_3_eqgd",
+          "personId": "43adbc70-6310-42e0-8357-8ef5bf23cb4c",
+          "displayId": "Sander_10",
+          "firstName": "Sander",
+          "registeredAt": "2026-09-10T09:04:46.596Z"
+        },
+        "winnerId": null,
+        "scoreA": null,
+        "scoreB": null,
+        "sets": [],
+        "setsWonA": null,
+        "setsWonB": null,
+        "tableNumber": null,
+        "status": "ready",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p1",
+        "nextMatchSlot": "A"
+      },
+      {
+        "id": "match_r1_p3",
+        "round": 1,
+        "roundName": "Kvartfinale",
+        "stage": "regular",
+        "format": {
+          "sets": 1,
+          "targetPoints": 11,
+          "winMargin": 1
+        },
+        "position": 3,
+        "playerA": {
+          "id": "sim_5_yjob",
+          "personId": "7d911fe2-50d7-4cd7-aca8-9b5a9289fe9d",
+          "displayId": "Lukas_10",
+          "firstName": "Lukas",
+          "registeredAt": "2026-09-10T09:06:46.596Z"
+        },
+        "playerB": {
+          "id": "sim_7_xn9c",
+          "personId": "d73b9ed4-e72a-497e-a886-794d97dda1c5",
+          "displayId": "Nora_10",
+          "firstName": "Nora",
+          "registeredAt": "2026-09-10T09:08:46.596Z"
+        },
+        "winnerId": null,
+        "scoreA": null,
+        "scoreB": null,
+        "sets": [],
+        "setsWonA": null,
+        "setsWonB": null,
+        "tableNumber": null,
+        "status": "ready",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r2_p1",
+        "nextMatchSlot": "B"
+      },
+      {
+        "id": "match_r2_p0",
+        "round": 2,
+        "roundName": "Semifinale",
+        "stage": "semifinal",
+        "format": {
+          "sets": 3,
+          "targetPoints": 21,
+          "winMargin": 2
+        },
+        "position": 0,
+        "playerA": null,
+        "playerB": null,
+        "winnerId": null,
+        "scoreA": null,
+        "scoreB": null,
+        "sets": [],
+        "setsWonA": null,
+        "setsWonB": null,
+        "tableNumber": null,
+        "status": "not_ready",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r3_p0",
+        "nextMatchSlot": "A"
+      },
+      {
+        "id": "match_r2_p1",
+        "round": 2,
+        "roundName": "Semifinale",
+        "stage": "semifinal",
+        "format": {
+          "sets": 3,
+          "targetPoints": 21,
+          "winMargin": 2
+        },
+        "position": 1,
+        "playerA": null,
+        "playerB": null,
+        "winnerId": null,
+        "scoreA": null,
+        "scoreB": null,
+        "sets": [],
+        "setsWonA": null,
+        "setsWonB": null,
+        "tableNumber": null,
+        "status": "not_ready",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": "match_r3_p0",
+        "nextMatchSlot": "B"
+      },
+      {
+        "id": "match_r3_p0",
+        "round": 3,
+        "roundName": "Finale",
+        "stage": "final",
+        "format": {
+          "sets": 3,
+          "targetPoints": 21,
+          "winMargin": 2
+        },
+        "position": 0,
+        "playerA": null,
+        "playerB": null,
+        "winnerId": null,
+        "scoreA": null,
+        "scoreB": null,
+        "sets": [],
+        "setsWonA": null,
+        "setsWonB": null,
+        "tableNumber": null,
+        "status": "not_ready",
+        "isWalkover": false,
+        "walkoverPlayerId": null,
+        "nextMatchId": null,
+        "nextMatchSlot": null
       }
-    ]
+    ],
+    "startedAt": "2026-09-10T09:10:46.597Z",
+    "formatSettings": {
+      "regular": {
+        "sets": 1,
+        "targetPoints": 11,
+        "winMargin": 1
+      },
+      "semifinal": {
+        "sets": 3,
+        "targetPoints": 21,
+        "winMargin": 2
+      },
+      "final": {
+        "sets": 3,
+        "targetPoints": 21,
+        "winMargin": 2
+      }
+    },
+    "status": "active",
+    "participants": [
+      {
+        "id": "sim_1_ncuf",
+        "personId": "dd184ef6-6e37-494d-9c58-1bf8d293f30b",
+        "displayId": "Oliver_10",
+        "firstName": "Oliver",
+        "registeredAt": "2026-09-10T09:02:46.596Z"
+      },
+      {
+        "id": "sim_2_j6po",
+        "personId": "6072d552-e2f2-4532-8a8c-110850b95d3a",
+        "displayId": "Emma_10",
+        "firstName": "Emma",
+        "registeredAt": "2026-09-10T09:03:46.596Z"
+      },
+      {
+        "id": "sim_3_eqgd",
+        "personId": "43adbc70-6310-42e0-8357-8ef5bf23cb4c",
+        "displayId": "Sander_10",
+        "firstName": "Sander",
+        "registeredAt": "2026-09-10T09:04:46.596Z"
+      },
+      {
+        "id": "sim_4_8ekw",
+        "personId": "4eb19f67-2918-4155-99b0-e584913fe481",
+        "displayId": "Thea_10",
+        "firstName": "Thea",
+        "registeredAt": "2026-09-10T09:05:46.596Z"
+      },
+      {
+        "id": "sim_5_yjob",
+        "personId": "7d911fe2-50d7-4cd7-aca8-9b5a9289fe9d",
+        "displayId": "Lukas_10",
+        "firstName": "Lukas",
+        "registeredAt": "2026-09-10T09:06:46.596Z"
+      },
+      {
+        "id": "sim_6_iaw0",
+        "personId": "a130bb8a-88e9-4501-8dae-e04b87c827f0",
+        "displayId": "Mathias_10",
+        "firstName": "Mathias",
+        "registeredAt": "2026-09-10T09:07:46.596Z"
+      },
+      {
+        "id": "sim_7_xn9c",
+        "personId": "d73b9ed4-e72a-497e-a886-794d97dda1c5",
+        "displayId": "Nora_10",
+        "firstName": "Nora",
+        "registeredAt": "2026-09-10T09:08:46.596Z"
+      },
+      {
+        "id": "sim_8_54c4",
+        "personId": "dd3e49af-a4a9-45cb-b07e-06c4242784d9",
+        "displayId": "Jakob_10",
+        "firstName": "Jakob",
+        "registeredAt": "2026-09-10T09:09:46.596Z"
+      }
+    ],
+    "completedAt": null,
+    "winner": null,
+    "estimatedMinutesPerMatch": 10,
+    "bracketCapacity": 8,
+    "id": "tour-lillesand-2026"
   },
   "activities": [
     {
-      "id": "act-tabletennis",
       "name": "Bordtenniscup",
       "shortDesc": "Digital påmelding ved ankomst! Single elimination cup på 2 bord. Premieutdeling kl. 22:30!",
-      "fullDesc": "Klassisk bordtennisturnering med digital påmelding ved ankomst og digital turneringsflyt! Kampene starter kl. 18:45, og spilles først til 21 poeng med 5 server hver (2 poengs ledelse ved 20–20). Semifinaler og finale spilles fra kl. 22:00, og høytidelig premieutdeling skjer kl. 22:30!",
-      "iconName": "Trophy",
-      "time": "Digital påmelding fra 17:00 • Kampstart 18:45",
-      "location": "Bordtennis-sonen (2 bord)",
-      "enabled": true,
       "badge": "Digital påmelding",
-      "highlight": true
+      "location": "Bordtennis-sonen (2 bord)",
+      "time": "Digital påmelding fra 17:00 • Kampstart 18:45",
+      "id": "act-tabletennis",
+      "enabled": true,
+      "fullDesc": "Klassisk bordtennisturnering med digital påmelding ved ankomst og digital turneringsflyt! Kampene starter kl. 18:45, og spilles først til 21 poeng med 5 server hver (2 poengs ledelse ved 20–20). Semifinaler og finale spilles fra kl. 22:00, og høytidelig premieutdeling skjer kl. 22:30!",
+      "highlight": true,
+      "iconName": "Trophy"
     },
     {
-      "id": "act-football",
-      "name": "Lillesand United Fotball",
-      "shortDesc": "5-er turnering i hallen. Fysisk organisering og lagpåmelding ved ankomst fra kl. 17:00!",
-      "fullDesc": "Rå 5-er innendørs fotballturnering! Turneringen organiseres fysisk i hallen (har foreløpig ikke digital turneringsmotor). Sett sammen et lag med venner eller meld deg på et lag ved ankomst. Kampene starter kl. 18:45, semifinaler/finaler kl. 22:00 og premieutdeling kl. 22:30.",
-      "iconName": "CircleDot",
       "time": "Fysisk lagpåmelding fra 17:00 • Kampstart 18:45",
+      "fullDesc": "Rå 5-er innendørs fotballturnering! Turneringen organiseres fysisk i hallen (har foreløpig ikke digital turneringsmotor). Sett sammen et lag med venner eller meld deg på et lag ved ankomst. Kampene starter kl. 18:45, semifinaler/finaler kl. 22:00 og premieutdeling kl. 22:30.",
+      "name": "Lillesand United Fotball",
+      "iconName": "CircleDot",
+      "id": "act-football",
       "location": "Hovedbanen, Møglestuhallen",
       "enabled": true,
-      "badge": "Fysisk organisering"
+      "badge": "Fysisk organisering",
+      "shortDesc": "5-er turnering i hallen. Fysisk organisering og lagpåmelding ved ankomst fra kl. 17:00!"
     },
     {
-      "id": "act-gaming",
-      "name": "Mario Kart & Gaming Lounge",
-      "shortDesc": "Påmelding enkeltvis ved ankomst! Konkurranser, Mario Kart på storskjerm og lounge.",
-      "fullDesc": "Gaming på storskjerm og dedikerte spillstasjoner! Påmelding skjer enkeltvis ved ankomst i gaming-sonen (har foreløpig ikke digital turneringsmotor). Gaming og turnering starter kl. 18:45, finaler kl. 22:00 og premieutdeling kl. 22:30.",
       "iconName": "Gamepad2",
-      "time": "Påmelding fra 17:00 • Gaming starter 18:45",
-      "location": "Gaming-hjørnet",
       "enabled": true,
+      "fullDesc": "Gaming på storskjerm og dedikerte spillstasjoner! Påmelding skjer enkeltvis ved ankomst i gaming-sonen (har foreløpig ikke digital turneringsmotor). Gaming og turnering starter kl. 18:45, finaler kl. 22:00 og premieutdeling kl. 22:30.",
+      "shortDesc": "Påmelding enkeltvis ved ankomst! Konkurranser, Mario Kart på storskjerm og lounge.",
+      "time": "Påmelding fra 17:00 • Gaming starter 18:45",
+      "id": "act-gaming",
+      "location": "Gaming-hjørnet",
+      "name": "Mario Kart & Gaming Lounge",
       "badge": "Påmelding ved ankomst"
     },
     {
-      "id": "act-gathering",
       "name": "Kveldens fellesmøte",
+      "badge": "Kveldens fellesmøte",
       "shortDesc": "Lovsang, lek, Moshpit-sanger og tale ved Eivind Galdal (SALT Bergen)!",
-      "fullDesc": "Kveldens store felles samlingsstund for hele hallen! Fellesmøte med lovsang, morsomme leker, energiske Moshpit-sanger og inspirerende tale ved Eivind Galdal fra SALT Bergen. Starter kl. 21:00 og varer til ca. 21:45.",
-      "iconName": "Music",
+      "enabled": true,
       "time": "Kl. 21:00 – ca. 21:45",
       "location": "Hovedscenen / Tribunen",
-      "enabled": true,
-      "badge": "Kveldens fellesmøte"
+      "id": "act-gathering",
+      "iconName": "Music",
+      "fullDesc": "Kveldens store felles samlingsstund for hele hallen! Fellesmøte med lovsang, morsomme leker, energiske Moshpit-sanger og inspirerende tale ved Eivind Galdal fra SALT Bergen. Starter kl. 21:00 og varer til ca. 21:45."
     },
     {
-      "id": "act-kiosk",
-      "name": "Kiosk & Varmmat",
       "shortDesc": "Gratis popcorn til de første 100! Salg av pølser, brus og kioskvarer hele kvelden.",
-      "fullDesc": "De første 100 som kommer inn døra fra kl. 17:00 får gratis nypoppet popcorn! I kiosken kan du kjøpe varme pølser, iskald brus, sjokolade og snacks til ungdomsvennlige priser gjennom hele kvelden helt til avslutning kl. 22:45.",
-      "iconName": "Utensils",
-      "time": "Kl. 17:00 – 22:45",
-      "location": "Kioskområdet ved inngangen",
       "enabled": true,
-      "badge": "Gratis popcorn!"
+      "badge": "Gratis popcorn!",
+      "location": "Kioskområdet ved inngangen",
+      "id": "act-kiosk",
+      "iconName": "Utensils",
+      "name": "Kiosk & Varmmat",
+      "time": "Kl. 17:00 – 22:45",
+      "fullDesc": "De første 100 som kommer inn døra fra kl. 17:00 får gratis nypoppet popcorn! I kiosken kan du kjøpe varme pølser, iskald brus, sjokolade og snacks til ungdomsvennlige priser gjennom hele kvelden helt til avslutning kl. 22:45."
     },
     {
       "id": "act-alpha",
-      "name": "UngdomsAlpha",
-      "shortDesc": "Starter fredag 25. september kl. 19:00. Uformelt og gøy med god mat!",
-      "fullDesc": "Hva er egentlig meningen med livet? UngdomsAlpha er for deg mellom 13 og 19 år som vil henge, spise digg mat, se morsomme filmer og prate om de store spørsmålene uten fasitsvar og press. Oppstart 25. september kl 19:00!",
-      "iconName": "Sparkles",
-      "time": "Oppstart: Fredag 25. sept kl. 19:00",
       "location": "Lillesand",
       "enabled": true,
+      "iconName": "Sparkles",
+      "shortDesc": "Starter fredag 25. september kl. 19:00. Uformelt og gøy med god mat!",
+      "name": "UngdomsAlpha",
+      "fullDesc": "Hva er egentlig meningen med livet? UngdomsAlpha er for deg mellom 13 og 19 år som vil henge, spise digg mat, se morsomme filmer og prate om de store spørsmålene uten fasitsvar og press. Oppstart 25. september kl 19:00!",
+      "time": "Oppstart: Fredag 25. sept kl. 19:00",
       "badge": "Oppstart 25. sept"
-    }
-  ],
-  "tournament": {
-    "id": "tour-lillesand-2026",
-    "status": "registration",
-    "startedAt": null,
-    "completedAt": null,
-    "participants": [],
-    "matches": [],
-    "winner": null,
-    "estimatedMinutesPerMatch": 10,
-    "bracketCapacity": 16
-  },
-  "alphaInterests": [],
-  "persons": [
-    {
-      "id": "8582629d-85bb-4c4a-a807-ac0d398d126b",
-      "firstName": "PopcornGjest_1",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_1_1",
-      "anonymousToken": "tok_d756971bcc1241cb",
-      "createdAt": "2026-09-10T07:52:03.322Z",
-      "updatedAt": "2026-09-10T07:52:03.322Z",
-      "isSimulated": false
-    },
-    {
-      "id": "4546cee1-b455-4b39-b41f-8c4af4257c0f",
-      "firstName": "PopcornGjest_2",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_2_1",
-      "anonymousToken": "tok_a3001a0b3bcf4ec6",
-      "createdAt": "2026-09-10T07:52:03.326Z",
-      "updatedAt": "2026-09-10T07:52:03.326Z",
-      "isSimulated": false
-    },
-    {
-      "id": "417a00c9-069d-4152-90b1-ccfef4a57e37",
-      "firstName": "PopcornGjest_3",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_3_1",
-      "anonymousToken": "tok_ec0a745c715c4e20",
-      "createdAt": "2026-09-10T07:52:03.330Z",
-      "updatedAt": "2026-09-10T07:52:03.330Z",
-      "isSimulated": false
-    },
-    {
-      "id": "ea5c24c4-d8a0-4c0b-80fd-76d1a05d0364",
-      "firstName": "PopcornGjest_4",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_4_1",
-      "anonymousToken": "tok_47c2bab0f491465a",
-      "createdAt": "2026-09-10T07:52:03.333Z",
-      "updatedAt": "2026-09-10T07:52:03.333Z",
-      "isSimulated": false
-    },
-    {
-      "id": "bcd3b414-fae0-4aa3-8536-309222e61564",
-      "firstName": "PopcornGjest_5",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_5_1",
-      "anonymousToken": "tok_ca9916d8569f4149",
-      "createdAt": "2026-09-10T07:52:03.338Z",
-      "updatedAt": "2026-09-10T07:52:03.338Z",
-      "isSimulated": false
-    },
-    {
-      "id": "38061097-a99f-4b42-8d6c-dfb66a1456ce",
-      "firstName": "PopcornGjest_6",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_6_1",
-      "anonymousToken": "tok_1a291c7b632d44f3",
-      "createdAt": "2026-09-10T07:52:03.341Z",
-      "updatedAt": "2026-09-10T07:52:03.341Z",
-      "isSimulated": false
-    },
-    {
-      "id": "9274658e-77f2-4b48-9cd0-5c521da44848",
-      "firstName": "PopcornGjest_7",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_7_1",
-      "anonymousToken": "tok_42a8b25716bd40de",
-      "createdAt": "2026-09-10T07:52:03.345Z",
-      "updatedAt": "2026-09-10T07:52:03.345Z",
-      "isSimulated": false
-    },
-    {
-      "id": "f59ba401-9828-4e14-b776-5b4582e85dd4",
-      "firstName": "PopcornGjest_8",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_8_1",
-      "anonymousToken": "tok_da9bdd322bbf46af",
-      "createdAt": "2026-09-10T07:52:03.350Z",
-      "updatedAt": "2026-09-10T07:52:03.350Z",
-      "isSimulated": false
-    },
-    {
-      "id": "cff88fd2-d67f-45da-a844-13e47b913f21",
-      "firstName": "PopcornGjest_9",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_9_1",
-      "anonymousToken": "tok_727746ec4dce40c0",
-      "createdAt": "2026-09-10T07:52:03.355Z",
-      "updatedAt": "2026-09-10T07:52:03.355Z",
-      "isSimulated": false
-    },
-    {
-      "id": "2cc83b29-54fe-4200-868e-a159390ef35b",
-      "firstName": "PopcornGjest_10",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_10_1",
-      "anonymousToken": "tok_f60e7874eb69422f",
-      "createdAt": "2026-09-10T07:52:03.360Z",
-      "updatedAt": "2026-09-10T07:52:03.360Z",
-      "isSimulated": false
-    },
-    {
-      "id": "9d44e2ad-0f03-44b2-b732-6e8d11688252",
-      "firstName": "PopcornGjest_11",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_11_1",
-      "anonymousToken": "tok_098a61a869be4b37",
-      "createdAt": "2026-09-10T07:52:03.362Z",
-      "updatedAt": "2026-09-10T07:52:03.362Z",
-      "isSimulated": false
-    },
-    {
-      "id": "12cfba1b-7358-48dd-b587-d97db8780aad",
-      "firstName": "PopcornGjest_12",
-      "nameNumber": 1,
-      "displayId": "PopcornGjest_12_1",
-      "anonymousToken": "tok_0bf90b62e2144652",
-      "createdAt": "2026-09-10T07:52:03.366Z",
-      "updatedAt": "2026-09-10T07:52:03.366Z",
-      "isSimulated": false
-    },
-    {
-      "id": "d2b8b790-67b0-4ae0-b088-ea5e8a0880c6",
-      "firstName": "Oliver",
-      "nameNumber": 1,
-      "displayId": "Oliver_1",
-      "anonymousToken": "tok_1514d766744d4bee",
-      "createdAt": "2026-09-10T07:52:03.402Z",
-      "updatedAt": "2026-09-10T07:52:03.402Z",
-      "isSimulated": false
-    },
-    {
-      "id": "c64a1535-c36f-42e1-97fc-441f54e947c8",
-      "firstName": "Oliver",
-      "nameNumber": 2,
-      "displayId": "Oliver_2",
-      "anonymousToken": "tok_ce9bd5764c51465a",
-      "createdAt": "2026-09-10T07:52:03.406Z",
-      "updatedAt": "2026-09-10T07:52:03.406Z",
-      "isSimulated": false
-    },
-    {
-      "id": "41ca8ff3-9481-4b73-8093-ab30fb0d65c9",
-      "firstName": "RaceTestSpiller",
-      "nameNumber": 1,
-      "displayId": "RaceTestSpiller_1",
-      "anonymousToken": "tok_1516f7e33a41468e",
-      "createdAt": "2026-09-10T07:52:03.426Z",
-      "updatedAt": "2026-09-10T07:52:03.426Z",
-      "isSimulated": false
-    },
-    {
-      "id": "68e180f5-fa16-49db-a4fb-491512c7d1ec",
-      "firstName": "Kandidat_A",
-      "nameNumber": 1,
-      "displayId": "Kandidat_A_1",
-      "anonymousToken": "tok_8a6644fc56274f51",
-      "createdAt": "2026-09-10T07:52:03.458Z",
-      "updatedAt": "2026-09-10T07:52:03.458Z",
-      "isSimulated": false
-    },
-    {
-      "id": "9ac2caa6-ef80-4c8e-8ca8-e2c2ec70197b",
-      "firstName": "Kandidat_B",
-      "nameNumber": 1,
-      "displayId": "Kandidat_B_1",
-      "anonymousToken": "tok_8e7ec44a9a354e5e",
-      "createdAt": "2026-09-10T07:52:03.466Z",
-      "updatedAt": "2026-09-10T07:52:03.466Z",
-      "isSimulated": false
-    },
-    {
-      "id": "a74219f1-f6b5-4b0b-b597-99f5972e88a7",
-      "firstName": "Kandidat_C",
-      "nameNumber": 1,
-      "displayId": "Kandidat_C_1",
-      "anonymousToken": "tok_cd00d3618cdd476e",
-      "createdAt": "2026-09-10T07:52:03.473Z",
-      "updatedAt": "2026-09-10T07:52:03.473Z",
-      "isSimulated": false
-    },
-    {
-      "id": "a52d6248-6cbc-4fa5-8cc8-a3de23842aa9",
-      "firstName": "Kandidat_D",
-      "nameNumber": 1,
-      "displayId": "Kandidat_D_1",
-      "anonymousToken": "tok_73f6e81623c248ee",
-      "createdAt": "2026-09-10T07:52:03.479Z",
-      "updatedAt": "2026-09-10T07:52:03.479Z",
-      "isSimulated": false
-    },
-    {
-      "id": "13366867-6d54-4bf4-a698-33b8767a9051",
-      "firstName": "EktePersonMagnar",
-      "nameNumber": 1,
-      "displayId": "EktePersonMagnar_1",
-      "anonymousToken": "tok_47835e2325ab4448",
-      "createdAt": "2026-09-10T07:52:03.523Z",
-      "updatedAt": "2026-09-10T07:52:03.523Z",
-      "isSimulated": false
     }
   ]
 }

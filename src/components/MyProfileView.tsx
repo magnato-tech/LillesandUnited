@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { AppState, PopcornBong, Person, Participant } from '../types';
 import { getUserToken, saveUserTokenForName } from '../lib/userProfile';
+import { calculatePlayerQueueStatus } from '../lib/tournament-notifications';
 import {
   activatePopcornBong,
   registerParticipant,
@@ -94,90 +95,21 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({
 
   // Table tennis match / turn details
   const tableTennisStatus = useMemo(() => {
-    if (!participant || !state.tournament) return null;
-    const tour = state.tournament;
-    const participantId = participant.id;
-
-    if (tour.status === 'registration') {
-      return {
-        stage: 'waiting_bracket',
-        title: 'Påmeldt – venter på trekning',
-        details: 'Trekningen skjer ved turneringsstart kl. 18:45.',
-      };
-    }
-
-    if (tour.winner && tour.winner.id === participantId) {
-      return {
-        stage: 'champion',
-        title: '🏆 TURNERINGSVINNER!',
-        details: 'Gratulerer, du vant bordtenniscupen i kveld!',
-      };
-    }
-
-    const myMatches = tour.matches.filter(
-      (m) =>
-        (m.playerA && m.playerA.id === participantId) ||
-        (m.playerB && m.playerB.id === participantId)
+    if (!state.tournament) return null;
+    const status = calculatePlayerQueueStatus(
+      state.tournament,
+      activePerson?.id,
+      currentUserName || participant?.firstName
     );
-
-    const opponentLabel = (p: Participant | null | undefined) =>
-      p?.displayId || p?.firstName || 'motstander';
-
-    const playingNow = myMatches.find((m) => m.status === 'in_progress');
-    if (playingNow) {
-      const opponent =
-        playingNow.playerA?.id === participantId ? playingNow.playerB : playingNow.playerA;
-      return {
-        stage: 'playing_now',
-        title: `🚨 SPILLES NÅ: BORD ${playingNow.tableNumber || 1}!`,
-        details: `Motstander: ${opponentLabel(opponent)}. Gå til bordet!`,
-      };
-    }
-
-    const readyTable = myMatches.find((m) => m.status === 'ready' && m.tableNumber);
-    if (readyTable) {
-      const opponent =
-        readyTable.playerA?.id === participantId ? readyTable.playerB : readyTable.playerA;
-      return {
-        stage: 'ready_table',
-        title: `🔔 NESTE KAMP PÅ BORD ${readyTable.tableNumber}!`,
-        details: `Gjør deg klar. Motstander: ${opponentLabel(opponent)}.`,
-      };
-    }
-
-    const waitingMatch = myMatches.find(
-      (m) => m.status === 'ready' || (m.status === 'not_ready' && !m.winnerId)
-    );
-    if (waitingMatch) {
-      const opponent =
-        waitingMatch.playerA?.id === participantId
-          ? waitingMatch.playerB
-          : waitingMatch.playerA;
-      return {
-        stage: 'in_queue',
-        title: `I turneringskø (${waitingMatch.roundName})`,
-        details: opponent ? `Møter ${opponentLabel(opponent)}` : 'Venter på avklaring av motstander.',
-      };
-    }
-
-    // Check if player was eliminated
-    const finishedLoss = myMatches.find(
-      (m) => m.status === 'completed' && m.winnerId && m.winnerId !== participant.id
-    );
-    if (finishedLoss) {
-      return {
-        stage: 'eliminated',
-        title: 'Utslått fra turneringen',
-        details: 'Bra innsats! Du kan heie på vennene dine videre.',
-      };
-    }
+    if (!status || !status.isRegistered) return null;
 
     return {
-      stage: 'active',
-      title: 'Aktiv i turneringen',
-      details: 'Følg med på storskjerm og oversikten.',
+      stage: status.stage,
+      title: status.title,
+      details: status.description,
+      matchesAhead: status.matchesAhead,
     };
-  }, [participant, state.tournament]);
+  }, [participant, state.tournament, activePerson, currentUserName]);
 
   // Actions
   const handleClaimPopcorn = async () => {

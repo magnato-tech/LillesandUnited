@@ -48,7 +48,7 @@ export const INITIAL_ACTIVITIES: Activity[] = [
   {
     id: 'act-gathering',
     name: 'Kveldens fellesmøte',
-    shortDesc: 'Lovsang, lek, Moshpit-sanger og tale ved Eivind Galdal (SALT Bergen)!',
+    shortDesc: 'Band & tale v/ Eivind Galdal',
     fullDesc: 'Kveldens store felles samlingsstund for hele hallen! Fellesmøte med lovsang, morsomme leker, energiske Moshpit-sanger og inspirerende tale ved Eivind Galdal fra SALT Bergen. Starter kl. 21:00 og varer til ca. 21:45.',
     iconName: 'Music',
     time: 'Kl. 21:00 – ca. 21:45',
@@ -60,9 +60,9 @@ export const INITIAL_ACTIVITIES: Activity[] = [
     id: 'act-kiosk',
     name: 'Kiosk & Varmmat',
     shortDesc: 'Gratis popcorn til de første 100! Salg av pølser, brus og kioskvarer hele kvelden.',
-    fullDesc: 'De første 100 som kommer inn døra fra kl. 17:00 får gratis nypoppet popcorn! I kiosken kan du kjøpe varme pølser, iskald brus, sjokolade og snacks til ungdomsvennlige priser gjennom hele kvelden helt til avslutning kl. 22:45.',
+    fullDesc: 'De første 100 som kommer inn døra fra kl. 17:00 får gratis nypoppet popcorn! I kiosken kan du kjøpe varme pølser, iskald brus, sjokolade og snacks til ungdomsvennlige priser gjennom hele kvelden helt til avslutning kl. 22:00.',
     iconName: 'Utensils',
-    time: 'Kl. 17:00 – 22:45',
+    time: 'Kl. 17:00 – 22:00',
     location: 'Kioskområdet ved inngangen',
     enabled: true,
     badge: 'Gratis popcorn!',
@@ -84,7 +84,7 @@ export const INITIAL_STATE: AppState = {
   event: {
     name: 'Lillesand United',
     date: 'Fredag 18. september 2026',
-    time: '17:00 – 22:45 (Aktiviteter fra 18:45)',
+    time: '17:00 – 22:00 (Aktiviteter fra 18:45)',
     location: 'Møglestuhallen, Lillesand',
     organizers: ['KRIK', 'Den Norske Kirke', 'Filadelfia', 'Misjonskirken', 'Baptistkirken'],
     freePopcornLimit: 100,
@@ -151,12 +151,18 @@ export const SIMULATION_NAMES_16 = [
   'Leah', 'William', 'Sara', 'Filip', 'Emilie', 'Henrik', 'Maja', 'Aksel'
 ];
 
-export const SIMULATION_NAMES_31 = [
+export const SIMULATION_NAMES_64 = [
   'Oliver', 'Emma', 'Sander', 'Thea', 'Lukas', 'Mathias', 'Nora', 'Jakob',
   'Leah', 'William', 'Sara', 'Filip', 'Emilie', 'Henrik', 'Maja', 'Aksel',
   'Ingrid', 'Tobias', 'Frida', 'Magnus', 'Hedda', 'Elias', 'Tuva', 'Sondre',
-  'Aurora', 'Mikkel', 'Selma', 'Kasper', 'Mia', 'Oskar', 'Astrid'
+  'Aurora', 'Mikkel', 'Selma', 'Kasper', 'Mia', 'Oskar', 'Astrid', 'Jonas',
+  'Ella', 'Noah', 'Sofie', 'Isak', 'Tiril', 'Adrian', 'Oda', 'Theodor',
+  'Vilde', 'Johannes', 'Live', 'Herman', 'Linnea', 'Gustav', 'Amalie', 'Leo',
+  'Julie', 'Felix', 'Signe', 'Victor', 'Helene', 'Sindre', 'Maria', 'Liam',
+  'Klara', 'Vetle', 'Victoria', 'Jens', 'Sigrid', 'Benjamin', 'Anna', 'Markus'
 ];
+
+export const SIMULATION_NAMES_31 = SIMULATION_NAMES_64.slice(0, 31);
 
 /** Standard og maks cup-størrelser (dobles ved utvidelse: 16 → 32 → 64). */
 export const TOURNAMENT_DEFAULT_CAPACITY = 16;
@@ -166,15 +172,15 @@ export const DRAW_BRACKET_SIZES = [4, 8, 16, 32, 64] as const;
 export type DrawBracketCapacity = (typeof DRAW_BRACKET_SIZES)[number];
 export const TOURNAMENT_MAX_PARTICIPANTS = 64;
 
-/** Generer unike testnavn for simulering (2–128 spillere). */
+/** Generer unike testnavn for simulering (2–64 spillere). */
 export function generateSimulationNames(count: number): string[] {
   const n = Math.min(Math.max(Math.floor(count), 2), TOURNAMENT_MAX_PARTICIPANTS);
   const names: string[] = [];
   for (let i = 0; i < n; i++) {
-    if (i < SIMULATION_NAMES_31.length) {
-      names.push(SIMULATION_NAMES_31[i]);
+    if (i < SIMULATION_NAMES_64.length) {
+      names.push(SIMULATION_NAMES_64[i]);
     } else {
-      names.push(`Spiller${i + 1}`);
+      names.push(`Spiller ${i + 1}`);
     }
   }
   return names;

@@ -1031,8 +1031,8 @@ app.post('/api/tournament/simulate', requireAdmin, (req, res) => {
   });
 
   state.tournament.participants = participants;
-  const simCapacity: 16 | 32 | 64 =
-    count <= 16 ? 16 : count <= 32 ? 32 : 64;
+  const simCapacity: 4 | 8 | 16 | 32 | 64 =
+    count <= 4 ? 4 : count <= 8 ? 8 : count <= 16 ? 16 : count <= 32 ? 32 : 64;
   state.tournament.bracketCapacity = simCapacity;
   const formatSettings = normalizeFormatSettings(state.tournament.formatSettings);
   state.tournament.formatSettings = formatSettings;

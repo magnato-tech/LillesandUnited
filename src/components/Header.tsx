@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               </div>
               <p className="text-xs text-zinc-400 font-semibold hidden sm:block">
-                Møglestuhallen • 17:00 – 22:45 • Gratis inngang
+                Møglestuhallen • 17:00 – 22:00 • Gratis inngang
               </p>
             </div>
           </div>

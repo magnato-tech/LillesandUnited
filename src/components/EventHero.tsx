@@ -53,15 +53,12 @@ export const EventHero: React.FC<EventHeroProps> = ({
       </div>
 
       {/* Main Headline */}
-      <div className="max-w-3xl">
+      <div className="max-w-3xl mb-8">
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-white uppercase mb-3 leading-none">
           Lillesand <span className="text-lime-400 drop-shadow-[0_0_30px_rgba(163,230,53,0.45)]">United</span>
         </h1>
-        <p className="text-lg sm:text-2xl font-black uppercase tracking-wide text-zinc-200 mb-2">
-          Et samarbeid mellom byens menigheter og KRIK
-        </p>
-        <p className="text-sm sm:text-base text-zinc-300 max-w-2xl mb-8 leading-relaxed font-medium">
-          Dørene åpner kl. 17:00! Bordtennis, fotball og gaming starter kl. 18:45. Kveldens fellesmøte kl. 21:00 med lovsang, lek, Moshpit-sanger og tale ved Eivind Galdal (SALT Bergen), semifinaler/finaler kl. 22:00 og premieutdeling kl. 22:30.
+        <p className="text-lg sm:text-2xl font-black uppercase tracking-wide text-zinc-200">
+          Et samarbeid mellom KRIK og byens menigheter
         </p>
       </div>
 
@@ -98,7 +95,7 @@ export const EventHero: React.FC<EventHeroProps> = ({
           <div>
             <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider block">Tid:</span>
             <strong className="text-sm sm:text-base text-white font-black block">
-              17:00 – 22:45 (Start 18:45)
+              17:00 – 22:00
             </strong>
           </div>
         </div>
@@ -114,7 +111,7 @@ export const EventHero: React.FC<EventHeroProps> = ({
             </h3>
           </div>
           <span className="text-[10px] font-black uppercase tracking-wider bg-zinc-900 text-lime-400 px-2.5 py-1 rounded-lg border border-zinc-800">
-            Møglestuhallen 17:00 – 22:45
+            Møglestuhallen
           </span>
         </div>
 
@@ -157,7 +154,7 @@ export const EventHero: React.FC<EventHeroProps> = ({
               </div>
               <h4 className="font-black text-white uppercase text-xs">Fellesmøte</h4>
               <p className="text-zinc-300 text-[11px] mt-1 leading-snug font-medium">
-                Lovsang, lek, Moshpit-sanger & tale v/ Eivind Galdal (SALT Bergen)!
+                Band & tale v/ Eivind Galdal
               </p>
             </div>
           </div>
@@ -175,7 +172,7 @@ export const EventHero: React.FC<EventHeroProps> = ({
             </div>
           </div>
 
-          {/* 22:30 - 22:45 */}
+          {/* 22:30 */}
           <div className="p-3 rounded-xl bg-zinc-900 border-2 border-amber-400/40 shadow-artistic-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-1.5">
@@ -186,7 +183,7 @@ export const EventHero: React.FC<EventHeroProps> = ({
               </div>
               <h4 className="font-black text-white uppercase text-xs">Premieutdeling</h4>
               <p className="text-zinc-400 text-[11px] mt-1 leading-snug">
-                Høytidelig premiering av vinnere! Arrangementet avsluttes kl. 22:45.
+                Høytidelig premiering av vinnere og kveldens avslutning!
               </p>
             </div>
           </div>

@@ -56,7 +56,7 @@ export const KioskSection: React.FC<KioskSectionProps> = ({
               Kioskmeny & Varmmat
             </h3>
             <p className="text-xs sm:text-sm text-zinc-400 font-medium">
-              Åpen fra kl. 17:00 til 22:45 i Møglestuhallen
+              Åpen fra kl. 17:00 til 22:00 i Møglestuhallen
             </p>
           </div>
           <span className="text-xs font-black uppercase tracking-wider bg-zinc-950 text-zinc-300 px-3.5 py-1.5 rounded-xl border-2 border-zinc-800 shadow-artistic-sm">
