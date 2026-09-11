@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Play, Pause, Square, RotateCcw, RefreshCw, Trophy, Check, AlertTriangle, Clock, Maximize2, Sliders, CheckCircle2, FastForward, FlaskConical, X, Lock, Unlock } from 'lucide-react';
+import { Play, Pause, Square, RotateCcw, RefreshCw, Trophy, Check, AlertTriangle, Clock, Maximize2, Sliders, CheckCircle2, FastForward, FlaskConical, X, Lock, Unlock, ChevronDown, ChevronUp } from 'lucide-react';
 import { Match, Person, Tournament, TournamentFormatSettings, TargetPoints, WinMargin, NumberOfSets, TournamentStage } from '../types';
 import { useTournamentSimulator, SimulatorDelay } from '../hooks/useTournamentSimulator';
 import {
@@ -66,6 +66,7 @@ interface TableTennisAdminPanelProps {
   onAssignTable: (matchId: string, tableNumber: 1 | 2 | null, status?: string) => void;
   onOpenScoreModal: (match: Match) => void;
   onRequestResetMatch?: (match: Match) => void;
+  onSetCapacity?: (capacity: 8 | 16 | 32 | 64) => void | Promise<void>;
   onExpandCapacity?: (capacity: 32 | 64) => void | Promise<void>;
   onSimTournamentChange?: (tournament: Tournament | null) => void;
 }
@@ -78,13 +79,14 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
   onAssignTable,
   onOpenScoreModal,
   onRequestResetMatch,
+  onSetCapacity,
   onExpandCapacity,
   onSimTournamentChange,
 }) => {
   const [showAllCompleted, setShowAllCompleted] = useState(false);
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
-  const [showExpandPanel, setShowExpandPanel] = useState(false);
   const [showFormatPanel, setShowFormatPanel] = useState(false);
+  const [isFormatBoxCollapsed, setIsFormatBoxCollapsed] = useState(true);
   const [showSimulatorPanel, setShowSimulatorPanel] = useState(false);
 
   // Editable format configuration per stage
@@ -438,13 +440,13 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
         </div>
       )}
 
-      {/* Cup capacity — standard 16, expandable to 32 / 64 */}
+      {/* Cup capacity — selectable tiers: 8, 16, 32, 64 */}
       {tournament.status === 'registration' && (
         <div className="p-5 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
               <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 block mb-1">
-                Cup-størrelse
+                Cup-størrelse (Maks tak)
               </span>
               <h3 className="text-lg font-black text-white uppercase">
                 {bracketCapacity} spillere
@@ -462,406 +464,102 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
                 )}
               </p>
               <p className="text-[10px] text-zinc-500 font-medium mt-1">
-                Minst {bracketCapacity / 2} spillere for å starte cupen.
+                Minst 4 spillere for å starte cupen.
               </p>
             </div>
-            {nextCapacityTier && onExpandCapacity && !showExpandPanel && (
-              <button
-                type="button"
-                onClick={() => setShowExpandPanel(true)}
-                className="self-start px-4 py-2.5 rounded-2xl bg-zinc-950 border-2 border-lime-400/40 hover:border-lime-400 text-lime-300 text-xs font-black uppercase tracking-wider flex items-center gap-2"
-              >
-                <Maximize2 className="w-4 h-4" />
-                Utvid cup
-              </button>
+            <div className="flex flex-wrap items-center gap-2">
+              {isRegistrationOpen && !cupAlreadyDrawn && (
+                <button
+                  type="button"
+                  onClick={onDrawCup}
+                  disabled={!drawCupEnabled}
+                  title={
+                    drawCupEnabled
+                      ? drawCupWalkovers > 0
+                        ? `Trekk ${drawCupCapacity}-slots cup med ${drawCupWalkovers} walkover${drawCupWalkovers > 1 ? 's' : ''}`
+                        : `Trekk cup for ${tournament.participants.length} spillere`
+                      : 'Minst 4 påmeldte kreves for å trekke cup.'
+                  }
+                  className="px-4 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm"
+                >
+                  <Play className="w-4 h-4" />
+                  Trekk cup
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Valg av maks tak: 8, 16, 32, 64 */}
+          <div className="pt-2 border-t border-zinc-800/80">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
+                Velg maks tak for cupen
+              </span>
+              <span className="text-[10px] font-bold text-zinc-500">
+                8, 16, 32 eller 64 plasser
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {([8, 16, 32, 64] as const).map((tier) => {
+                const isCurrent = bracketCapacity === tier;
+                const isTooSmall = tournament.participants.length > tier;
+                return (
+                  <button
+                    key={tier}
+                    type="button"
+                    disabled={isTooSmall || isCurrent || overlayOpen}
+                    onClick={() => {
+                      if (onSetCapacity) {
+                        onSetCapacity(tier);
+                      } else if (onExpandCapacity && (tier === 32 || tier === 64)) {
+                        onExpandCapacity(tier);
+                      }
+                    }}
+                    className={`py-3 px-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 border ${
+                      isCurrent
+                        ? 'bg-lime-400 text-zinc-950 border-lime-400 shadow-artistic-sm cursor-default'
+                        : isTooSmall
+                        ? 'bg-zinc-950/50 border-zinc-900 text-zinc-600 cursor-not-allowed'
+                        : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:border-lime-400/60 hover:text-white active:scale-95'
+                    }`}
+                    title={
+                      isTooSmall
+                        ? `Kan ikke velge ${tier} fordi det allerede er ${tournament.participants.length} påmeldte`
+                        : isCurrent
+                        ? `Gjeldende tak: ${tier} spillere`
+                        : `Sett maks tak til ${tier} spillere`
+                    }
+                  >
+                    <span className="text-sm font-black flex items-center gap-1.5">
+                      {isCurrent && <CheckCircle2 className="w-3.5 h-3.5 text-zinc-950" />}
+                      {tier} spillere
+                    </span>
+                    <span
+                      className={`text-[10px] font-medium ${
+                        isCurrent ? 'text-zinc-800 font-bold' : 'text-zinc-500'
+                      }`}
+                    >
+                      {tier === 8 && 'Kvartfinaler (4)'}
+                      {tier === 16 && 'Åttedelsfinaler (8)'}
+                      {tier === 32 && '32-dels (16)'}
+                      {tier === 64 && '64-dels (32)'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {tournament.participants.length > 8 && (
+              <p className="text-[10px] text-zinc-500 font-medium mt-2">
+                * Størrelser lavere enn antall påmeldte ({tournament.participants.length}) er deaktivert for å hindre tap av deltakere.
+              </p>
             )}
           </div>
 
           <RoundStructurePreview capacity={bracketCapacity} />
-
-          {showExpandPanel && nextCapacityTier && onExpandCapacity && (
-            <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-lime-400/30 space-y-3">
-              <p className="text-sm font-bold text-white">
-                Utvid til <strong className="text-lime-400">{nextCapacityTier} spillere</strong>
-              </p>
-              <p className="text-xs text-zinc-400 font-medium">
-                Runde 1 går fra {capacityInfo.round1Matches} til {nextCapacityTier / 2} kamper.
-                Neste runde halveres som vanlig helt til finalen.
-              </p>
-              <RoundStructurePreview capacity={nextCapacityTier} />
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await onExpandCapacity(nextCapacityTier);
-                    setShowExpandPanel(false);
-                  }}
-                  className="px-4 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 text-xs font-black uppercase tracking-wider"
-                >
-                  Bekreft utvidelse til {nextCapacityTier}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowExpandPanel(false)}
-                  className="px-4 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 text-xs font-black uppercase tracking-wider"
-                >
-                  Avbryt
-                </button>
-              </div>
-            </div>
-          )}
-
-          {bracketCapacity === 64 && (
-            <p className="text-[10px] text-zinc-500 font-medium">
-              Maksimal cup-størrelse (64 spillere, 32 kamper i runde 1).
-            </p>
-          )}
         </div>
       )}
 
-      {/* Flexible Kampformat & Tidsestimat Panel */}
-      <div className="p-5 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-lime-400 block mb-1">
-              Innstillinger
-            </span>
-            <h3 className="text-lg font-black text-white uppercase flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-lime-400" />
-              Kampformat &amp; Tid
-            </h3>
-            <p className="text-xs text-zinc-400 font-medium mt-0.5">
-              Konfigurer sett, målpoeng og vinnemargin for cuprunder, semifinale og finale.
-              Endringer gjelder umiddelbart for kamper som ikke er startet.
-            </p>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (!showFormatPanel) {
-                setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
-                setFormatSaveSuccess(false);
-                setFormatSaveError(null);
-              }
-              setShowFormatPanel(!showFormatPanel);
-            }}
-            className="self-start px-4 py-2 rounded-2xl bg-zinc-950 border-2 border-zinc-800 hover:border-lime-400 text-zinc-200 text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-colors"
-          >
-            <Sliders className="w-3.5 h-3.5 text-lime-400" />
-            {showFormatPanel ? 'Skjul oppsett' : 'Endre oppsett'}
-          </button>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
-          <div className="min-w-0">
-            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block mb-1">
-              Status på turnering
-            </span>
-            <strong className="text-sm font-black text-lime-400 uppercase">{tournamentStatusLabel}</strong>
-            <span className="text-[11px] text-zinc-500 font-medium block mt-0.5">
-              {tournament.participants.length} spillere · {capacityInfo.round1Matches} kamper r1 ·{' '}
-              {stats.totalMatches} kamper · {stats.completedMatches} ferdige
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="text-right">
-              <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block">
-                Påmelding
-              </span>
-              <span
-                className={`text-xs font-black uppercase ${
-                  isRegistrationOpen ? 'text-lime-400' : 'text-zinc-400'
-                }`}
-              >
-                {isRegistrationOpen ? 'Åpen' : 'Låst'}
-              </span>
-            </div>
-            <div
-              role="status"
-              aria-label={isRegistrationOpen ? 'Påmelding åpen' : 'Påmelding låst'}
-              title={
-                cupAlreadyDrawn
-                  ? 'Cup er trukket. Nullstill cup i Test-fanen for å åpne påmelding på nytt.'
-                  : isRegistrationOpen
-                  ? 'Påmelding er åpen til du trekker cupen'
-                  : 'Påmelding er låst'
-              }
-              className={`relative w-14 h-8 rounded-full ${
-                isRegistrationOpen ? 'bg-lime-400' : 'bg-zinc-700'
-              }`}
-            >
-              <span
-                className={`absolute top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ${
-                  isRegistrationOpen ? 'left-7' : 'left-1'
-                }`}
-              >
-                {isRegistrationOpen ? (
-                  <Unlock className="w-3.5 h-3.5 text-lime-600" />
-                ) : (
-                  <Lock className="w-3.5 h-3.5 text-zinc-500" />
-                )}
-              </span>
-            </div>
-
-            {isRegistrationOpen && !cupAlreadyDrawn && (
-              <button
-                type="button"
-                onClick={onDrawCup}
-                disabled={!drawCupEnabled}
-                title={
-                  drawCupEnabled
-                    ? drawCupWalkovers > 0
-                      ? `Trekk ${drawCupCapacity}-slots cup med ${drawCupWalkovers} walkover${drawCupWalkovers > 1 ? 's' : ''}`
-                      : `Trekk cup for ${tournament.participants.length} spillere`
-                    : 'Cup er allerede trukket. Nullstill cup i Test-fanen før ny trekning.'
-                }
-                className="px-4 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm"
-              >
-                <Play className="w-4 h-4" />
-                Trekk cup
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Summary Badges */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          {(
-            [
-              { key: 'regular' as TournamentStage, title: 'Cuprunder' },
-              { key: 'semifinal' as TournamentStage, title: 'Semifinale' },
-              { key: 'final' as TournamentStage, title: 'Finale' },
-            ] as const
-          ).map(({ key, title }) => {
-            const conf =
-              normalizeFormatSettings(tournament.formatSettings)[key] || DEFAULT_FORMAT_SETTINGS[key];
-            return (
-              <div key={key} className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs">
-                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block mb-1">
-                  {title}
-                </span>
-                <div className="font-bold text-white flex items-center gap-1.5">
-                  <span className="text-lime-400">{conf.sets} sett</span>
-                  <span className="text-zinc-600">·</span>
-                  <span>{conf.targetPoints}p (margin {conf.winMargin})</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Editable Match Minutes */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
-          <div className="text-xs">
-            <span className="font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-lime-400" />
-              Estimert spilletid per kamp
-            </span>
-            <span className="text-[11px] text-zinc-500 font-medium block">
-              Brukes til å beregne resttid (totalt ~{stats.estimatedRemainingMinutes} min gjenstår)
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {[5, 8, 10, 15, 20].map((mins) => (
-              <button
-                key={mins}
-                type="button"
-                onClick={() => handleMinutesChange(mins)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-colors ${
-                  estimatedMinutes === mins
-                    ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
-                    : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
-                }`}
-              >
-                {mins}m
-              </button>
-            ))}
-            <div className="flex items-center gap-1 ml-1">
-              <input
-                type="number"
-                min={3}
-                max={60}
-                value={estimatedMinutes}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  if (!isNaN(val) && val > 0) handleMinutesChange(val);
-                }}
-                className="w-14 px-2 py-1 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-bold text-xs text-center focus:outline-none focus:border-lime-400"
-              />
-              <span className="text-[11px] text-zinc-500 font-bold">min</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Expandable Configuration Drawer */}
-        {showFormatPanel && (
-          <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-lime-400/40 space-y-4 shadow-artistic-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
-              <div>
-                <p className="text-xs font-bold text-zinc-200">
-                  Juster innstillingene for hvert trinn i turneringen:
-                </p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Gjør alle de valgene du ønsker på tvers av rundene, og klikk deretter «Lagre formatendringer».
-                </p>
-              </div>
-              {hasUnsavedFormatChanges ? (
-                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 animate-pulse">
-                  ● Ulagrede endringer
-                </span>
-              ) : (
-                <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-500 border border-zinc-800">
-                  Valg er lagret
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {(
-                [
-                  { key: 'regular' as TournamentStage, title: 'Vanlige cuprunder' },
-                  { key: 'semifinal' as TournamentStage, title: 'Semifinale' },
-                  { key: 'final' as TournamentStage, title: 'Finale' },
-                ] as const
-              ).map(({ key, title }) => {
-                const conf = formatDraft[key];
-                return (
-                  <div key={key} className="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-3">
-                    <span className="text-xs font-black text-white uppercase block border-b border-zinc-800 pb-1.5">
-                      {title}
-                    </span>
-
-                    {/* Sets */}
-                    <div>
-                      <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1">
-                        Antall sett
-                      </label>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {([1, 3] as NumberOfSets[]).map((sets) => (
-                          <button
-                            key={sets}
-                            type="button"
-                            onClick={() =>
-                              setFormatDraft((prev) => ({
-                                ...prev,
-                                [key]: { ...prev[key], sets },
-                              }))
-                            }
-                            className={`py-1.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
-                              conf.sets === sets
-                                ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
-                                : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
-                            }`}
-                          >
-                            {sets} {sets === 1 ? 'sett' : 'sett (best av 3)'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Target points */}
-                    <div>
-                      <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1">
-                        Målpoeng
-                      </label>
-                      <div className="grid grid-cols-4 gap-1">
-                        {([6, 7, 11, 21] as TargetPoints[]).map((pts) => (
-                          <button
-                            key={pts}
-                            type="button"
-                            onClick={() =>
-                              setFormatDraft((prev) => ({
-                                ...prev,
-                                [key]: { ...prev[key], targetPoints: pts },
-                              }))
-                            }
-                            className={`py-1 rounded-lg text-xs font-black transition-colors ${
-                              conf.targetPoints === pts
-                                ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
-                                : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
-                            }`}
-                          >
-                            {pts}p
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Win margin */}
-                    <div>
-                      <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1">
-                        Vinnemargin
-                      </label>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {([1, 2] as WinMargin[]).map((margin) => (
-                          <button
-                            key={margin}
-                            type="button"
-                            onClick={() =>
-                              setFormatDraft((prev) => ({
-                                ...prev,
-                                [key]: { ...prev[key], winMargin: margin },
-                              }))
-                            }
-                            className={`py-1.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
-                              conf.winMargin === margin
-                                ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
-                                : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
-                            }`}
-                          >
-                            Margin {margin} {margin === 2 ? '(deuce)' : '(først til mål)'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {formatSaveError && (
-              <p className="text-xs text-rose-400 font-bold">{formatSaveError}</p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <button
-                type="button"
-                disabled={formatSaveLoading || overlayOpen}
-                onClick={handleSaveFormat}
-                className={`px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 transition-all ${
-                  hasUnsavedFormatChanges
-                    ? 'bg-lime-400 hover:bg-lime-300 text-zinc-950 ring-2 ring-lime-400/60'
-                    : 'bg-lime-400/80 hover:bg-lime-400 text-zinc-950'
-                }`}
-              >
-                <Check className="w-4 h-4" />
-                {formatSaveLoading ? 'Lagrer...' : 'Lagre formatendringer'}
-              </button>
-
-              {formatSaveSuccess && (
-                <span className="text-xs font-bold text-lime-400 flex items-center gap-1">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Format lagret for alle ustartede kamper!
-                </span>
-              )}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
-                  setShowFormatPanel(false);
-                }}
-                className="px-4 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white text-xs font-black uppercase tracking-wider transition-colors"
-              >
-                Lukk
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Active tables */}
       {tournament.matches.length > 0 && (
@@ -1181,6 +879,404 @@ export const TableTennisAdminPanel: React.FC<TableTennisAdminPanelProps> = ({
           </p>
         </div>
       )}
+
+      {/* Flexible Kampformat & Tidsestimat Panel - Collapsible at Bottom */}
+      <div className="rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm overflow-hidden transition-all">
+        <button
+          type="button"
+          id="toggle-format-panel-btn"
+          onClick={() => setIsFormatBoxCollapsed(!isFormatBoxCollapsed)}
+          className="w-full p-5 text-left flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-zinc-800/40 transition-colors"
+        >
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0">
+              <Sliders className="w-4 h-4 text-lime-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-lime-400">
+                  Innstillinger
+                </span>
+                <span className="text-zinc-600 font-bold">•</span>
+                <span className="text-[10px] font-mono text-zinc-400">
+                  {tournamentStatusLabel}
+                </span>
+              </div>
+              <h3 className="text-base sm:text-lg font-black text-white uppercase flex items-center gap-2">
+                Kampformat &amp; Tid
+              </h3>
+              {isFormatBoxCollapsed && (
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-[11px] font-medium text-zinc-400">
+                  <span className="px-2 py-0.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300">
+                    Cup: <span className="text-lime-400 font-bold">{formatDraft.regular.sets} sett ({formatDraft.regular.targetPoints}p)</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300">
+                    Semi: <span className="text-lime-400 font-bold">{formatDraft.semifinal.sets}s</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300">
+                    Finale: <span className="text-lime-400 font-bold">{formatDraft.final.sets}s</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300">
+                    ~{estimatedMinutes}m / kamp
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-center shrink-0 mt-1 sm:mt-0">
+            <span className="px-3.5 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
+              {isFormatBoxCollapsed ? (
+                <>
+                  <span>Åpne innstillinger</span>
+                  <ChevronDown className="w-4 h-4 text-lime-400" />
+                </>
+              ) : (
+                <>
+                  <span>Kollaps</span>
+                  <ChevronUp className="w-4 h-4 text-zinc-400" />
+                </>
+              )}
+            </span>
+          </div>
+        </button>
+
+        {!isFormatBoxCollapsed && (
+          <div className="p-5 pt-2 border-t border-zinc-800/80 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p className="text-xs text-zinc-400 font-medium">
+                Konfigurer sett, målpoeng og vinnemargin for cuprunder, semifinale og finale.
+                Endringer gjelder umiddelbart for kamper som ikke er startet.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!showFormatPanel) {
+                    setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
+                    setFormatSaveSuccess(false);
+                    setFormatSaveError(null);
+                  }
+                  setShowFormatPanel(!showFormatPanel);
+                }}
+                className="self-start px-4 py-2 rounded-2xl bg-zinc-950 border-2 border-zinc-800 hover:border-lime-400 text-zinc-200 text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-colors shrink-0"
+              >
+                <Sliders className="w-3.5 h-3.5 text-lime-400" />
+                {showFormatPanel ? 'Skjul oppsett' : 'Endre oppsett'}
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <div className="min-w-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block mb-1">
+                  Status på turnering
+                </span>
+                <strong className="text-sm font-black text-lime-400 uppercase">{tournamentStatusLabel}</strong>
+                <span className="text-[11px] text-zinc-500 font-medium block mt-0.5">
+                  {tournament.participants.length} spillere · {capacityInfo.round1Matches} kamper r1 ·{' '}
+                  {stats.totalMatches} kamper · {stats.completedMatches} ferdige
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <div className="text-right">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block">
+                    Påmelding
+                  </span>
+                  <span
+                    className={`text-xs font-black uppercase ${
+                      isRegistrationOpen ? 'text-lime-400' : 'text-zinc-400'
+                    }`}
+                  >
+                    {isRegistrationOpen ? 'Åpen' : 'Låst'}
+                  </span>
+                </div>
+                <div
+                  role="status"
+                  aria-label={isRegistrationOpen ? 'Påmelding åpen' : 'Påmelding låst'}
+                  title={
+                    cupAlreadyDrawn
+                      ? 'Cup er trukket. Nullstill cup i Test-fanen for å åpne påmelding på nytt.'
+                      : isRegistrationOpen
+                      ? 'Påmelding er åpen til du trekker cupen'
+                      : 'Påmelding er låst'
+                  }
+                  className={`relative w-14 h-8 rounded-full ${
+                    isRegistrationOpen ? 'bg-lime-400' : 'bg-zinc-700'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ${
+                      isRegistrationOpen ? 'left-7' : 'left-1'
+                    }`}
+                  >
+                    {isRegistrationOpen ? (
+                      <Unlock className="w-3.5 h-3.5 text-lime-600" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5 text-zinc-500" />
+                    )}
+                  </span>
+                </div>
+
+                {isRegistrationOpen && !cupAlreadyDrawn && (
+                  <button
+                    type="button"
+                    onClick={onDrawCup}
+                    disabled={!drawCupEnabled}
+                    title={
+                      drawCupEnabled
+                        ? drawCupWalkovers > 0
+                          ? `Trekk ${drawCupCapacity}-slots cup med ${drawCupWalkovers} walkover${drawCupWalkovers > 1 ? 's' : ''}`
+                          : `Trekk cup for ${tournament.participants.length} spillere`
+                        : 'Cup er allerede trukket. Nullstill cup i Test-fanen før ny trekning.'
+                    }
+                    className="px-4 py-2.5 rounded-2xl bg-lime-400 hover:bg-lime-300 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-950 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm"
+                  >
+                    <Play className="w-4 h-4" />
+                    Trekk cup
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Summary Badges */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              {(
+                [
+                  { key: 'regular' as TournamentStage, title: 'Cuprunder' },
+                  { key: 'semifinal' as TournamentStage, title: 'Semifinale' },
+                  { key: 'final' as TournamentStage, title: 'Finale' },
+                ] as const
+              ).map(({ key, title }) => {
+                const conf =
+                  normalizeFormatSettings(tournament.formatSettings)[key] || DEFAULT_FORMAT_SETTINGS[key];
+                return (
+                  <div key={key} className="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 block mb-1">
+                      {title}
+                    </span>
+                    <div className="font-bold text-white flex items-center gap-1.5">
+                      <span className="text-lime-400">{conf.sets} sett</span>
+                      <span className="text-zinc-600">·</span>
+                      <span>{conf.targetPoints}p (margin {conf.winMargin})</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Editable Match Minutes */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <div className="text-xs">
+                <span className="font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-lime-400" />
+                  Estimert spilletid per kamp
+                </span>
+                <span className="text-[11px] text-zinc-500 font-medium block">
+                  Brukes til å beregne resttid (totalt ~{stats.estimatedRemainingMinutes} min gjenstår)
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {[5, 8, 10, 15, 20].map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    onClick={() => handleMinutesChange(mins)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-colors ${
+                      estimatedMinutes === mins
+                        ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
+                        : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+                <div className="flex items-center gap-1 ml-1">
+                  <input
+                    type="number"
+                    min={3}
+                    max={60}
+                    value={estimatedMinutes}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      if (!isNaN(val) && val > 0) handleMinutesChange(val);
+                    }}
+                    className="w-14 px-2 py-1 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono font-bold text-xs text-center focus:outline-none focus:border-lime-400"
+                  />
+                  <span className="text-[11px] text-zinc-500 font-bold">min</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Expandable Configuration Drawer */}
+            {showFormatPanel && (
+              <div className="p-4 rounded-2xl bg-zinc-950 border-2 border-lime-400/40 space-y-4 shadow-artistic-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+                  <div>
+                    <p className="text-xs font-bold text-zinc-200">
+                      Juster innstillingene for hvert trinn i turneringen:
+                    </p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      Gjør alle de valgene du ønsker på tvers av rundene, og klikk deretter «Lagre formatendringer».
+                    </p>
+                  </div>
+                  {hasUnsavedFormatChanges ? (
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 animate-pulse">
+                      ● Ulagrede endringer
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-500 border border-zinc-800">
+                      Valg er lagret
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(
+                    [
+                      { key: 'regular' as TournamentStage, title: 'Vanlige cuprunder' },
+                      { key: 'semifinal' as TournamentStage, title: 'Semifinale' },
+                      { key: 'final' as TournamentStage, title: 'Finale' },
+                    ] as const
+                  ).map(({ key, title }) => {
+                    const conf = formatDraft[key];
+                    return (
+                      <div key={key} className="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-3">
+                        <span className="text-xs font-black text-white uppercase block border-b border-zinc-800 pb-1.5">
+                          {title}
+                        </span>
+
+                        {/* Sets */}
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1">
+                            Antall sett
+                          </label>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {([1, 3] as NumberOfSets[]).map((sets) => (
+                              <button
+                                key={sets}
+                                type="button"
+                                onClick={() =>
+                                  setFormatDraft((prev) => ({
+                                    ...prev,
+                                    [key]: { ...prev[key], sets },
+                                  }))
+                                }
+                                className={`py-1.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
+                                  conf.sets === sets
+                                    ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
+                                    : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
+                                }`}
+                              >
+                                {sets} {sets === 1 ? 'sett' : 'sett (best av 3)'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Target points */}
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1">
+                            Målpoeng
+                          </label>
+                          <div className="grid grid-cols-4 gap-1">
+                            {([6, 7, 11, 21] as TargetPoints[]).map((pts) => (
+                              <button
+                                key={pts}
+                                type="button"
+                                onClick={() =>
+                                  setFormatDraft((prev) => ({
+                                    ...prev,
+                                    [key]: { ...prev[key], targetPoints: pts },
+                                  }))
+                                }
+                                className={`py-1 rounded-lg text-xs font-black transition-colors ${
+                                  conf.targetPoints === pts
+                                    ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
+                                    : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
+                                }`}
+                              >
+                                {pts}p
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Win margin */}
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-zinc-500 block mb-1">
+                            Vinnemargin
+                          </label>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {([1, 2] as WinMargin[]).map((margin) => (
+                              <button
+                                key={margin}
+                                type="button"
+                                onClick={() =>
+                                  setFormatDraft((prev) => ({
+                                    ...prev,
+                                    [key]: { ...prev[key], winMargin: margin },
+                                  }))
+                                }
+                                className={`py-1.5 px-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors ${
+                                  conf.winMargin === margin
+                                    ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm'
+                                    : 'bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white'
+                                }`}
+                              >
+                                Margin {margin} {margin === 2 ? '(deuce)' : '(først til mål)'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {formatSaveError && (
+                  <p className="text-xs text-rose-400 font-bold">{formatSaveError}</p>
+                )}
+
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    disabled={formatSaveLoading || overlayOpen}
+                    onClick={handleSaveFormat}
+                    className={`px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-artistic-sm active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 transition-all ${
+                      hasUnsavedFormatChanges
+                        ? 'bg-lime-400 hover:bg-lime-300 text-zinc-950 ring-2 ring-lime-400/60'
+                        : 'bg-lime-400/80 hover:bg-lime-400 text-zinc-950'
+                    }`}
+                  >
+                    <Check className="w-4 h-4" />
+                    {formatSaveLoading ? 'Lagrer...' : 'Lagre formatendringer'}
+                  </button>
+
+                  {formatSaveSuccess && (
+                    <span className="text-xs font-bold text-lime-400 flex items-center gap-1">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Format lagret for alle ustartede kamper!
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormatDraft(normalizeFormatSettings(tournament.formatSettings));
+                      setShowFormatPanel(false);
+                    }}
+                    className="px-4 py-2.5 rounded-2xl bg-zinc-900 border-2 border-zinc-800 text-zinc-400 hover:text-white text-xs font-black uppercase tracking-wider transition-colors"
+                  >
+                    Lukk
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -61,6 +61,7 @@ import {
   resetAlpha,
   resetTestData,
   resetAllData,
+  setTournamentCapacity,
   expandTournamentCapacity,
   getFirestoreStatus,
   syncFirestore,
@@ -603,24 +604,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  // Run test simulation
+  // Set tournament capacity (8, 16, 32, 64)
+  const handleSetCapacity = async (capacity: 8 | 16 | 32 | 64) => {
+    try {
+      await setTournamentCapacity(capacity);
+      onRefresh();
+      showToast(`Cup-størrelse satt til ${capacity} spillere!`, 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Kunne ikke endre cup-størrelse', 'error');
+    }
+  };
+
   const handleExpandCapacity = (capacity: 32 | 64) => {
-    setConfirmDialog({
-      isOpen: true,
-      title: `Utvid cup-oppsett til ${capacity} plasser`,
-      message: `Utvide cupen til ${capacity} spillere (${capacity / 2} kamper i runde 1)?`,
-      confirmLabel: `Utvid til ${capacity}`,
-      variant: 'primary',
-      onConfirm: async () => {
-        try {
-          await expandTournamentCapacity(capacity);
-          onRefresh();
-          showToast(`Cup-kapasiteten er utvidet til ${capacity} plasser!`, 'success');
-        } catch (err: any) {
-          showToast(err.message || 'Kunne ikke utvide cup-størrelse', 'error');
-        }
-      },
-    });
+    handleSetCapacity(capacity);
   };
 
   const handleSimulate = (count: number) => {
@@ -1310,6 +1306,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             onAssignTable={handleAssignTable}
             onOpenScoreModal={openScoreModal}
             onRequestResetMatch={openResetMatchModal}
+            onSetCapacity={handleSetCapacity}
             onExpandCapacity={handleExpandCapacity}
             onSimTournamentChange={setSimTournament}
           />

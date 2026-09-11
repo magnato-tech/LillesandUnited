@@ -14,7 +14,7 @@ interface TableTennisViewProps {
   state: AppState;
   myPlayerName: string | null;
   onSetMyPlayer: (name: string | null) => void;
-  onRegister: (firstName: string, personId: string) => Promise<void>;
+  onRegister: (firstName: string, personId?: string) => Promise<void>;
   onGoToAdmin: () => void;
   activePersonId?: string | null;
   activePerson?: Person | null;
@@ -67,19 +67,12 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
   // Handle player registration
   const handleSubmitRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activePersonId) {
-      setFeedbackMsg({
-        type: 'error',
-        text: 'Du må velge hvem du er i menyen øverst (eller opprett profil under Min profil) før du melder deg på.',
-      });
-      return;
-    }
     if (!nameInput.trim()) return;
 
     setIsSubmitting(true);
     setFeedbackMsg(null);
     try {
-      await onRegister(nameInput.trim(), activePersonId);
+      await onRegister(nameInput.trim(), activePersonId || '');
       setFeedbackMsg({
         type: 'success',
         text: `Du er nå påmeldt bordtenniscupen! Følg med her for å se når du skal spille.`,
@@ -390,9 +383,9 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
             </p>
 
             {!activePersonId && (
-              <div className="mb-4 p-3.5 rounded-2xl bg-amber-400/10 border-2 border-amber-400/30 text-xs font-bold text-amber-200 flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 shrink-0" />
-                <span>Velg eller opprett profil i headeren før du melder deg på.</span>
+              <div className="mb-4 p-3 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-xs font-medium text-zinc-300 flex items-center gap-2">
+                <span className="text-lime-400 font-bold">Tips:</span>
+                <span>Skriv navnet ditt nedenfor og trykk «Bli med!» for å melde deg på cupen.</span>
               </div>
             )}
 
@@ -416,7 +409,7 @@ export const TableTennisView: React.FC<TableTennisViewProps> = ({
               <button
                 id="submit-registration-btn"
                 type="submit"
-                disabled={isSubmitting || !nameInput.trim() || !activePersonId || isAlreadyRegistered}
+                disabled={isSubmitting || !nameInput.trim() || isAlreadyRegistered}
                 className={`px-6 py-3.5 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-transform active:translate-x-0.5 active:translate-y-0.5 shrink-0 shadow-artistic-sm ${
                   isAlreadyRegistered
                     ? 'bg-lime-400/80 text-zinc-950 border-2 border-lime-400'

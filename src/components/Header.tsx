@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Sparkles, Tv, ShieldCheck, Home, Popcorn, User } from 'lucide-react';
+import { Trophy, Sparkles, ShieldCheck, Home, Popcorn, User } from 'lucide-react';
 import { Person } from '../types';
 
 interface HeaderProps {
@@ -126,20 +126,6 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
-              id="nav-display-btn"
-              onClick={() => setCurrentTab('display')}
-              className={`px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 border ${
-                currentTab === 'display'
-                  ? 'bg-purple-500 text-white border-purple-500 shadow-artistic-sm'
-                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900 border-transparent hover:border-zinc-800'
-              }`}
-              title="Storskjermmodus for projektor i hallen"
-            >
-              <Tv className="w-4 h-4" />
-              Storskjerm
-            </button>
-
-            <button
               id="nav-admin-btn"
               onClick={() => setCurrentTab('admin')}
               className={`px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 border ${
@@ -173,65 +159,6 @@ export const Header: React.FC<HeaderProps> = ({
               <ShieldCheck className="w-4 h-4" />
             </button>
           </div>
-        </div>
-
-        {/* Mobile Bottom Sub-navigation bar */}
-        <div className="md:hidden flex items-center justify-between gap-1 py-2 border-t-2 border-zinc-900 overflow-x-auto">
-          <button
-            onClick={() => setCurrentTab('home')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1 shrink-0 ${
-              currentTab === 'home' ? 'bg-zinc-800 text-lime-400 shadow-artistic-sm' : 'text-zinc-400'
-            }`}
-          >
-            <Home className="w-3.5 h-3.5" />
-            Oversikt
-          </button>
-          <button
-            id="mobile-nav-profile-btn"
-            onClick={() => setCurrentTab('profile')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1 shrink-0 ${
-              currentTab === 'profile' ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm font-black' : 'text-zinc-400'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            {profileLabel ? profileLabel : 'Min side'}
-          </button>
-          <button
-            onClick={() => setCurrentTab('tabletennis')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1 shrink-0 ${
-              currentTab === 'tabletennis' ? 'bg-lime-400 text-zinc-950 shadow-artistic-sm' : 'text-zinc-400'
-            }`}
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            Bordtennis
-          </button>
-          <button
-            onClick={() => setCurrentTab('alpha')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1 shrink-0 ${
-              currentTab === 'alpha' ? 'bg-sky-400 text-zinc-950 shadow-artistic-sm' : 'text-zinc-400'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            Alpha
-          </button>
-          <button
-            onClick={() => setCurrentTab('kiosk')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1 shrink-0 ${
-              currentTab === 'kiosk' ? 'bg-orange-500 text-zinc-950 shadow-artistic-sm' : 'text-zinc-400'
-            }`}
-          >
-            <Popcorn className="w-3.5 h-3.5" />
-            Kiosk
-          </button>
-          <button
-            onClick={() => setCurrentTab('display')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-1 shrink-0 ${
-              currentTab === 'display' ? 'bg-purple-500 text-white shadow-artistic-sm' : 'text-zinc-400'
-            }`}
-          >
-            <Tv className="w-3.5 h-3.5" />
-            Storskjerm
-          </button>
         </div>
       </div>
     </header>

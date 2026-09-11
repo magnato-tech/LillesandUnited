@@ -605,9 +605,25 @@ app.post('/api/register', (req, res) => {
     state.tournament.status === 'registration' &&
     state.tournament.participants.length >= registrationCapacity
   ) {
-    return res.status(400).json({
-      error: `Cupen er full (${registrationCapacity} spillere). Be admin utvide cup-størrelsen.`,
-    });
+    // If the cup is full but contains simulated test players, let the real participant replace the last test player!
+    const lastSimIndex = state.tournament.participants
+      .map((p, idx) => ({ p, idx }))
+      .filter((item) => {
+        const isSimId = item.p.id?.startsWith('sim_');
+        const isSimPerson = item.p.personId
+          ? state.persons?.find((per) => per.id === item.p.personId)?.isSimulated
+          : false;
+        return isSimId || isSimPerson;
+      })
+      .pop()?.idx;
+
+    if (typeof lastSimIndex === 'number' && lastSimIndex >= 0) {
+      state.tournament.participants.splice(lastSimIndex, 1);
+    } else {
+      return res.status(400).json({
+        error: `Cupen er full (${registrationCapacity} spillere). Be admin utvide cup-størrelsen.`,
+      });
+    }
   }
 
   const participant: Participant = {
@@ -949,30 +965,28 @@ app.post('/api/tournament/reset', requireAdmin, (req, res) => {
   res.json({ success: true, state });
 });
 
-// Expand bracket capacity (Admin) — only during registration, doubles each step: 16 → 32 → 64
+// Set bracket capacity (Admin) — 8, 16, 32 or 64
 app.patch('/api/tournament/capacity', requireAdmin, (req, res) => {
   if (state.tournament.status !== 'registration') {
     return res.status(400).json({ error: 'Cup-størrelse kan bare endres under påmelding.' });
   }
 
-  const current = resolveBracketCapacity(
-    state.tournament.participants.length,
-    state.tournament.bracketCapacity ?? TOURNAMENT_DEFAULT_CAPACITY
-  );
-  const nextTier = getNextCapacityTier(current);
   const requested = Number(req.body?.capacity);
-
-  if (!nextTier) {
-    return res.status(400).json({ error: 'Cupen er allerede på maksimal størrelse (64 spillere).' });
-  }
-
-  if (requested !== nextTier) {
+  const validTiers = [8, 16, 32, 64];
+  if (!validTiers.includes(requested)) {
     return res.status(400).json({
-      error: `Du kan bare utvide til ${nextTier} spillere (${nextTier / 2} kamper i runde 1).`,
+      error: 'Ugyldig cup-størrelse. Velg mellom 8, 16, 32 eller 64 spillere.',
     });
   }
 
-  state.tournament.bracketCapacity = nextTier;
+  const enrolledCount = state.tournament.participants?.length || 0;
+  if (requested < enrolledCount) {
+    return res.status(400).json({
+      error: `Kan ikke sette cup-størrelse til ${requested} når det allerede er ${enrolledCount} påmeldte spillere.`,
+    });
+  }
+
+  state.tournament.bracketCapacity = requested as 8 | 16 | 32 | 64;
   saveState();
   res.json({ success: true, state });
 });

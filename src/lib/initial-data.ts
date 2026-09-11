@@ -164,9 +164,9 @@ export const SIMULATION_NAMES_64 = [
 
 export const SIMULATION_NAMES_31 = SIMULATION_NAMES_64.slice(0, 31);
 
-/** Standard og maks cup-størrelser (dobles ved utvidelse: 16 → 32 → 64). */
+/** Standard og maks cup-størrelser: 8, 16, 32, 64. */
 export const TOURNAMENT_DEFAULT_CAPACITY = 16;
-export const TOURNAMENT_CAPACITY_TIERS = [16, 32, 64] as const;
+export const TOURNAMENT_CAPACITY_TIERS = [8, 16, 32, 64] as const;
 export type BracketCapacity = (typeof TOURNAMENT_CAPACITY_TIERS)[number];
 export const DRAW_BRACKET_SIZES = [4, 8, 16, 32, 64] as const;
 export type DrawBracketCapacity = (typeof DRAW_BRACKET_SIZES)[number];

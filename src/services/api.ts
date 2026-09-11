@@ -298,16 +298,18 @@ export async function reDrawTournament(): Promise<AppState> {
   return data.state;
 }
 
-export async function expandTournamentCapacity(capacity: 32 | 64): Promise<AppState> {
+export async function setTournamentCapacity(capacity: 8 | 16 | 32 | 64): Promise<AppState> {
   const res = await fetch('/api/tournament/capacity', {
     method: 'PATCH',
     headers: getAdminHeaders(),
     body: JSON.stringify({ capacity }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Kunne ikke utvide cup-størrelse');
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke oppdatere cup-størrelse');
   return data.state;
 }
+
+export const expandTournamentCapacity = setTournamentCapacity as (capacity: 32 | 64) => Promise<AppState>;
 
 export async function updateTournamentFormat(
   formatSettings?: TournamentFormatSettings,

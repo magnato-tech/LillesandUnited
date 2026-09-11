@@ -1,5 +1,5 @@
-import React from 'react';
-import { Calendar, MapPin, Clock, Trophy, Sparkles, Popcorn, Users, CheckCircle2, ChevronRight, Music, Award, Flame } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Calendar, MapPin, Clock, Trophy, Sparkles, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { AppState, Person } from '../types';
 import { PopcornBongCard } from './PopcornBongCard';
 
@@ -32,6 +32,70 @@ export const EventHero: React.FC<EventHeroProps> = ({
     100,
     Math.round((state.event.popcornClaimedCount / state.event.freePopcornLimit) * 100)
   );
+
+  const isRegisteredInTournament = useMemo(() => {
+    const participants = state.tournament?.participants || [];
+    if (!participants.length) return false;
+
+    // Technical person IDs
+    const targetPersonId = activePersonId || activePerson?.id;
+    if (targetPersonId) {
+      const match = participants.some(
+        (p) => (p.personId && p.personId === targetPersonId) || p.id === targetPersonId
+      );
+      if (match) return true;
+    }
+
+    // Display ID (e.g. Magnar_1)
+    if (activePerson?.displayId) {
+      const dId = activePerson.displayId.trim().toLowerCase();
+      const match = participants.some(
+        (p) => p.displayId && p.displayId.trim().toLowerCase() === dId
+      );
+      if (match) return true;
+    }
+
+    // First name
+    if (activePerson?.firstName) {
+      const fName = activePerson.firstName.trim().toLowerCase();
+      const match = participants.some(
+        (p) => p.firstName && p.firstName.trim().toLowerCase() === fName
+      );
+      if (match) return true;
+    }
+
+    // Player name prop
+    if (myPlayerName && myPlayerName.trim()) {
+      const clean = myPlayerName.trim().toLowerCase();
+      const match = participants.some(
+        (p) =>
+          (p.firstName && p.firstName.trim().toLowerCase() === clean) ||
+          (p.displayId && p.displayId.trim().toLowerCase() === clean) ||
+          (clean.includes('_') && p.firstName && p.firstName.trim().toLowerCase() === clean.split('_')[0])
+      );
+      if (match) return true;
+    }
+
+    // Also check cached local player name if available
+    try {
+      if (typeof window !== 'undefined') {
+        const storedName = localStorage.getItem('lillesand_my_player_name');
+        if (storedName && storedName.trim()) {
+          const sClean = storedName.trim().toLowerCase();
+          const match = participants.some(
+            (p) =>
+              (p.firstName && p.firstName.trim().toLowerCase() === sClean) ||
+              (p.displayId && p.displayId.trim().toLowerCase() === sClean)
+          );
+          if (match) return true;
+        }
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+
+    return false;
+  }, [state.tournament?.participants, activePersonId, activePerson, myPlayerName]);
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-md p-6 sm:p-10 mb-8">
@@ -101,95 +165,6 @@ export const EventHero: React.FC<EventHeroProps> = ({
         </div>
       </div>
 
-      {/* Official Schedule / Kjøreplan Timeline Strip */}
-      <div className="mb-8 p-5 rounded-2xl bg-zinc-950 border-2 border-zinc-800 shadow-artistic-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b-2 border-zinc-900">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-lime-400" />
-            <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
-              Kveldens Kjøreplan
-            </h3>
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-wider bg-zinc-900 text-lime-400 px-2.5 py-1 rounded-lg border border-zinc-800">
-            Møglestuhallen
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
-          {/* 17:00 */}
-          <div className="p-3 rounded-xl bg-zinc-900 border-2 border-zinc-800/80 shadow-artistic-sm flex flex-col justify-between">
-            <div>
-              <span className="inline-block px-2 py-0.5 rounded bg-zinc-950 text-lime-400 font-mono font-black text-xs mb-1.5 border border-zinc-800">
-                17:00
-              </span>
-              <h4 className="font-black text-white uppercase text-xs">Dørene åpner</h4>
-              <p className="text-zinc-400 text-[11px] mt-1 leading-snug">
-                Ankomst, påmelding til aktiviteter, åpen kiosk og gratis popcorn til 100 første!
-              </p>
-            </div>
-          </div>
-
-          {/* 18:45 */}
-          <div className="p-3 rounded-xl bg-zinc-900 border-2 border-zinc-800/80 shadow-artistic-sm flex flex-col justify-between">
-            <div>
-              <span className="inline-block px-2 py-0.5 rounded bg-zinc-950 text-emerald-400 font-mono font-black text-xs mb-1.5 border border-zinc-800">
-                18:45
-              </span>
-              <h4 className="font-black text-white uppercase text-xs">Aktivitetsstart</h4>
-              <p className="text-zinc-400 text-[11px] mt-1 leading-snug">
-                Bordtenniscup, 5-er fotball og Mario Kart gaming starter i hallen.
-              </p>
-            </div>
-          </div>
-
-          {/* 21:00 */}
-          <div className="p-3 rounded-xl bg-zinc-900 border-2 border-rose-500/50 shadow-artistic-sm flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-rose-500/10 rounded-full blur-xl pointer-events-none" />
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="inline-block px-2 py-0.5 rounded bg-rose-500 text-zinc-950 font-mono font-black text-xs">
-                  21:00 – 21:45
-                </span>
-                <Flame className="w-3.5 h-3.5 text-rose-400" />
-              </div>
-              <h4 className="font-black text-white uppercase text-xs">Fellesmøte</h4>
-              <p className="text-zinc-300 text-[11px] mt-1 leading-snug font-medium">
-                Band & tale v/ Eivind Galdal
-              </p>
-            </div>
-          </div>
-
-          {/* 22:00 */}
-          <div className="p-3 rounded-xl bg-zinc-900 border-2 border-zinc-800/80 shadow-artistic-sm flex flex-col justify-between">
-            <div>
-              <span className="inline-block px-2 py-0.5 rounded bg-zinc-950 text-amber-400 font-mono font-black text-xs mb-1.5 border border-zinc-800">
-                22:00
-              </span>
-              <h4 className="font-black text-white uppercase text-xs">Sluttspill & Leking</h4>
-              <p className="text-zinc-400 text-[11px] mt-1 leading-snug">
-                Semifinaler og finaler i turneringene, samt fri leking og moro i hallen.
-              </p>
-            </div>
-          </div>
-
-          {/* 22:30 */}
-          <div className="p-3 rounded-xl bg-zinc-900 border-2 border-amber-400/40 shadow-artistic-sm flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="inline-block px-2 py-0.5 rounded bg-amber-400 text-zinc-950 font-mono font-black text-xs">
-                  22:30
-                </span>
-                <Award className="w-3.5 h-3.5 text-amber-400" />
-              </div>
-              <h4 className="font-black text-white uppercase text-xs">Premieutdeling</h4>
-              <p className="text-zinc-400 text-[11px] mt-1 leading-snug">
-                Høytidelig premiering av vinnere og kveldens avslutning!
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Free Popcorn Digital Bong Card */}
       <PopcornBongCard
         popcorn={state.popcorn}
@@ -205,15 +180,27 @@ export const EventHero: React.FC<EventHeroProps> = ({
 
       {/* Action CTA Buttons */}
       <div className="flex flex-wrap items-center gap-4">
-        <button
-          id="hero-join-cup-btn"
-          onClick={onGoToTableTennis}
-          className="px-7 py-4 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-2.5 shadow-artistic-md transition-all active:translate-x-0.5 active:translate-y-0.5 -rotate-1 hover:rotate-0"
-        >
-          <Trophy className="w-5 h-5" />
-          Meld deg på Bordtenniscup
-          <ChevronRight className="w-4 h-4" />
-        </button>
+        {isRegisteredInTournament ? (
+          <button
+            id="hero-cup-registered-btn"
+            disabled
+            type="button"
+            className="px-7 py-4 rounded-2xl bg-zinc-950 border-2 border-lime-400 text-lime-400 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-2.5 shadow-artistic-sm cursor-default select-none -rotate-1 opacity-100"
+          >
+            <CheckCircle2 className="w-5 h-5 text-lime-400 shrink-0" />
+            <span>Du er påmeldt bordtenniscup</span>
+          </button>
+        ) : (
+          <button
+            id="hero-join-cup-btn"
+            onClick={onGoToTableTennis}
+            className="px-7 py-4 rounded-2xl bg-lime-400 hover:bg-lime-300 text-zinc-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-2.5 shadow-artistic-md transition-all active:translate-x-0.5 active:translate-y-0.5 -rotate-1 hover:rotate-0"
+          >
+            <Trophy className="w-5 h-5" />
+            Meld deg på Bordtenniscup
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        )}
 
         <button
           id="hero-alpha-btn"
@@ -223,21 +210,6 @@ export const EventHero: React.FC<EventHeroProps> = ({
           <Sparkles className="w-5 h-5 text-sky-400" />
           Info om UngdomsAlpha
         </button>
-      </div>
-
-      {/* Organizer churches strip */}
-      <div className="mt-8 pt-6 border-t-2 border-zinc-800/80 flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-400">
-        <span className="font-black uppercase tracking-wider text-zinc-300">Arrangeres i fellesskap av:</span>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 font-bold">
-          {state.event.organizers.map((org, idx) => (
-            <span
-              key={idx}
-              className="bg-zinc-950 px-3 py-1 rounded-xl border-2 border-zinc-800 text-zinc-300 shadow-artistic-sm"
-            >
-              {org}
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   );

@@ -18,19 +18,13 @@ export const BracketView: React.FC<BracketViewProps> = ({
   const isLargeBracket = matches.length > 16;
   const [showFullBracket, setShowFullBracket] = useState(false);
 
-  if (matches.length === 0) {
-    return (
-      <div className="p-8 text-center text-slate-500 bg-slate-900/40 rounded-2xl border border-slate-800">
-        Turneringen er ikke trukket enda. Registrer deg for å bli med i trekningen!
-      </div>
-    );
-  }
-
-  const rounds: number[] = Array.from(new Set<number>(matches.map((m) => m.round))).sort(
-    (a, b) => a - b
-  );
+  const rounds: number[] = useMemo(() => {
+    if (matches.length === 0) return [];
+    return Array.from(new Set<number>(matches.map((m) => m.round))).sort((a, b) => a - b);
+  }, [matches]);
 
   const activeRound = useMemo(() => {
+    if (rounds.length === 0) return 1;
     const incomplete = rounds.find((r) =>
       matches.some(
         (m) =>
@@ -43,6 +37,18 @@ export const BracketView: React.FC<BracketViewProps> = ({
   }, [matches, rounds]);
 
   const [selectedRoundMobile, setSelectedRoundMobile] = useState<number>(activeRound);
+
+  React.useEffect(() => {
+    setSelectedRoundMobile(activeRound);
+  }, [activeRound]);
+
+  if (matches.length === 0) {
+    return (
+      <div className="p-8 text-center text-slate-500 bg-slate-900/40 rounded-2xl border border-slate-800">
+        Turneringen er ikke trukket enda. Registrer deg for å bli med i trekningen!
+      </div>
+    );
+  }
 
   const visibleRounds =
     isLargeBracket && !showFullBracket ? [activeRound] : rounds;

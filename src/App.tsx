@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import { Header } from './components/Header';
 import { EventHero } from './components/EventHero';
 import { ActivityGrid } from './components/ActivityGrid';
+import { ScheduleSection } from './components/ScheduleSection';
 import { TableTennisView } from './components/TableTennisView';
 import { AlphaView } from './components/AlphaView';
 import { KioskSection } from './components/KioskSection';
@@ -11,6 +12,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { MyProfileView } from './components/MyProfileView';
 import { WelcomeBanner } from './components/WelcomeBanner';
 import { InAppNotificationBanner } from './components/InAppNotificationBanner';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { AppState, Person } from './types';
 import { INITIAL_STATE } from './lib/initial-data';
 import { fetchState, registerParticipant, createPerson } from './services/api';
@@ -283,7 +285,20 @@ export default function App() {
   useEffect(() => {
     loadLatestState();
     const interval = setInterval(loadLatestState, 4000);
-    return () => clearInterval(interval);
+
+    const handleResume = () => {
+      if (document.visibilityState === 'visible') {
+        loadLatestState();
+      }
+    };
+    window.addEventListener('visibilitychange', handleResume);
+    window.addEventListener('focus', handleResume);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('visibilitychange', handleResume);
+      window.removeEventListener('focus', handleResume);
+    };
   }, []);
 
   const handleSelectPerson = (person: Person | null) => {
@@ -334,14 +349,23 @@ export default function App() {
     await handleCreatePerson(clean);
   };
 
-  const handleRegisterPlayer = async (name: string, personId: string) => {
-    const person =
-      effectiveActivePerson?.id === personId
+  const handleRegisterPlayer = async (name: string, personId?: string) => {
+    let person =
+      personId && effectiveActivePerson?.id === personId
         ? effectiveActivePerson
-        : (state.persons || []).find((p) => p.id === personId);
+        : (state.persons || []).find((p) =>
+            personId ? p.id === personId : p.firstName?.toLowerCase() === name.trim().toLowerCase()
+          );
+
     if (!person) {
-      throw new Error('Profil ikke funnet. Opprett eller velg profil på Min side.');
+      const { person: newPerson, state: newState } = await createPerson(name.trim());
+      person = newPerson;
+      handleSelectPerson(newPerson);
+      setState(newState);
+    } else if (!effectiveActivePerson) {
+      handleSelectPerson(person);
     }
+
     const updatedState = await registerParticipant(
       person.firstName,
       undefined,
@@ -386,7 +410,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-lime-400 selection:text-zinc-950 artistic-pattern">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-lime-400 selection:text-zinc-950 artistic-pattern pb-20 md:pb-0">
       {/* Floating In-App Push Notification Banner */}
       <InAppNotificationBanner
         alert={activePushAlert}
@@ -430,6 +454,7 @@ export default function App() {
                 activities={state.activities}
                 onSelectActivity={handleSelectActivity}
               />
+              <ScheduleSection />
             </>
           )}
 
@@ -500,27 +525,34 @@ export default function App() {
 
       {/* Footer */}
       <footer className="border-t-2 border-zinc-800 bg-zinc-950 py-8 text-xs text-zinc-400 mt-12">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-lime-400 text-zinc-950 font-black flex items-center justify-center text-sm shadow-artistic-sm -rotate-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 flex flex-col items-center justify-center text-center gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-lime-400 text-zinc-950 font-black flex items-center justify-center text-xs shadow-artistic-sm -rotate-2">
               LU
             </div>
-            <div>
-              <strong className="text-zinc-100 block font-black uppercase tracking-wider text-sm">
-                Lillesand United 2026
-              </strong>
-              <span className="text-zinc-400">Møglestuhallen, Lillesand • 17:00 – 22:00</span>
-            </div>
+            <strong className="text-zinc-100 block font-black uppercase tracking-wider text-sm sm:text-base">
+              Lillesand United 2026, Møglestuhallen, Lillesand 17.00-22.00
+            </strong>
           </div>
 
-          <div className="text-center sm:text-right text-zinc-400">
-            <span className="font-semibold text-zinc-300">Et felles ungdomsarrangement av KRIK & byens menigheter</span>
-            <div className="text-zinc-500 mt-0.5 font-medium">
-              Gratis inngang for alle interesserte (13–19 år)
-            </div>
+          <p className="font-semibold text-zinc-300 text-xs sm:text-sm max-w-2xl">
+            Et felles ungdomsarrangement av KRIK, DNK, Misjonskirken, Filadelfia og Baptistkirken
+          </p>
+
+          <div className="text-zinc-500 text-[11px] font-medium">
+            Gratis inngang for alle interesserte (13–19 år)
           </div>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation for users */}
+      <MobileBottomNav
+        currentTab={currentTab}
+        onNavigate={handleNavigate}
+        tournamentActive={state.tournament.status === 'active'}
+        activePerson={effectiveActivePerson}
+        myPlayerName={currentUserName}
+      />
     </div>
   );
 }

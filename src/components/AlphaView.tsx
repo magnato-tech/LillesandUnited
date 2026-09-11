@@ -207,10 +207,12 @@ export const AlphaView: React.FC<AlphaViewProps> = ({ myPlayerName, onSuccessReg
                 </p>
               )}
 
-              <p className="text-[11px] text-zinc-500 text-center flex items-center justify-center gap-1 font-medium">
-                <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-                Personvern: Vi deler aldri opplysningene dine. Kun for oppfølging til kurset.
-              </p>
+              <div className="text-[11px] text-zinc-500 text-center flex items-start sm:items-center justify-center gap-1.5 font-medium leading-relaxed">
+                <ShieldCheck className="w-3.5 h-3.5 text-zinc-400 shrink-0 mt-0.5 sm:mt-0" />
+                <span>
+                  Personvern: Mobilnummeret brukes kun til SMS-påminnelser om Alpha-kurset og slettes etter kurset. Du kan når som helst be oss om å stoppe SMS-varslene.
+                </span>
+              </div>
             </form>
           </div>
         )}

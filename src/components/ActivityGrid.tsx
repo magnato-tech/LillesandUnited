@@ -11,6 +11,30 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
   activities,
   onSelectActivity,
 }) => {
+  const isClickableActivity = (id: string) => {
+    return id === 'act-tabletennis' || id === 'act-alpha' || id === 'act-kiosk';
+  };
+
+  // Clickable activities first, then non-clickable info cards at the bottom
+  const sortedActivities = [...activities].sort((a, b) => {
+    const aClickable = isClickableActivity(a.id);
+    const bClickable = isClickableActivity(b.id);
+
+    if (aClickable && !bClickable) return -1;
+    if (!aClickable && bClickable) return 1;
+
+    // Fixed sensible priority among clickable
+    const priorityMap: Record<string, number> = {
+      'act-tabletennis': 1,
+      'act-kiosk': 2,
+      'act-alpha': 3,
+      'act-football': 4,
+      'act-gaming': 5,
+      'act-gathering': 6,
+    };
+    return (priorityMap[a.id] || 99) - (priorityMap[b.id] || 99);
+  });
+
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case 'Trophy':
@@ -47,28 +71,33 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {activities.map((activity) => {
+        {sortedActivities.map((activity) => {
           const isDisabled = !activity.enabled;
+          const isClickable = !isDisabled && isClickableActivity(activity.id);
 
           return (
             <div
               key={activity.id}
               id={`activity-card-${activity.id}`}
               onClick={() => {
-                if (!isDisabled) onSelectActivity(activity.id);
+                if (isClickable) onSelectActivity(activity.id);
               }}
-              className={`group relative rounded-3xl p-6 border-2 transition-all duration-200 flex flex-col justify-between ${
+              className={`relative rounded-3xl p-6 border-2 transition-all duration-200 flex flex-col justify-between ${
                 isDisabled
                   ? 'bg-zinc-900/40 border-zinc-800/50 opacity-60 cursor-not-allowed'
-                  : activity.highlight
-                  ? 'bg-gradient-to-b from-zinc-900 to-zinc-950 border-lime-400 shadow-artistic-lime hover:-translate-y-1.5 cursor-pointer'
-                  : 'bg-zinc-900 border-zinc-800 hover:border-lime-400 shadow-artistic-md hover:-translate-y-1.5 cursor-pointer'
+                  : isClickable
+                  ? activity.highlight
+                    ? 'group bg-gradient-to-b from-zinc-900 to-zinc-950 border-lime-400 shadow-artistic-lime hover:-translate-y-1.5 cursor-pointer'
+                    : 'group bg-zinc-900 border-zinc-800 hover:border-lime-400 shadow-artistic-md hover:-translate-y-1.5 cursor-pointer'
+                  : 'bg-zinc-950/80 border-zinc-800/90 shadow-artistic-sm'
               }`}
             >
               <div>
                 {/* Header with icon & badge */}
                 <div className="flex items-start justify-between gap-3 mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-center shrink-0 shadow-artistic-sm group-hover:scale-105 group-hover:border-zinc-700 transition-all">
+                  <div className={`w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-center shrink-0 shadow-artistic-sm ${
+                    isClickable ? 'group-hover:scale-105 group-hover:border-zinc-700 transition-all' : ''
+                  }`}>
                     {getIcon(activity.iconName)}
                   </div>
 
@@ -93,7 +122,9 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
                 </div>
 
                 {/* Title & Short Description */}
-                <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight mb-2 group-hover:text-lime-400 transition-colors">
+                <h3 className={`text-xl sm:text-2xl font-black text-white uppercase tracking-tight mb-2 transition-colors ${
+                  isClickable ? 'group-hover:text-lime-400' : ''
+                }`}>
                   {activity.name}
                 </h3>
                 <p className="text-xs sm:text-sm text-zinc-400 mb-5 leading-relaxed font-medium">
@@ -103,7 +134,7 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
 
               {/* Footer info: time, location & action */}
               <div className="pt-4 border-t-2 border-zinc-800/80 mt-auto">
-                <div className="space-y-1.5 text-xs text-zinc-400 mb-3 font-semibold">
+                <div className="space-y-1.5 text-xs text-zinc-400 mb-1 font-semibold">
                   <div className="flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                     <span>{activity.time}</span>
@@ -114,14 +145,14 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
                   </div>
                 </div>
 
-                {!isDisabled && (
-                  <div className="flex items-center justify-between text-xs font-black text-lime-400 uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+                {isClickable && (
+                  <div className="pt-3 flex items-center justify-between text-xs font-black text-lime-400 uppercase tracking-wider group-hover:translate-x-1 transition-transform">
                     <span>
                       {activity.id === 'act-tabletennis'
                         ? 'Se cup & meld på'
                         : activity.id === 'act-alpha'
                         ? 'Meld interesse'
-                        : 'Les mer info'}
+                        : 'Se meny & kiosk'}
                     </span>
                     <ChevronRight className="w-4 h-4" />
                   </div>
