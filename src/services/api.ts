@@ -254,6 +254,68 @@ export async function resetPopcorn(): Promise<AppState> {
 }
 
 // ----------------------------------------------------
+// KIOSK MENU & ITEMS API
+// ----------------------------------------------------
+
+export async function addKioskItem(item: {
+  name: string;
+  desc?: string;
+  price: string;
+  icon?: string;
+  category?: string;
+}): Promise<AppState> {
+  const res = await fetch('/api/kiosk/items', {
+    method: 'POST',
+    headers: getAdminHeaders(),
+    body: JSON.stringify(item),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke opprette vare');
+  return data.state;
+}
+
+export async function updateKioskItem(
+  id: string,
+  updates: {
+    name?: string;
+    desc?: string;
+    price?: string;
+    icon?: string;
+    category?: string;
+    isAvailable?: boolean;
+  }
+): Promise<AppState> {
+  const res = await fetch(`/api/kiosk/items/${id}`, {
+    method: 'PUT',
+    headers: getAdminHeaders(),
+    body: JSON.stringify(updates),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke oppdatere vare');
+  return data.state;
+}
+
+export async function deleteKioskItem(id: string): Promise<AppState> {
+  const res = await fetch(`/api/kiosk/items/${id}`, {
+    method: 'DELETE',
+    headers: getAdminHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke slette vare');
+  return data.state;
+}
+
+export async function toggleKioskItemAvailability(id: string): Promise<AppState> {
+  const res = await fetch(`/api/kiosk/items/${id}/toggle`, {
+    method: 'POST',
+    headers: getAdminHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Kunne ikke endre status på vare');
+  return data.state;
+}
+
+// ----------------------------------------------------
 // PARTICIPANTS & TOURNAMENT API
 // ----------------------------------------------------
 

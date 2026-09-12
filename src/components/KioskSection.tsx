@@ -23,14 +23,7 @@ export const KioskSection: React.FC<KioskSectionProps> = ({
   onCreatePerson,
   onGoToProfile,
 }) => {
-  const kioskItems = [
-    { name: 'Nypoppet Popcorn', desc: 'Første 100 beger gratis med digital bong!', price: 'Gratis bong / 20 kr', icon: '🍿', free: true },
-    { name: 'Varm Grillpølse i brød', desc: 'Serveres med ketchup og sennep', price: '25 kr', icon: '🌭' },
-    { name: 'Varm Wienerpølse', desc: 'I lompe eller brød', price: '20 kr', icon: '🌭' },
-    { name: 'Iskald Brus (0.5L)', desc: 'Coca-Cola, Solo, Sprite, Urge, Pepsi Max', price: '25 kr', icon: '🥤' },
-    { name: 'Sjokolade & Snacks', desc: 'Melkesjokolade, Smash, Kvikklunsj', price: '20 kr', icon: '🍫' },
-    { name: 'Kaffe & Te (til voksne/ledere)', desc: 'Nytraktet filterkaffe', price: '15 kr', icon: '☕' },
-  ];
+  const kioskItems = state.kioskItems || [];
 
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
@@ -64,32 +57,56 @@ export const KioskSection: React.FC<KioskSectionProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {kioskItems.map((item, idx) => (
-            <div
-              key={idx}
-              className="p-4 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-between gap-3 hover:border-zinc-700 shadow-artistic-sm transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{item.icon}</span>
-                <div>
-                  <h4 className="font-black text-white text-sm flex items-center gap-1.5">
-                    {item.name}
-                    {item.free && (
-                      <span className="text-[10px] bg-lime-400 text-zinc-950 px-2 py-0.5 rounded-md font-black shadow-artistic-sm">
-                        GRATIS BONG
-                      </span>
-                    )}
-                  </h4>
-                  <p className="text-xs text-zinc-400 font-medium">{item.desc}</p>
+        {kioskItems.length === 0 ? (
+          <div className="text-center py-10 px-4 rounded-2xl bg-zinc-950 border-2 border-dashed border-zinc-800">
+            <p className="text-sm font-bold text-zinc-400">Ingen varer i kioskmenyen for øyeblikket.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {kioskItems.map((item) => {
+              const isAvail = item.isAvailable ?? true;
+              return (
+                <div
+                  key={item.id}
+                  className={`p-4 rounded-2xl border-2 flex items-center justify-between gap-3 shadow-artistic-sm transition-all ${
+                    isAvail
+                      ? 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
+                      : 'bg-zinc-950/50 border-zinc-900 opacity-60'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-2xl shrink-0">{item.icon || '🛒'}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-black text-white text-sm truncate">
+                          {item.name}
+                        </h4>
+                        {!isAvail && (
+                          <span className="text-[9px] bg-rose-500/20 text-rose-400 border border-rose-500/40 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                            Utsolgt
+                          </span>
+                        )}
+                        {item.category && (
+                          <span className="text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded font-bold">
+                            {item.category}
+                          </span>
+                        )}
+                      </div>
+                      {item.desc && (
+                        <p className="text-xs text-zinc-400 font-medium truncate mt-0.5">
+                          {item.desc}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm font-black text-amber-400 font-mono shrink-0">
+                    {item.price}
+                  </span>
                 </div>
-              </div>
-              <span className="text-sm font-black text-amber-400 font-mono shrink-0">
-                {item.price}
-              </span>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

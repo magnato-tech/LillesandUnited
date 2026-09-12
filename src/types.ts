@@ -145,6 +145,17 @@ export interface PopcornData {
   bongs: PopcornBong[];
 }
 
+export interface KioskItem {
+  id: string;
+  name: string;
+  desc?: string;
+  price: string;
+  icon: string;
+  isAvailable?: boolean;
+  category?: string;
+  createdAt?: string;
+}
+
 export interface AppState {
   event: {
     name: string;
@@ -156,6 +167,7 @@ export interface AppState {
     popcornClaimedCount: number;
   };
   popcorn: PopcornData;
+  kioskItems?: KioskItem[];
   activities: Activity[];
   tournament: Tournament;
   alphaInterests: AlphaInterest[];

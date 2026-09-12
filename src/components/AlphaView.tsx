@@ -97,41 +97,8 @@ export const AlphaView: React.FC<AlphaViewProps> = ({ myPlayerName, onSuccessReg
         </div>
       </div>
 
-      {/* 3 Pillars of Alpha Youth */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-        <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm hover:border-zinc-700 transition-colors">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-orange-400 flex items-center justify-center mb-4 shadow-artistic-sm -rotate-2">
-            <Utensils className="w-6 h-6" />
-          </div>
-          <h3 className="font-black text-white text-lg uppercase tracking-tight mb-1">Gratis digg mat</h3>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-medium">
-            Vi starter alltid hver samling med et deilig måltid, snacks og tid til å bare henge med venner.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm hover:border-zinc-700 transition-colors">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-sky-400 flex items-center justify-center mb-4 shadow-artistic-sm rotate-1">
-            <MessageCircle className="w-6 h-6" />
-          </div>
-          <h3 className="font-black text-white text-lg uppercase tracking-tight mb-1">Gode samtaler</h3>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-medium">
-            Se inspirerende filmer og si akkurat det du mener. Ingen spørsmål er for dumme eller for store.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm hover:border-zinc-700 transition-colors">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-rose-400 flex items-center justify-center mb-4 shadow-artistic-sm -rotate-1">
-            <Heart className="w-6 h-6" />
-          </div>
-          <h3 className="font-black text-white text-lg uppercase tracking-tight mb-1">Null press</h3>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-medium">
-            Alt er helt uforpliktende og gratis. Bli med én kveld og se om det er noe for deg!
-          </p>
-        </div>
-      </div>
-
-      {/* Registration / Interest Form */}
-      <div className="rounded-3xl p-6 sm:p-8 bg-zinc-900 border-2 border-zinc-800 shadow-artistic-md">
+      {/* Registration / Interest Form placed directly under YouTube video and right above "Gratis digg mat" */}
+      <div className="rounded-3xl p-6 sm:p-8 bg-zinc-900 border-2 border-zinc-800 shadow-artistic-md mb-8">
         {submitted ? (
           <div className="text-center py-6">
             <div className="w-16 h-16 rounded-2xl bg-lime-400 text-zinc-950 flex items-center justify-center mx-auto mb-4 shadow-artistic-sm -rotate-2">
@@ -216,6 +183,39 @@ export const AlphaView: React.FC<AlphaViewProps> = ({ myPlayerName, onSuccessReg
             </form>
           </div>
         )}
+      </div>
+
+      {/* 3 Pillars of Alpha Youth */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm hover:border-zinc-700 transition-colors">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-orange-400 flex items-center justify-center mb-4 shadow-artistic-sm -rotate-2">
+            <Utensils className="w-6 h-6" />
+          </div>
+          <h3 className="font-black text-white text-lg uppercase tracking-tight mb-1">Gratis digg mat</h3>
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-medium">
+            Vi starter alltid hver samling med et deilig måltid, snacks og tid til å bare henge med venner.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm hover:border-zinc-700 transition-colors">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-sky-400 flex items-center justify-center mb-4 shadow-artistic-sm rotate-1">
+            <MessageCircle className="w-6 h-6" />
+          </div>
+          <h3 className="font-black text-white text-lg uppercase tracking-tight mb-1">Gode samtaler</h3>
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-medium">
+            Se inspirerende filmer og si akkurat det du mener. Ingen spørsmål er for dumme eller for store.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-zinc-900 border-2 border-zinc-800 shadow-artistic-sm hover:border-zinc-700 transition-colors">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-zinc-800 text-rose-400 flex items-center justify-center mb-4 shadow-artistic-sm -rotate-1">
+            <Heart className="w-6 h-6" />
+          </div>
+          <h3 className="font-black text-white text-lg uppercase tracking-tight mb-1">Null press</h3>
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-medium">
+            Alt er helt uforpliktende og gratis. Bli med én kveld og se om det er noe for deg!
+          </p>
+        </div>
       </div>
     </div>
   );

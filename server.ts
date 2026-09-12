@@ -209,6 +209,7 @@ function loadState(): AppState {
         ...parsed,
         event: mergeEventFromDisk(parsed.event, INITIAL_STATE.event, popcorn, activeCount),
         popcorn,
+        kioskItems: Array.isArray(parsed.kioskItems) ? parsed.kioskItems : [],
         activities: mergeActivitiesFromDisk(parsed.activities, INITIAL_ACTIVITIES),
         persons,
       };
@@ -1574,6 +1575,113 @@ app.post('/api/popcorn/reset', requireAdmin, (req, res) => {
   saveState();
 
   res.json({ success: true, state });
+});
+
+// ----------------------------------------------------
+// KIOSK MENU & ITEMS (Admin & Public)
+// ----------------------------------------------------
+
+// Add kiosk item (Admin)
+app.post('/api/kiosk/items', requireAdmin, (req, res) => {
+  const { name, desc, price, icon, category } = req.body;
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    return res.status(400).json({ error: 'Varenavn er påkrevd.' });
+  }
+  if (!price || typeof price !== 'string' || !price.trim()) {
+    return res.status(400).json({ error: 'Pris er påkrevd.' });
+  }
+
+  if (!Array.isArray(state.kioskItems)) {
+    state.kioskItems = [];
+  }
+
+  const newItem = {
+    id: `kiosk-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    name: name.trim(),
+    desc: typeof desc === 'string' ? desc.trim() : '',
+    price: price.trim(),
+    icon: typeof icon === 'string' && icon.trim() ? icon.trim() : '🛒',
+    isAvailable: true,
+    category: typeof category === 'string' && category.trim() ? category.trim() : 'Diverse',
+    createdAt: new Date().toISOString(),
+  };
+
+  state.kioskItems.push(newItem);
+  state.updatedAt = new Date().toISOString();
+  saveState();
+
+  res.json({ success: true, item: newItem, state });
+});
+
+// Update kiosk item (Admin)
+app.put('/api/kiosk/items/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { name, desc, price, icon, category, isAvailable } = req.body;
+
+  if (!Array.isArray(state.kioskItems)) {
+    state.kioskItems = [];
+  }
+
+  const itemIndex = state.kioskItems.findIndex((item) => item.id === id);
+  if (itemIndex === -1) {
+    return res.status(404).json({ error: 'Varen ble ikke funnet.' });
+  }
+
+  const existing = state.kioskItems[itemIndex];
+  state.kioskItems[itemIndex] = {
+    ...existing,
+    name: typeof name === 'string' && name.trim() ? name.trim() : existing.name,
+    desc: typeof desc === 'string' ? desc.trim() : existing.desc,
+    price: typeof price === 'string' && price.trim() ? price.trim() : existing.price,
+    icon: typeof icon === 'string' && icon.trim() ? icon.trim() : existing.icon,
+    category: typeof category === 'string' && category.trim() ? category.trim() : existing.category,
+    isAvailable: typeof isAvailable === 'boolean' ? isAvailable : existing.isAvailable ?? true,
+  };
+
+  state.updatedAt = new Date().toISOString();
+  saveState();
+
+  res.json({ success: true, item: state.kioskItems[itemIndex], state });
+});
+
+// Delete kiosk item (Admin)
+app.delete('/api/kiosk/items/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+
+  if (!Array.isArray(state.kioskItems)) {
+    state.kioskItems = [];
+  }
+
+  const itemIndex = state.kioskItems.findIndex((item) => item.id === id);
+  if (itemIndex === -1) {
+    return res.status(404).json({ error: 'Varen ble ikke funnet.' });
+  }
+
+  const deleted = state.kioskItems.splice(itemIndex, 1)[0];
+  state.updatedAt = new Date().toISOString();
+  saveState();
+
+  res.json({ success: true, deleted, state });
+});
+
+// Toggle kiosk item availability (Admin)
+app.post('/api/kiosk/items/:id/toggle', requireAdmin, (req, res) => {
+  const { id } = req.params;
+
+  if (!Array.isArray(state.kioskItems)) {
+    state.kioskItems = [];
+  }
+
+  const item = state.kioskItems.find((i) => i.id === id);
+  if (!item) {
+    return res.status(404).json({ error: 'Varen ble ikke funnet.' });
+  }
+
+  item.isAvailable = !(item.isAvailable ?? true);
+  state.updatedAt = new Date().toISOString();
+  saveState();
+
+  res.json({ success: true, item, state });
 });
 
 // Toggle activity status (Admin)

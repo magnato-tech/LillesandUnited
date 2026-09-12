@@ -33,8 +33,9 @@ import {
   ExternalLink,
   Sliders,
   Minus,
+  ShoppingBag,
 } from 'lucide-react';
-import { AppState, Match, PopcornBong, Person, Tournament } from '../types';
+import { AppState, Match, PopcornBong, Person, Tournament, KioskItem } from '../types';
 import {
   startTournament,
   submitMatchScore,
@@ -77,6 +78,7 @@ import {
 } from '../lib/tournament';
 import { TableTennisAdminPanel, ScoreEntryModal, ResetMatchConfirmModal } from './TableTennisAdminPanel';
 import { BracketView } from './BracketView';
+import { KioskAdminPanel } from './KioskAdminPanel';
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -106,6 +108,7 @@ interface AdminDashboardProps {
   onGoToProfile?: () => void;
   onOpenPersonProfile?: (person: Person) => void;
   initialTab?:
+    | 'kiosk'
     | 'kiosk_popcorn'
     | 'matches'
     | 'event_participants'
@@ -203,6 +206,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (typeof window === 'undefined') return initialTab;
     const saved = sessionStorage.getItem('lillesand_admin_section');
     const valid: AdminSectionTab[] = [
+      'kiosk',
       'kiosk_popcorn',
       'matches',
       'event_participants',
@@ -1058,10 +1062,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       activeClass: 'bg-lime-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
     },
     {
-      id: 'kiosk_popcorn',
+      id: 'kiosk',
       shortLabel: 'KIOSK',
+      countLabel: String((state.kioskItems || []).length),
+      tooltip: 'Kioskmeny — administrer varer, priser, ikoner og utsolgt-status',
+      icon: ShoppingBag,
+      activeClass: 'bg-amber-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
+    },
+    {
+      id: 'kiosk_popcorn',
+      shortLabel: 'POPCORN',
       countLabel: `${usedBongs.length}/${totalCapacity}`,
-      tooltip: 'Kiosk & popcorn — bongkart, utlevering og kapasitet',
+      tooltip: 'Popcorn — bongkart, utlevering og kapasitet',
       icon: Popcorn,
       activeClass: 'bg-amber-400 text-zinc-950 border-zinc-950 shadow-artistic-sm',
     },
@@ -1115,7 +1127,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-2 border-b-2 border-zinc-800 pb-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2 border-b-2 border-zinc-800 pb-3 mb-6">
         {adminNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = adminTab === item.id;
@@ -1145,7 +1157,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       {/* ==================================================== */}
-      {/* 5. ADMIN: KIOSK & POPCORN (Section 5–10)               */}
+      {/* KIOSK MENY & VARER                                   */}
+      {/* ==================================================== */}
+      {adminTab === 'kiosk' && (
+        <KioskAdminPanel
+          items={state.kioskItems || []}
+          onRefresh={onRefresh}
+          showToast={showToast}
+          onRequestConfirm={({ title, message, confirmLabel, variant, onConfirm }) => {
+            setConfirmDialog({
+              isOpen: true,
+              title,
+              message,
+              confirmLabel: confirmLabel || 'Bekreft',
+              variant: variant || 'danger',
+              onConfirm,
+            });
+          }}
+        />
+      )}
+
+      {/* ==================================================== */}
+      {/* POPCORN BONGKART & UTLEVERING                        */}
       {/* ==================================================== */}
       {adminTab === 'kiosk_popcorn' && (
         <div className="space-y-6">
@@ -1202,10 +1235,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div>
               <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
                 <Popcorn className="w-5 h-5 text-amber-400" />
-                Bongkart Kiosk (Ingen QR – Trykk på bongnummer)
+                Bongkart Popcorn (Ingen QR – Trykk på bongnummer)
               </h3>
               <p className="text-xs text-zinc-400 mt-0.5 font-medium">
-                Ungdommen sier: «Jeg har bong nummer 47.» Trykk på nummeret under for å levere ut.
+                Ungdommen sier: «Jeg har bong nummer 47.» Trykk på nummeret under for å levere ut popcorn.
               </p>
             </div>
 
