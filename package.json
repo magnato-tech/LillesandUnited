@@ -18,8 +18,9 @@
     "test:cup-63": "tsx scripts/test-cup-63-players.ts",
     "test:resets": "tsx scripts/test-tournament-resets.ts",
     "test:populate-reset": "tsx scripts/test-populate-and-reset.ts",
+    "test:load-500": "tsx scripts/test-load-500.ts",
     "validate:db": "tsx scripts/validate-db.ts",
-    "test:all": "tsx scripts/test-walkovers.ts && tsx scripts/test-duplicate-names.ts && tsx scripts/test-db-consistency.ts && tsx scripts/test-firestore-integration.ts && tsx scripts/test-populate-and-reset.ts"
+    "test:all": "tsx scripts/test-walkovers.ts && tsx scripts/test-duplicate-names.ts && tsx scripts/test-db-consistency.ts && tsx scripts/test-firestore-integration.ts && tsx scripts/test-populate-and-reset.ts && tsx scripts/test-load-500.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

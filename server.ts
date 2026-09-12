@@ -31,7 +31,7 @@ const PORT = 3000;
 const ADMIN_PIN = process.env.ADMIN_PIN || 'United2026';
 const RESET_PIN = process.env.RESET_PIN || 'ResetUnited2026';
 
-app.use(express.json());
+app.use(express.json({ limit: '256kb' }));
 
 // Firebase Firestore setup
 let firestoreDb: any = null;
@@ -49,6 +49,49 @@ try {
   }
 } catch (err) {
   console.error('[Firestore] Initialization error:', err);
+}
+
+// In-memory rate limiting / brute-force protection for PIN verification
+interface FailedPinAttempt {
+  count: number;
+  lockedUntil: number;
+}
+const failedPinAttempts = new Map<string, FailedPinAttempt>();
+
+function getClientIp(req: express.Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded.length > 0) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
+}
+
+function checkPinRateLimit(ip: string): { locked: boolean; retryAfterSeconds: number } {
+  const attempt = failedPinAttempts.get(ip);
+  if (!attempt) return { locked: false, retryAfterSeconds: 0 };
+  const now = Date.now();
+  if (attempt.lockedUntil > now) {
+    return { locked: true, retryAfterSeconds: Math.ceil((attempt.lockedUntil - now) / 1000) };
+  }
+  return { locked: false, retryAfterSeconds: 0 };
+}
+
+function recordFailedPinAttempt(ip: string): { locked: boolean; retryAfterSeconds: number } {
+  const now = Date.now();
+  const attempt = failedPinAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+  attempt.count += 1;
+  if (attempt.count >= 5) {
+    attempt.lockedUntil = now + 60 * 1000; // 60s cooldown after 5 failed attempts
+    attempt.count = 0; // reset counter after locking
+    failedPinAttempts.set(ip, attempt);
+    return { locked: true, retryAfterSeconds: 60 };
+  }
+  failedPinAttempts.set(ip, attempt);
+  return { locked: false, retryAfterSeconds: 0 };
+}
+
+function recordSuccessfulPin(ip: string) {
+  failedPinAttempts.delete(ip);
 }
 
 function isValidAdminPin(pin: unknown): boolean {
@@ -178,9 +221,13 @@ function loadState(): AppState {
         };
       }
 
+      if (!loadedState.updatedAt) {
+        loadedState.updatedAt = new Date().toISOString();
+      }
+
       if (personsMigrated) {
         try {
-          fs.writeFileSync(DB_FILE, JSON.stringify(loadedState, null, 2), 'utf-8');
+          fs.writeFileSync(DB_FILE, JSON.stringify(loadedState), 'utf-8');
         } catch (e) {
           console.error('Failed to write back migrated persons:', e);
         }
@@ -201,7 +248,9 @@ function saveLocalStateOnly() {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), 'utf-8');
+    const tempFile = `${DB_FILE}.tmp`;
+    fs.writeFileSync(tempFile, JSON.stringify(state), 'utf-8');
+    fs.renameSync(tempFile, DB_FILE);
   } catch (err) {
     console.error('Failed to save state to db.json:', err);
   }
@@ -319,6 +368,7 @@ async function saveToFirestoreNow(): Promise<void> {
 }
 
 function saveState() {
+  state.updatedAt = new Date().toISOString();
   saveLocalStateOnly();
 
   if (firestoreDb) {
@@ -338,22 +388,66 @@ app.get('/api/health', (req, res) => {
 });
 
 app.post('/api/admin/verify-pin', (req, res) => {
+  const ip = getClientIp(req);
+  const status = checkPinRateLimit(ip);
+  if (status.locked) {
+    return res.status(429).json({
+      error: `For mange feilforsøk. Prøv igjen om ${status.retryAfterSeconds} sekunder.`,
+      retryAfterSeconds: status.retryAfterSeconds,
+    });
+  }
+
   const { pin } = req.body || {};
   if (isValidAdminPin(pin)) {
+    recordSuccessfulPin(ip);
     return res.json({ success: true });
   }
+
+  const failStatus = recordFailedPinAttempt(ip);
+  if (failStatus.locked) {
+    return res.status(429).json({
+      error: `For mange feilforsøk. Låst i 60 sekunder.`,
+      retryAfterSeconds: 60,
+    });
+  }
+
   return res.status(401).json({ error: 'Ugyldig admin-PIN' });
 });
 
 app.post('/api/admin/verify-reset-pin', (req, res) => {
+  const ip = getClientIp(req);
+  const status = checkPinRateLimit(ip);
+  if (status.locked) {
+    return res.status(429).json({
+      error: `For mange feilforsøk. Prøv igjen om ${status.retryAfterSeconds} sekunder.`,
+      retryAfterSeconds: status.retryAfterSeconds,
+    });
+  }
+
   const { pin } = req.body || {};
   if (isValidResetPin(pin)) {
+    recordSuccessfulPin(ip);
     return res.json({ success: true });
   }
+
+  const failStatus = recordFailedPinAttempt(ip);
+  if (failStatus.locked) {
+    return res.status(429).json({
+      error: `For mange feilforsøk. Låst i 60 sekunder.`,
+      retryAfterSeconds: 60,
+    });
+  }
+
   return res.status(403).json({ error: 'Ugyldig nullstillings-PIN' });
 });
 
 app.get('/api/state', (req, res) => {
+  const serverEtag = `"${state.updatedAt || '0'}"`;
+  res.setHeader('ETag', serverEtag);
+  const clientEtag = req.headers['if-none-match'];
+  if (clientEtag && clientEtag === serverEtag) {
+    return res.status(304).end();
+  }
   res.json(state);
 });
 
@@ -369,13 +463,17 @@ app.get('/api/firestore/status', (req, res) => {
   });
 });
 
-app.post('/api/firestore/flush', async (req, res) => {
-  if (firestoreSaveTimeout) {
-    clearTimeout(firestoreSaveTimeout);
-    firestoreSaveTimeout = null;
+app.post('/api/firestore/flush', requireAdmin, async (req, res) => {
+  try {
+    if (firestoreSaveTimeout) {
+      clearTimeout(firestoreSaveTimeout);
+      firestoreSaveTimeout = null;
+    }
+    await saveToFirestoreNow();
+    res.json({ success: true, lastSyncTime: lastFirestoreSyncTime, error: firestoreSyncError });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Kunne ikke flushe til Firestore' });
   }
-  await saveToFirestoreNow();
-  res.json({ success: true, lastSyncTime: lastFirestoreSyncTime, error: firestoreSyncError });
 });
 
 app.post('/api/admin/firestore/sync', requireAdmin, async (req, res) => {

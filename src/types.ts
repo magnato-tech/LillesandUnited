@@ -160,4 +160,5 @@ export interface AppState {
   tournament: Tournament;
   alphaInterests: AlphaInterest[];
   persons: Person[];
+  updatedAt?: string;
 }

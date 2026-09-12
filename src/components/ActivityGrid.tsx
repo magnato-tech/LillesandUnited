@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, CircleDot, Gamepad2, Music, Utensils, Sparkles, Clock, MapPin, ChevronRight, AlertCircle } from 'lucide-react';
+import { Trophy, CircleDot, Gamepad2, Music, Utensils, Sparkles, Clock, MapPin, ChevronRight } from 'lucide-react';
 import { Activity } from '../types';
 
 interface ActivityGridProps {
@@ -15,25 +15,27 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
     return id === 'act-tabletennis' || id === 'act-alpha' || id === 'act-kiosk';
   };
 
-  // Clickable activities first, then non-clickable info cards at the bottom
-  const sortedActivities = [...activities].sort((a, b) => {
-    const aClickable = isClickableActivity(a.id);
-    const bClickable = isClickableActivity(b.id);
+  // Only show active activities to the youth, sorted: clickable first, then info cards
+  const visibleActivities = activities
+    .filter((a) => a.enabled)
+    .sort((a, b) => {
+      const aClickable = isClickableActivity(a.id);
+      const bClickable = isClickableActivity(b.id);
 
-    if (aClickable && !bClickable) return -1;
-    if (!aClickable && bClickable) return 1;
+      if (aClickable && !bClickable) return -1;
+      if (!aClickable && bClickable) return 1;
 
-    // Fixed sensible priority among clickable
-    const priorityMap: Record<string, number> = {
-      'act-tabletennis': 1,
-      'act-kiosk': 2,
-      'act-alpha': 3,
-      'act-football': 4,
-      'act-gaming': 5,
-      'act-gathering': 6,
-    };
-    return (priorityMap[a.id] || 99) - (priorityMap[b.id] || 99);
-  });
+      // Fixed sensible priority among clickable
+      const priorityMap: Record<string, number> = {
+        'act-tabletennis': 1,
+        'act-kiosk': 2,
+        'act-alpha': 3,
+        'act-football': 4,
+        'act-gaming': 5,
+        'act-gathering': 6,
+      };
+      return (priorityMap[a.id] || 99) - (priorityMap[b.id] || 99);
+    });
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -71,9 +73,8 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {sortedActivities.map((activity) => {
-          const isDisabled = !activity.enabled;
-          const isClickable = !isDisabled && isClickableActivity(activity.id);
+        {visibleActivities.map((activity) => {
+          const isClickable = isClickableActivity(activity.id);
 
           return (
             <div
@@ -83,9 +84,7 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
                 if (isClickable) onSelectActivity(activity.id);
               }}
               className={`relative rounded-3xl p-6 border-2 transition-all duration-200 flex flex-col justify-between ${
-                isDisabled
-                  ? 'bg-zinc-900/40 border-zinc-800/50 opacity-60 cursor-not-allowed'
-                  : isClickable
+                isClickable
                   ? activity.highlight
                     ? 'group bg-gradient-to-b from-zinc-900 to-zinc-950 border-lime-400 shadow-artistic-lime hover:-translate-y-1.5 cursor-pointer'
                     : 'group bg-zinc-900 border-zinc-800 hover:border-lime-400 shadow-artistic-md hover:-translate-y-1.5 cursor-pointer'
@@ -111,11 +110,6 @@ export const ActivityGrid: React.FC<ActivityGridProps> = ({
                         }`}
                       >
                         {activity.badge}
-                      </span>
-                    )}
-                    {isDisabled && (
-                      <span className="text-[10px] font-black bg-rose-500/20 text-rose-400 px-2.5 py-1 rounded-lg flex items-center gap-1 border border-rose-500/30">
-                        <AlertCircle className="w-3 h-3" /> Deaktivert av admin
                       </span>
                     )}
                   </div>

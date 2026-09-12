@@ -7,9 +7,14 @@ import { ScheduleSection } from './components/ScheduleSection';
 import { TableTennisView } from './components/TableTennisView';
 import { AlphaView } from './components/AlphaView';
 import { KioskSection } from './components/KioskSection';
-import { DisplayScreen } from './components/DisplayScreen';
-import { AdminDashboard } from './components/AdminDashboard';
 import { MyProfileView } from './components/MyProfileView';
+
+const DisplayScreen = React.lazy(() =>
+  import('./components/DisplayScreen').then((m) => ({ default: m.DisplayScreen }))
+);
+const AdminDashboard = React.lazy(() =>
+  import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard }))
+);
 import { WelcomeBanner } from './components/WelcomeBanner';
 import { InAppNotificationBanner } from './components/InAppNotificationBanner';
 import { MobileBottomNav } from './components/MobileBottomNav';
@@ -224,9 +229,16 @@ export default function App() {
   };
 
   // Load state and poll periodically to keep all devices in sync
-  const loadLatestState = async () => {
+  const loadLatestState = async (force?: boolean) => {
     try {
-      const data = await fetchState();
+      const data = await fetchState(force);
+      if (!data) {
+        // 304 Not Modified: server data is completely unchanged.
+        // Avoid re-rendering, session re-parsing and localStorage writes!
+        setIsStateLoaded(true);
+        return;
+      }
+
       setState(data);
       setIsStateLoaded(true);
 
@@ -283,21 +295,53 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Initial fetch
     loadLatestState();
-    const interval = setInterval(loadLatestState, 4000);
 
-    const handleResume = () => {
+    let intervalId: any = null;
+
+    const startActivePolling = () => {
+      if (intervalId) clearInterval(intervalId);
+      // Fast polling (4s) when user is actively looking at the app
+      intervalId = setInterval(loadLatestState, 4000);
+    };
+
+    const startBackgroundPolling = () => {
+      if (intervalId) clearInterval(intervalId);
+      // Slow polling (60s) when app is in the background / phone locked in pocket
+      intervalId = setInterval(loadLatestState, 60000);
+    };
+
+    // Start appropriate interval based on current visibility
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+      startBackgroundPolling();
+    } else {
+      startActivePolling();
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Immediate sync upon unlocking phone or switching back tab
+        loadLatestState();
+        startActivePolling();
+      } else {
+        startBackgroundPolling();
+      }
+    };
+
+    const handleFocus = () => {
       if (document.visibilityState === 'visible') {
         loadLatestState();
       }
     };
-    window.addEventListener('visibilitychange', handleResume);
-    window.addEventListener('focus', handleResume);
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
 
     return () => {
-      clearInterval(interval);
-      window.removeEventListener('visibilitychange', handleResume);
-      window.removeEventListener('focus', handleResume);
+      if (intervalId) clearInterval(intervalId);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
@@ -406,7 +450,11 @@ export default function App() {
 
   // Storskjermmodus / Projector view
   if (currentTab === 'display') {
-    return <DisplayScreen state={state} onExit={() => setCurrentTab('home')} />;
+    return (
+      <React.Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 font-mono text-sm">Laster storskjerm...</div>}>
+        <DisplayScreen state={state} onExit={() => setCurrentTab('home')} />
+      </React.Suspense>
+    );
   }
 
   return (
@@ -508,17 +556,19 @@ export default function App() {
           )}
 
           {currentTab === 'admin' && (
-            <AdminDashboard
-              state={state}
-              onRefresh={loadLatestState}
-              onOpenDisplay={() => setCurrentTab('display')}
-              onGoToProfile={() => setCurrentTab('profile')}
-              onOpenPersonProfile={(person: Person) => {
-                handleSelectPerson(person);
-                handleNavigate('profile');
-              }}
-              initialTab={adminInitialTab}
-            />
+            <React.Suspense fallback={<div className="p-12 text-center text-zinc-500 font-mono text-sm">Laster administrasjon...</div>}>
+              <AdminDashboard
+                state={state}
+                onRefresh={loadLatestState}
+                onOpenDisplay={() => setCurrentTab('display')}
+                onGoToProfile={() => setCurrentTab('profile')}
+                onOpenPersonProfile={(person: Person) => {
+                  handleSelectPerson(person);
+                  handleNavigate('profile');
+                }}
+                initialTab={adminInitialTab}
+              />
+            </React.Suspense>
           )}
         </main>
       </div>

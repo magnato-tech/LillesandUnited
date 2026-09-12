@@ -125,10 +125,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authError, setAuthError] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [testTabUnlocked, setTestTabUnlocked] = useState(false);
   const [testTabUnlockPin, setTestTabUnlockPin] = useState('');
-  const [testTabUnlockError, setTestTabUnlockError] = useState(false);
+  const [testTabUnlockError, setTestTabUnlockError] = useState<string | null>(null);
 
   // In-app confirm dialog & toast state (replacing window.confirm and window.alert for reliable iframe behavior)
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
@@ -238,7 +238,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleAdminTabSelect = (tab: typeof initialTab) => {
     if (tab === 'test' && !testTabUnlocked) {
       setTestTabUnlockPin('');
-      setTestTabUnlockError(false);
+      setTestTabUnlockError(null);
       setAdminTab('test');
       return;
     }
@@ -249,21 +249,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     e?.preventDefault();
     const cleanPin = testTabUnlockPin.trim();
     if (!cleanPin) {
-      setTestTabUnlockError(true);
+      setTestTabUnlockError('Skriv inn nullstillings-PIN.');
       return;
     }
 
     try {
-      const ok = await verifyResetPin(cleanPin);
-      if (ok) {
+      const result = await verifyResetPin(cleanPin);
+      if (result.ok) {
         setTestTabUnlocked(true);
-        setTestTabUnlockError(false);
+        setTestTabUnlockError(null);
         setTestTabUnlockPin('');
       } else {
-        setTestTabUnlockError(true);
+        setTestTabUnlockError(result.error || 'Feil nullstillings-PIN. Prøv igjen.');
       }
     } catch {
-      setTestTabUnlockError(true);
+      setTestTabUnlockError('Kunne ikke kontakte serveren.');
     }
   };
 
@@ -341,21 +341,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     e?.preventDefault();
     const cleanPin = pin.trim();
     if (!cleanPin) {
-      setAuthError(true);
+      setAuthError('Skriv inn admin-PIN.');
       return;
     }
 
     try {
-      const ok = await verifyAdminPin(cleanPin);
-      if (ok) {
+      const result = await verifyAdminPin(cleanPin);
+      if (result.ok) {
         setAdminPin(cleanPin);
         setIsAuthenticated(true);
-        setAuthError(false);
+        setAuthError(null);
       } else {
-        setAuthError(true);
+        setAuthError(result.error || 'Feil kode. Prøv igjen eller kontakt arrangør.');
       }
     } catch {
-      setAuthError(true);
+      setAuthError('Kunne ikke kontakte serveren.');
     }
   };
 
@@ -976,7 +976,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           {authError && (
             <p className="text-xs text-rose-400 text-center font-bold">
-              Feil kode. Prøv igjen eller kontakt arrangør.
+              {authError}
             </p>
           )}
 
@@ -1858,7 +1858,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             {testTabUnlockError && (
               <p className="text-xs text-rose-400 text-center font-bold">
-                Feil nullstillings-PIN. Prøv igjen.
+                {testTabUnlockError}
               </p>
             )}
           </form>

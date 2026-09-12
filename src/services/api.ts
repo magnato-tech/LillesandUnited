@@ -20,22 +20,34 @@ export function getAdminPin(): string {
   return currentAdminPin;
 }
 
-export async function verifyAdminPin(pin: string): Promise<boolean> {
-  const res = await fetch('/api/admin/verify-pin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pin }),
-  });
-  return res.ok;
+export async function verifyAdminPin(pin: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/admin/verify-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin }),
+    });
+    if (res.ok) return { ok: true };
+    const data = await res.json().catch(() => ({}));
+    return { ok: false, error: data.error || 'Ugyldig admin-PIN' };
+  } catch (err: any) {
+    return { ok: false, error: 'Kunne ikke kontakte serveren' };
+  }
 }
 
-export async function verifyResetPin(pin: string): Promise<boolean> {
-  const res = await fetch('/api/admin/verify-reset-pin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pin }),
-  });
-  return res.ok;
+export async function verifyResetPin(pin: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch('/api/admin/verify-reset-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin }),
+    });
+    if (res.ok) return { ok: true };
+    const data = await res.json().catch(() => ({}));
+    return { ok: false, error: data.error || 'Ugyldig nullstillings-PIN' };
+  } catch (err: any) {
+    return { ok: false, error: 'Kunne ikke kontakte serveren' };
+  }
 }
 
 function getAdminHeaders(): HeadersInit {
@@ -45,21 +57,45 @@ function getAdminHeaders(): HeadersInit {
   };
 }
 
-export async function fetchState(): Promise<AppState> {
+let lastKnownEtag: string | null = null;
+let lastInMemoryState: AppState | null = null;
+
+export async function fetchState(force?: boolean): Promise<AppState | null> {
   try {
-    const res = await fetch('/api/state');
+    const headers: Record<string, string> = {};
+    if (!force && lastKnownEtag) {
+      headers['If-None-Match'] = lastKnownEtag;
+    }
+
+    const res = await fetch('/api/state', { headers });
+
+    // 304 Not Modified - server data is unchanged, saving bandwidth and CPU
+    if (res.status === 304) {
+      return null;
+    }
+
     if (!res.ok) throw new Error('Kunne ikke hente arrangementsdata');
+
+    const etag = res.headers.get('ETag');
+    if (etag) {
+      lastKnownEtag = etag;
+    }
+
     const data: AppState = await res.json();
+    lastInMemoryState = data;
     if (typeof window !== 'undefined') {
       localStorage.setItem(STATE_CACHE_KEY, JSON.stringify(data));
     }
     return data;
   } catch (err) {
     console.warn('Network error or server not responding, checking localStorage cache:', err);
+    if (lastInMemoryState) return lastInMemoryState;
     const cached = typeof window !== 'undefined' ? localStorage.getItem(STATE_CACHE_KEY) : null;
     if (cached) {
       try {
-        return JSON.parse(cached);
+        const parsed = JSON.parse(cached);
+        lastInMemoryState = parsed;
+        return parsed;
       } catch (e) {}
     }
     throw err;
